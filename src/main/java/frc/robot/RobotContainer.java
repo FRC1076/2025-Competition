@@ -61,16 +61,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 public class RobotContainer {
     // The robot's subsystems and commands are defined here...
     private final ExampleSubsystem m_exampleSubsystem = new ExampleSubsystem();
-    private final DriveSubsystem m_drive;
-    private final ElevatorSubsystem m_elevator;
-    private final WristSubsystem m_wrist;
-    private final GrabberSubsystem m_grabber;
-    private final IndexSubsystem m_index;
-    private final Trigger m_indexBeamBreak;
-    private final Trigger m_transferBeamBreak;
-    private final Trigger m_grabberBeamBreak;
-    private final Superstructure m_superstructure;
-    private final SuperstructureVisualizer superVis;
+    private DriveSubsystem m_drive;
+    private ElevatorSubsystem m_elevator;
+    private WristSubsystem m_wrist;
+    private GrabberSubsystem m_grabber;
+    private IndexSubsystem m_index;
+    private Trigger m_indexBeamBreak;
+    private Trigger m_transferBeamBreak;
+    private Trigger m_grabberBeamBreak;
+    private Superstructure m_superstructure;
+    private SuperstructureVisualizer superVis;
 
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
@@ -80,9 +80,9 @@ public class RobotContainer {
     private final CommandXboxController m_operatorController =
         new CommandXboxController(OIConstants.kOperatorControllerPort);
     
-    private final SendableChooser<Command> m_autoChooser;
+    private SendableChooser<Command> m_autoChooser;
 
-    private final TeleopDriveCommand teleopDriveCommand;
+    private TeleopDriveCommand teleopDriveCommand;
 
     private final SamuraiSymphony m_symphony = new SamuraiSymphony();
 
@@ -98,17 +98,17 @@ public class RobotContainer {
     */
     
     
-        m_indexBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.indexBeamBreakPort)::get);
-        m_transferBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.transferBeamBreakPort)::get);
-        m_grabberBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.grabberBeamBreakPort)::get);
+        //m_indexBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.indexBeamBreakPort)::get);
+        //m_transferBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.transferBeamBreakPort)::get);
+        //m_grabberBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.grabberBeamBreakPort)::get);
 
         if (Akit.currentMode == 0) {
             DriveIOHardware driveIO =  new DriveIOHardware(TunerConstants.createDrivetrain());
             m_drive = new DriveSubsystem(driveIO);
-            m_elevator = new ElevatorSubsystem(new ElevatorIOHardware());
-            m_wrist = new WristSubsystem(new WristIOHardware());
-            m_grabber = new GrabberSubsystem(new GrabberIOHardware());
-            m_index = new IndexSubsystem(new IndexIOHardware());
+            //m_elevator = new ElevatorSubsystem(new ElevatorIOHardware());
+            //m_wrist = new WristSubsystem(new WristIOHardware());
+            //m_grabber = new GrabberSubsystem(new GrabberIOHardware());
+            //m_index = new IndexSubsystem(new IndexIOHardware());
             m_symphony.addDrivetrain(driveIO);
             m_symphony.loadMusic("hungarianrhapsodyno2.chrp");
             m_symphony.play();
@@ -119,7 +119,7 @@ public class RobotContainer {
             m_grabber = new GrabberSubsystem(new GrabberIOSim());
             m_index = new IndexSubsystem(new IndexIOSim());
         }
-
+        /* 
         m_superstructure = new Superstructure(
             m_elevator,
             m_grabber,
@@ -129,9 +129,10 @@ public class RobotContainer {
             m_transferBeamBreak, 
             m_grabberBeamBreak
         );
+        */
 
-        superVis = new SuperstructureVisualizer(m_superstructure);
-
+        //superVis = new SuperstructureVisualizer(m_superstructure);
+        /* 
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
             () -> MathUtil.applyDeadband(-m_driverController.getLeftY(), OIConstants.kControllerDeadband), 
             () -> MathUtil.applyDeadband(-m_driverController.getLeftX(), OIConstants.kControllerDeadband),
@@ -149,19 +150,19 @@ public class RobotContainer {
         m_elevator.setDefaultCommand(m_elevator.applyManualControl(
             () -> MathUtil.applyDeadband(-m_operatorController.getLeftY(), OIConstants.kControllerDeadband)
         ));
-
+        */
         // Configure the trigger bindings
-        configureDriverBindings();
+        //configureDriverBindings();
 
         // Configure the operator bindings
-        configureOperatorBindings();
+        //configureOperatorBindings();
     
         //configure beam break triggers
-        configureBeamBreakTriggers();
+        //configureBeamBreakTriggers();
 
         //Build the auto chooser with PathPlanner
-        m_autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData(m_autoChooser);
+        //m_autoChooser = AutoBuilder.buildAutoChooser();
+        //SmartDashboard.putData(m_autoChooser);
 
         
     }
@@ -173,12 +174,12 @@ public class RobotContainer {
    * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
    * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
+   * joysticks}. 
    */
     private void configureBindings() {
         
     }
-
+    /* 
     private void configureDriverBindings() {
 
         m_driverController.leftTrigger().whileTrue(
@@ -256,6 +257,7 @@ public class RobotContainer {
             m_superstructure.CommandBuilder.calculatePossession()
         );
     }
+        */
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
