@@ -28,9 +28,11 @@ import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.wrist.WristIOHardware;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
+import frc.robot.utils.SamuraiSymphony;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 
+import com.ctre.phoenix6.Orchestra;
 import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.MathUtil;
@@ -82,6 +84,8 @@ public class RobotContainer {
 
     private final TeleopDriveCommand teleopDriveCommand;
 
+    private final SamuraiSymphony m_symphony = new SamuraiSymphony();
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
@@ -99,11 +103,15 @@ public class RobotContainer {
         m_grabberBeamBreak = new Trigger(new DigitalInput(BeamBreakConstants.grabberBeamBreakPort)::get);
 
         if (Akit.currentMode == 0) {
-            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()));
+            DriveIOHardware driveIO =  new DriveIOHardware(TunerConstants.createDrivetrain());
+            m_drive = new DriveSubsystem(driveIO);
             m_elevator = new ElevatorSubsystem(new ElevatorIOHardware());
             m_wrist = new WristSubsystem(new WristIOHardware());
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
             m_index = new IndexSubsystem(new IndexIOHardware());
+            m_symphony.addDrivetrain(driveIO);
+            m_symphony.loadMusic("hungarianrhapsodyno2.chrp");
+            m_symphony.play();
         } else if (Akit.currentMode == 1) {
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()));
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim());
@@ -154,6 +162,8 @@ public class RobotContainer {
         //Build the auto chooser with PathPlanner
         m_autoChooser = AutoBuilder.buildAutoChooser();
         SmartDashboard.putData(m_autoChooser);
+
+        
     }
 
   /**
