@@ -109,8 +109,11 @@ public class RobotContainer {
             m_wrist = new WristSubsystem(new WristIOHardware());
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
             m_index = new IndexSubsystem(new IndexIOHardware());
-            m_symphony.addDrivetrain(driveIO);
-            m_symphony.loadMusic("music/verdi_dies_irae.chrp");
+            if (Constants.MusicConstants.playMusic) {
+                m_symphony.addDrivetrain(driveIO);
+                m_symphony.loadMusic(Constants.MusicConstants.songPath);
+                m_symphony.play();
+            }
         } else if (Akit.currentMode == 1) {
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()));
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim());

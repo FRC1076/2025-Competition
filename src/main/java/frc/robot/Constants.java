@@ -36,6 +36,11 @@ public final class Constants {
         public static final double kControllerTriggerThreshold = 0.7;
     }
 
+    public static class MusicConstants {
+        public static final boolean playMusic = false;
+        public static final String songPath = "music/terminator.chrp";
+    }
+
     public static class Akit {
         public static final int currentMode = 0;
     }
@@ -218,8 +223,8 @@ public final class Constants {
     }
 
     public static class ElevatorConstants {
-        public static final int kMotorPort0 = -1;
-        public static final int kMotorPort1 = -1;
+        public static final int kMotorPort0 = 40;
+        public static final int kMotorPort1 = 41;
         
         public static final double elevatorPositionToleranceMeters = Units.inchesToMeters(0.5);
         public static final double maxOperatorControlVolts = 6;
@@ -262,8 +267,8 @@ public final class Constants {
 
     public static class ElevatorSimConstants {
         //RANDOM ports
-        public static final int kSimMotorPort0 = 20;
-        public static final int kSimMotorPort1 = 21;
+        public static final int kSimMotorPort0 = 40;
+        public static final int kSimMotorPort1 = 41;
         
         public static final double kElevatorGearing = 60.0/11.0;
         public static final double kCarriageMass = Units.lbsToKilograms(30); //kg
@@ -289,15 +294,15 @@ public final class Constants {
     }
 
     public static final class GrabberConstants {
-        public static final int kLeftMotorPort = -1;
-        public static final int kRightMotorPort = -1;
+        public static final int kLeftMotorPort = 42;
+        public static final int kRightMotorPort = 43;
         
         public static final double kCurrentLimit = 40; 
     }
 
     public static class WristConstants {
-        public static final int kLeadMotorPort = -2;
-        public static final int kFollowMotorPort = -3;
+        public static final int kLeadMotorPort = 44;
+        public static final int kFollowMotorPort = 45;
 
         public static final double wristAngleToleranceRadians = Units.degreesToRadians(1);
         public static final double maxOperatorControlVolts = 6;
@@ -345,8 +350,8 @@ public final class Constants {
     }
 
     public static class IndexConstants {
-        public static final int kLeadMotorPort = -10;
-        public static final int kFollowMotorPort = -10;
+        public static final int kLeadMotorPort = 46;
+        public static final int kFollowMotorPort = 47;
 
         public static final double kCurrentLimit = 40;
         public static final double kIndexVoltage = 6;
