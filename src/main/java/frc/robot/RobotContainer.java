@@ -110,7 +110,7 @@ public class RobotContainer {
             //m_grabber = new GrabberSubsystem(new GrabberIOHardware());
             //m_index = new IndexSubsystem(new IndexIOHardware());
             m_symphony.addDrivetrain(driveIO);
-            m_symphony.loadMusic("hungarianrhapsodyno2.chrp");
+            m_symphony.loadMusic("terminator.chrp");
             m_symphony.play();
         } else if (Akit.currentMode == 1) {
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()));
