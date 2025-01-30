@@ -3,6 +3,7 @@ package frc.robot.subsystems.drive;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
@@ -48,6 +49,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX,TalonFX,CANcoder> 
             odometryUpdateFrequency,
             moduleConstants
         );
+        
         super.registerTelemetry(
             (state) -> {
                 odometryCache.offer(state);
