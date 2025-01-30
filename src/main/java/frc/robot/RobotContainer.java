@@ -156,11 +156,11 @@ public class RobotContainer {
         configureOperatorBindings();
     
         //configure beam break triggers
-        //configureBeamBreakTriggers();
+        configureBeamBreakTriggers();
 
         //Build the auto chooser with PathPlanner
-        //m_autoChooser = AutoBuilder.buildAutoChooser();
-        //SmartDashboard.putData(m_autoChooser);
+        m_autoChooser = AutoBuilder.buildAutoChooser();
+        SmartDashboard.putData(m_autoChooser);
 
         
     }

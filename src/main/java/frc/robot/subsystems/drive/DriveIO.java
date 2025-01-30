@@ -40,7 +40,6 @@ public interface DriveIO {
             this.RawHeading = stateIn.RawHeading;
             this.OdometryPeriod = stateIn.OdometryPeriod;
         }
-
     }
 
     @AutoLog
