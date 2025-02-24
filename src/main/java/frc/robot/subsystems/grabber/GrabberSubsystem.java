@@ -74,7 +74,8 @@ public class GrabberSubsystem extends SubsystemBase{
             (interrupted) -> stop(),
             positiveDirection 
                 ? () -> inputs.motorPositionRadians >= setpoint
-                : () -> inputs.motorPositionRadians <= setpoint
+                : () -> inputs.motorPositionRadians <= setpoint,
+            this
         );
         
     }
