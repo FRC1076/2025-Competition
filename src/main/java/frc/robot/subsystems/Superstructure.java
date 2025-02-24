@@ -218,22 +218,30 @@ public class Superstructure {
             () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
         );
         
+        // We use parallel commands here to reduce the number of loops that instant commands use
         return Commands.sequence(
-            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position)))
+            // Sets the wristevatorState instantly for purpose of logging
+            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))) 
+            // Folds the wrist in to avoid hitting obstacles, at an angle depending on grabber possession
             .alongWith(new ProxyCommand(wristPreMoveCommand)),
+            // Holds the wrist in place and raises the elevator until the elevator at the correct height
             new ProxyCommand(Commands.deadline(
                 m_elevator.applyPosition(position.elevatorHeightMeters),
                 wristHoldCommand
             )),
+            // Moves to the next command instantly, but holds the elevator in place in the background
             new ProxyCommand(new DaemonCommand(
                 () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
                 () -> false
             ))
+            // Moves the wrist to the final position
             .alongWith(new ProxyCommand(m_wrist.applyAngle(position.wristAngle))),
+            // Moves to the next command instantly, but holds the wrist in place in the background
             new ProxyCommand(new DaemonCommand(
                 () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
                 () -> false
             ))
+            // If acknowledgeClutch == true, apply clutch state found in WristevatorState
             .alongWith(acknowledgeClutch ? Commands.runOnce(() -> elevatorClutch = position.elevatorClutch) : Commands.runOnce(() -> {}))
         );
         /*

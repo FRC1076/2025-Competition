@@ -293,7 +293,6 @@ public class RobotContainer {
         );*/
 
         // Point to reef
-        
         m_driverController.a().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
         // Apply single clutch
@@ -324,13 +323,11 @@ public class RobotContainer {
             )
         ).onTrue(new InstantCommand(
             () -> m_drive.resetHeading()
-        ));
-        
+        )); 
     }
 
     private void configureOperatorBindings() {
 
-        
         //if (SystemConstants.operatorSysID) {
             /* 
             // Quasistsic and Dynamic control scheme for Elevator Sysid
@@ -369,10 +366,8 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kReverse));*/
         //}
-        
-        
+         
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
-        
         
         // L1
         m_operatorController.x()
