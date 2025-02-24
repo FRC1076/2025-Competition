@@ -182,6 +182,8 @@ public final class Constants {
             public static final double doubleClutchRotationFactor = 0.35;
             public static final double FPVClutchTranslationFactor = 0.1;
             public static final double FPVClutchRotationFactor = 0.1;
+            public static final double ElevatorClutchTransFactor = 0.5; // Clutch activated when the elevator is above L3
+            public static final double ElevatorClutchRotFactor = 0.5;
             public static final double maxTranslationSpeedMPS = 5.0;
             public static final double maxRotationSpeedRadPerSec = 5.0;
         }
@@ -303,29 +305,31 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.08128,90),
-            ALGAE_TRAVEL(0.08128, 65),
+            TRAVEL(0.08128,90,false),
+            ALGAE_TRAVEL(0.08128, 65,false),
 
-            CORAL_TRANSFER(0.08128,-23.5), // Same as CORAL_DIRECT_INTAKE
+            CORAL_TRANSFER(0.08128,-23.5,false), // Same as CORAL_DIRECT_INTAKE
 
-            L1(0.08128,90), // Placeholder
-            L2(0.910, -35),//0.71628, -35),
-            L3(1.348 + 2 * 0.00889, -35),//1.11252, -35),
-            L4(2.109649 + 3 * 0.00635, -40.4130051),//1.8161, -45),
+            L1(0.08128,90,false), // Placeholder
+            L2(0.910, -35,false),//0.71628, -35),
+            L3(1.348 + 2 * 0.00889, -35,true),//1.11252, -35),
+            L4(2.109649 + 3 * 0.00635, -40.4130051,true),//1.8161, -45),
 
-            GROUND_INTAKE(0.184277,-20),
-            LOW_INTAKE(1.13789, -35),
-            HIGH_INTAKE(1.7440645, -35),
+            GROUND_INTAKE(0.184277,-20,false),
+            LOW_INTAKE(1.13789, -35,false),
+            HIGH_INTAKE(1.7440645, -35,true),
 
-            PROCESSOR(0.184277 + 0.15, 0),
-            NET(2.109649 + 3 * 0.00635, 65);
+            PROCESSOR(0.184277 + 0.15, 0,false),
+            NET(2.109649 + 3 * 0.00635, 65,true);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
+            public final boolean elevatorClutch;
             
-            private WristevatorState(double elevatorHeightMeters, double wristAngleDegrees) {
+            private WristevatorState(double elevatorHeightMeters, double wristAngleDegrees, boolean elevatorClutch) {
                 this.elevatorHeightMeters = elevatorHeightMeters;
                 this.wristAngle = Rotation2d.fromDegrees(wristAngleDegrees);
+                this.elevatorClutch = elevatorClutch;
             }
         }
     }

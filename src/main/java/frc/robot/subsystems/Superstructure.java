@@ -11,6 +11,7 @@ import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexPossession;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
+import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
@@ -30,6 +31,7 @@ import java.util.Set;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -124,6 +126,8 @@ public class Superstructure {
     //Super State
     private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
 
+    private boolean elevatorClutch = false;
+
     public Superstructure (
         ElevatorSubsystem elevator,
         GrabberSubsystem grabber,
@@ -176,6 +180,14 @@ public class Superstructure {
         return CommandBuilder;
     }
 
+    private boolean elevatorClutchSignal() {
+        return elevatorClutch;
+    }
+
+    public Trigger elevatorClutchTrigger() {
+        return new Trigger(this::elevatorClutchSignal);
+    }
+
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
     /**
@@ -215,7 +227,8 @@ public class Superstructure {
             new ProxyCommand(new DaemonCommand(
                 () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
                 () -> false
-            ))
+            )),
+            Commands.runOnce(() -> elevatorClutch = position.elevatorClutch)
         );
         /*
         return Commands.sequence(
