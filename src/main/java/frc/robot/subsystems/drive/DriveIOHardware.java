@@ -95,7 +95,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX,TalonFX,CANcoder> 
     }
 
     public void addVisionMeasurement(Pose2d poseEstimate,double timestampSeconds,Matrix<N3,N1> StdDevs){
-        //System.out.println("ADDING VISION");
+        System.out.println("ADDING VISION");
         super.addVisionMeasurement(poseEstimate, timestampSeconds, StdDevs);
     }
 
@@ -112,15 +112,14 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX,TalonFX,CANcoder> 
     /** Updates overall drivetrain inputs, to be logged into AdvantageKit */
     @Override
     public void updateInputs(DriveIOInputs inputs) {
-        //int drainSize = drainCache();
         inputs.fromSwerveDriveState(getState());
+        inputs.operatorForwardDirection = getOperatorForwardDirection();
         if (SystemConstants.logOdometry) {
             int drainSize = drainCache();
             inputs.odometryTimestamps = new double[drainSize];
             inputs.odometryHeadings = new Rotation2d[drainSize];
             inputs.odometryPoses = new Pose2d[drainSize];
             inputs.odometrySpeeds = new ChassisSpeeds[drainSize];
-            inputs.operatorForwardDirection = getOperatorForwardDirection();
             for (int i = 0; i < drainSize; i++) {
                 inputs.odometryTimestamps[i] = odomDrain[i].Timestamp;
                 inputs.odometryHeadings[i] = odomDrain[i].RawHeading;

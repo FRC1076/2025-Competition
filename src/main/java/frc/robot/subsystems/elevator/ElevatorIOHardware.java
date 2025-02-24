@@ -99,9 +99,6 @@ public class ElevatorIOHardware implements ElevatorIO {
         inputs.appliedOutput = m_leadMotor.getAppliedOutput();
         inputs.leadCurrentAmps = m_leadMotor.getOutputCurrent();
         inputs.followCurrentAmps = m_followMotor.getOutputCurrent();
-        inputs.leadPowerWatts = inputs.leadCurrentAmps * inputs.appliedVolts;
-        inputs.followPowerWatts = inputs.followCurrentAmps * inputs.appliedVolts;
-        inputs.totalPowerWatts = inputs.leadPowerWatts + inputs.followPowerWatts;
 
         inputs.elevatorHeightMeters = m_encoder.getPosition();
         inputs.velocityMetersPerSecond = m_encoder.getVelocity();
