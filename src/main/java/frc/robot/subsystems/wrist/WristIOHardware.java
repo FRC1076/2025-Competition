@@ -5,7 +5,7 @@
 package frc.robot.subsystems.wrist;
 
 import frc.robot.Constants.WristConstants;
-import static frc.robot.Constants.WristSimConstants.Control.*;
+import static frc.robot.Constants.WristConstants.Control.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 

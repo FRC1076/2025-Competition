@@ -100,9 +100,7 @@ public class VisionLocalizationSystem {
      */
     public void update() {
         for (var camStruct : cameras.values()) {
-            //System.out.println("THERE ARE CAMERAS");
             if (camStruct.cameraActive) {
-                //System.out.println("CAMERAS ARE ACTIVE");
                 camStruct.camera.getPoseEstimate().ifPresent(
                     (estimate) -> {
                         measurementConsumer.accept(

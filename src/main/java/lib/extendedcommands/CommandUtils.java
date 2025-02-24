@@ -5,6 +5,7 @@
 package lib.extendedcommands;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -17,8 +18,8 @@ public class CommandUtils {
         throw new NotImplementedException("This is a utility class!");
     }
 
-    public static Command makeDaemon(Command command, BooleanSupplier endCondition) {
-        return new DaemonCommand(command, endCondition);
+    public static Command makeDaemon(Supplier<Command> commandSupplier, BooleanSupplier endCondition) {
+        return new DaemonCommand(commandSupplier, endCondition);
     }
 
     /** tells the robot to periodically run a runnable that is not associated with any particular subsystem */

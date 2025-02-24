@@ -19,14 +19,17 @@ import frc.robot.subsystems.wrist.WristSubsystem;
 import static frc.robot.Constants.IndexConstants.kIndexVoltage;
 
 import lib.extendedcommands.CommandUtils;
+import lib.extendedcommands.DaemonCommand;
 import lib.extendedcommands.SelectWithFallbackCommand;
 
 import java.util.function.BooleanSupplier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.math.geometry.Rotation2d;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -177,10 +180,13 @@ public class Superstructure {
 
     /**
      * Folds back wrist, moves elevator, then deploys wrist
+     * <p> The wrist and elevator are held in place after they reach their setpoints with a DaemonCommand, which allows
+     * the sequential command to move forward but the action doesn't end
      * @param position the WristevatorState, which consists of elevator height and wrist angle, to transition to
      * @return generic transition command from one state to another 
      */
     private Command applyWristevatorState(WristevatorState position) {
+        
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
             m_wrist.applyAngle(coralTravelAngle),
@@ -195,14 +201,33 @@ public class Superstructure {
         );
         
         return Commands.sequence(
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
-            wristPreMoveCommand,
-            Commands.deadline(
+            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))),
+            new ProxyCommand(wristPreMoveCommand),
+            new ProxyCommand(Commands.deadline(
                 m_elevator.applyPosition(position.elevatorHeightMeters),
                 wristHoldCommand
-            ),
-            m_wrist.applyAngle(position.wristAngle)
+            )),
+            new ProxyCommand(new DaemonCommand(
+                () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
+                () -> false
+            )),
+            new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
+            new ProxyCommand(new DaemonCommand(
+                () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
+                () -> false
+            ))
         );
+        /*
+        return Commands.sequence(
+            //m_elevator.applyPosition(position.elevatorHeightMeters),
+            
+            new DaemonCommand(
+                () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
+                () -> false
+            )
+            m_wrist.applyAngle(Rotation2d.fromDegrees(80)),
+            m_wrist.applyAngle(Rotation2d.fromDegrees(-30))
+        );*/
     }
 
     /**
@@ -316,7 +341,7 @@ public class Superstructure {
             grabberActionCommands.put(WristevatorState.GROUND_INTAKE,
                                         superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
-            grabberActionCommands.put(WristevatorState.PROCESSOR, superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE));
+            grabberActionCommands.put(WristevatorState.PROCESSOR, superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
             grabberActionCommands.put(WristevatorState.LOW_INTAKE,
                                         superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
@@ -484,7 +509,7 @@ public class Superstructure {
          * @return a command sequence
          */
         public Command intakeCoral(){ // (BooleanSupplier safeSignal)
-            return Commands.parallel(
+            return Commands.sequence(
                 /* 
                 superstructure.applyWristevatorState(WristevatorState.TRAVEL),
                 indexCoral(),
@@ -510,6 +535,10 @@ public class Superstructure {
 
         public Command interruptWrist(){
             return superstructure.interruptWrist();
+        }
+
+        public Command holdAlgae(){
+            return superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE);
         }
 
         //TODO: Write separate intake coral command for auton

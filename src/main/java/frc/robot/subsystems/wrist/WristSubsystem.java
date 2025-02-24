@@ -121,7 +121,7 @@ public class WristSubsystem extends SubsystemBase {
     */
     public Command holdAngle(Rotation2d angle){
         return new FunctionalCommand(
-            () -> m_profiledPIDController.reset(getAngleRadians()),
+            () -> {},//m_profiledPIDController.reset(getAngleRadians()),
             () -> setAngle(angle), 
             (interrupted) -> {},
             () -> {return false;},
