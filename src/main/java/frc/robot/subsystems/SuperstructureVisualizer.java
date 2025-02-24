@@ -16,6 +16,7 @@ import lib.extendedcommands.CommandUtils;
  * This class is used to create mechanism visualizations and pass them into IOSim objects
  */
 public class SuperstructureVisualizer {
+    
     private final Mechanism2d superstructureVis;
     private final MechanismRoot2d elevatorRoot;
     private final MechanismLigament2d elevator;

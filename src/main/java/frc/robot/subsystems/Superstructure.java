@@ -197,9 +197,13 @@ public class Superstructure {
      * <p> The wrist and elevator are held in place after they reach their setpoints with a DaemonCommand, which allows
      * the sequential command to move forward but the action doesn't end
      * @param position the WristevatorState, which consists of elevator height and wrist angle, to transition to
+     * @param acknowledgeClutchExistsForPurposeOfAutonAsWellAsOtherMiscellaneousThingsAndPurposes 
+     * When <code>true</code>, this command will apply a clutch based on {@link WristevatorState}. 
+     * When <code>false</code>, the command will ignore the clutch. 
+     * This is used for auton, when we don't want to apply the clutch.
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position) {
+    private Command applyWristevatorState(WristevatorState position, boolean acknowledgeClutch) {
         
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
@@ -215,8 +219,8 @@ public class Superstructure {
         );
         
         return Commands.sequence(
-            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))),
-            new ProxyCommand(wristPreMoveCommand),
+            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position)))
+            .alongWith(new ProxyCommand(wristPreMoveCommand)),
             new ProxyCommand(Commands.deadline(
                 m_elevator.applyPosition(position.elevatorHeightMeters),
                 wristHoldCommand
@@ -224,13 +228,13 @@ public class Superstructure {
             new ProxyCommand(new DaemonCommand(
                 () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
                 () -> false
-            )),
-            new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
+            ))
+            .alongWith(new ProxyCommand(m_wrist.applyAngle(position.wristAngle))),
             new ProxyCommand(new DaemonCommand(
                 () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
                 () -> false
-            )),
-            Commands.runOnce(() -> elevatorClutch = position.elevatorClutch)
+            ))
+            .alongWith(acknowledgeClutch ? Commands.runOnce(() -> elevatorClutch = position.elevatorClutch) : Commands.runOnce(() -> {}))
         );
         /*
         return Commands.sequence(
