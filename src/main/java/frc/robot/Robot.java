@@ -51,25 +51,19 @@ public class Robot extends LoggedRobot {
         }
 
     // Set up data receivers & replay source
-    switch (Constants.Akit.currentMode) {
-        case 0:
-            // Running on a real robot, log to a USB stick ("/U/logs")
-            Logger.addDataReceiver(new WPILOGWriter());
-            Logger.addDataReceiver(new NT4Publisher());
-            break;
-
-        case 1:
-            // Running a physics simulator, log to NT
-            Logger.addDataReceiver(new NT4Publisher());
-            break;
-
-        case 2:
-            // Replaying a log, set up replay source
-            setUseTiming(false); // Run as fast as possible
-            String logPath = LogFileUtil.findReplayLog();
-            Logger.setReplaySource(new WPILOGReader(logPath));
-            Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
-            break;
+    if (Constants.SystemConstants.currentMode == 0){
+        // Running on a real robot, log to a USB stick ("/U/logs")
+        Logger.addDataReceiver(new WPILOGWriter());
+        Logger.addDataReceiver(new NT4Publisher());
+    } else if (Constants.SystemConstants.currentMode == 1) {
+        // Running a physics simulator, log to NT
+        Logger.addDataReceiver(new NT4Publisher());
+    } else if (Constants.SystemConstants.currentMode == 2) {
+        // Replaying a log, set up replay source
+        setUseTiming(false); // Run as fast as possible
+        String logPath = LogFileUtil.findReplayLog();
+        Logger.setReplaySource(new WPILOGReader(logPath));
+        Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
     }
 
     // Start AdvantageKit logger

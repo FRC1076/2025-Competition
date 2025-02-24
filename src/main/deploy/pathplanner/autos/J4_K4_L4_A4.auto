@@ -1,0 +1,61 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "stopAndRetract"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1-J4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "J4_LOUT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LOUT-K4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "K4-LOUT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LOUT-L4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "L4-LOUT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LOUT-A4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
