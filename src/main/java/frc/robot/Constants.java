@@ -456,7 +456,7 @@ public final class Constants {
             public static final double kV = 2.8829; // 12.0 // velocity game
             public static final double kA = 0.0; //Acceleration Gain
 
-            public static final Constraints kProfileConstraints = new Constraints(3, 8);
+            public static final Constraints kProfileConstraints = new Constraints(4, 6);
         }
     }
 
@@ -531,7 +531,7 @@ public final class Constants {
             public static final double kV = 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
-            public static final Constraints kProfileConstraints = new Constraints(7 * Math.PI, 7 * Math.PI);
+            public static final Constraints kProfileConstraints = new Constraints(10 * Math.PI, 6 * Math.PI);
         }
     }
 
