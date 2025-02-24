@@ -196,6 +196,8 @@ public final class Constants {
                 public static final PIDConstants rotPID = new PIDConstants(5, 0, 0);
             }
         }
+
+        public static final double kOdometryUpdateFrequency = 250.0;
     }
 
     public static class SuperstructureConstants {
@@ -432,8 +434,8 @@ public final class Constants {
         // Still set to WAPUR elevator units, need to be changed
         public static final double kGearRatio = 10.909;
         public static final double kElevatorStages = 3;
-        public static final double kVelocityConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635 / 60.0; //Gear ratio & chain pitch & rpm -> m/s
-        public static final double kPositionConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635; //Gear ratio & chain pitch
+        public static final double kVelocityConversionFactor = (22.0/24.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635 / 60.0; //Gear ratio & chain pitch & rpm -> m/s
+        public static final double kPositionConversionFactor = (22.0/24.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635; //Gear ratio & chain pitch
 
         /*
         public static final double kMaxVelocityMeters = 1.0;
