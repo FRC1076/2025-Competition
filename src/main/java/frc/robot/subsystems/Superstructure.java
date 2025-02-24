@@ -119,6 +119,7 @@ public class Superstructure {
     private final IndexSubsystem m_index;
     private final WristSubsystem m_wrist;
     private final Elastic m_elastic;
+    private final Trigger elevatorClutchTrigger;
     private final LEDSubsystem m_led;
 
     public final SuperstructureCommandFactory CommandBuilder;
@@ -154,6 +155,7 @@ public class Superstructure {
             Logger.processInputs("Superstructure", superState);
         });
         CommandBuilder = new SuperstructureCommandFactory(this, indexBeamBreak, transferBeamBreak, grabberBeamBreak);
+        elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
     }
 
     public MutableSuperState getSuperState() {
@@ -185,7 +187,7 @@ public class Superstructure {
     }
 
     public Trigger elevatorClutchTrigger() {
-        return new Trigger(this::elevatorClutchSignal);
+        return elevatorClutchTrigger;
     }
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory

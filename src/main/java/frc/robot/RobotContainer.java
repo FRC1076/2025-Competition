@@ -42,6 +42,8 @@ import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultMultiTagStdDevs;
+import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
+import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
 import static frc.robot.Constants.VisionConstants.fieldLayout;
 
 import java.util.HashMap;
@@ -229,6 +231,9 @@ public class RobotContainer {
 
         configureNamedCommands();
 
+        // Configure miscellaneous bindings
+        configureBindings();
+
         // Configure the trigger bindings
         configureDriverBindings();
 
@@ -261,7 +266,7 @@ public class RobotContainer {
    * joysticks}.
    */
     private void configureBindings() {
-        
+        m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
     }
 
     private void configureNamedCommands(){
