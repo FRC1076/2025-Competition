@@ -206,13 +206,6 @@ public class Superstructure {
             m_wrist.applyAngle(coralTravelAngle),
             () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
         );
-
-        
-        Command wristHoldCommand = Commands.either(
-            m_wrist.holdAngle(algaeTravelAngle), 
-            m_wrist.holdAngle(coralTravelAngle),
-            () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
-        );
         
         // We use parallel commands here to reduce the number of loops that instant commands use
         return Commands.sequence(
@@ -220,11 +213,14 @@ public class Superstructure {
             new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))) 
             // Folds the wrist in to avoid hitting obstacles, at an angle depending on grabber possession
             .alongWith(new ProxyCommand(wristPreMoveCommand)),
-            // Holds the wrist in place and raises the elevator until the elevator at the correct height
-            new ProxyCommand(Commands.deadline(
-                m_elevator.applyPosition(position.elevatorHeightMeters),
-                wristHoldCommand
-            )),
+            // Raises the elevator until the elevator at the correct height and holds the wrist in place in the background
+            new ProxyCommand(m_elevator.applyPosition(position.elevatorHeightMeters))
+            .alongWith(new ProxyCommand(new DaemonCommand(
+                () -> Commands.run(() -> m_wrist.setAngle(
+                    superState.getGrabberPossession() == GrabberPossession.ALGAE
+                        ? algaeTravelAngle
+                        : coralTravelAngle)), 
+                () -> false))),
             // Moves to the next command instantly, but holds the elevator in place in the background
             new ProxyCommand(new DaemonCommand(
                 () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
