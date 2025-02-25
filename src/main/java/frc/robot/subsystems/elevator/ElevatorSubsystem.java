@@ -143,7 +143,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      * them manually move the elevator to the zero position in order to rezero the encoder in the event that it
      * gets thrown off by acceleration. NOTE: both software stops and gravity compensation are disabled during this command
      */
-    public Command zeroEncoder(DoubleSupplier controlSupplier) {
+    public Command zeroEncoderJoystickControl(DoubleSupplier controlSupplier) {
         return run(() -> io.setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.maxOperatorControlVolts))
             .finallyDo(() -> io.resetPosition(0));
     }
