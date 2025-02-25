@@ -256,6 +256,7 @@ public final class Constants {
             }
         }
 
+        /*
         // Index Possession State
         public enum IndexPossession {
             EMPTY("EMPTY"),
@@ -267,6 +268,7 @@ public final class Constants {
                 this.name = name;
             }
         }
+        */
 
         // Grabber State
         public enum GrabberState {
@@ -291,14 +293,13 @@ public final class Constants {
 
         // Index State
         public enum IndexState {
-            EMPTY_IDLE(false, 0),
-            CORAL_INTAKE(true, 12),
-            CORAL_TRANSFER(true, 12),
-            CORAL_IDLE(false, 0);
-            public final boolean running; // Whether or not the indexer motors are running
+            TRANSFER(2),
+            IDLE(0), // Never implemented, just an option
+            BACKWARDS(-1);
+            
             public final double volts;
-            private IndexState(boolean running, double volts) {
-                this.running = running;
+
+            private IndexState(double volts) {
                 this.volts = volts;
             }
         }
@@ -570,10 +571,10 @@ public final class Constants {
 
     public static class IndexConstants {
         public static final int kLeadMotorPort = 51;
-        public static final int kFollowMotorPort = 52;
+        // public static final int kFollowMotorPort = 52;
 
         public static final double kCurrentLimit = 20.0;
-        public static final double kIndexVoltage = 12.0;
+        // public static final double kIndexVoltage = 12.0;
 
         public static final boolean kLeadMotorInverted = false;
         public static final boolean kFollowMotorInverted = true;

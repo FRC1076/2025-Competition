@@ -69,7 +69,7 @@ public class GrabberSubsystem extends SubsystemBase{
      * @return
      *  a command that applies a certain number of rotations to the grabber via a simple Bang-Bang controller.
      */
-    public Command applyRotationsBangBang(double volts, double radians) {
+    public Command applyRadiansBangBang(double volts, double radians) {
         double setpoint = inputs.motorPositionRadians + radians;
         boolean positiveDirection = (setpoint > inputs.motorPositionRadians);
         return new FunctionalCommand(

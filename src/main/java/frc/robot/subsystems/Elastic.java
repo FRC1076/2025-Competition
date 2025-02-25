@@ -11,7 +11,6 @@ import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.StartPositions;
 import frc.robot.Constants.GameConstants.TeamColors;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
-import frc.robot.Constants.SuperstructureConstants.IndexPossession;
 
 //TODO: Either make this a singleton class or make putX methods static
 public class Elastic {

@@ -14,27 +14,17 @@ import frc.robot.Constants.IndexConstants;
 
 public class IndexIOHardware implements IndexIO {
     private final SparkMax m_leadMotor;
-    private final SparkMax m_followMotor;
-
     private final SparkMaxConfig m_leadMotorConfig;
-    private final SparkMaxConfig m_followMotorConfig;
 
     public IndexIOHardware() {
         m_leadMotor = new SparkMax(IndexConstants.kLeadMotorPort, MotorType.kBrushless);
-        m_followMotor = new SparkMax(IndexConstants.kFollowMotorPort, MotorType.kBrushless);
 
         m_leadMotorConfig = new SparkMaxConfig();
-        m_followMotorConfig = new SparkMaxConfig();
-
         m_leadMotorConfig
             .smartCurrentLimit((int) IndexConstants.kCurrentLimit)
             .inverted(IndexConstants.kLeadMotorInverted);
-        m_followMotorConfig
-            .smartCurrentLimit((int) IndexConstants.kCurrentLimit)
-            .follow(m_leadMotor, IndexConstants.kLeadMotorInverted != IndexConstants.kFollowMotorInverted);
 
         m_leadMotor.configure(m_leadMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        m_followMotor.configure(m_followMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
     }
 
     @Override
@@ -46,8 +36,5 @@ public class IndexIOHardware implements IndexIO {
     public void updateInputs(IndexIOInputs inputs) {
         inputs.leadMotorAppliedVoltage = m_leadMotor.getAppliedOutput() * m_leadMotor.getBusVoltage();
         inputs.leadMotorCurrent = m_leadMotor.getOutputCurrent();
-
-        inputs.followMotorAppliedVoltage = m_followMotor.getAppliedOutput() * m_followMotor.getBusVoltage();
-        inputs.followMotorCurrent = m_followMotor.getOutputCurrent();
     }
 }

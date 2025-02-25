@@ -10,7 +10,6 @@ import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
-import frc.robot.Constants.SuperstructureConstants.IndexPossession;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -18,7 +17,6 @@ import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
-import static frc.robot.Constants.IndexConstants.kIndexVoltage;
 
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.DaemonCommand;
@@ -253,7 +251,7 @@ public class Superstructure {
 
     //TODO: Refactor this to be more in-line with the rest of the superstructure code
     private Command grabberRotationsBangBang(double volts, double rotations) {
-        return m_grabber.applyRotationsBangBang(volts,rotations);
+        return m_grabber.applyRadiansBangBang(volts, rotations);
     }
 
     /**
@@ -289,11 +287,6 @@ public class Superstructure {
         boolean transferBB,
         boolean grabberBB
     ) {
-        /*
-        IndexPossession indexPossession = indexBB 
-            ? IndexPossession.CORAL 
-            : IndexPossession.EMPTY;
-        */
         GrabberPossession grabberPossession;
         
         if (transferBB && grabberBB) {
@@ -315,9 +308,7 @@ public class Superstructure {
 
         // For debugging the beambreaks
         //System.out.println("updatePossessionAndKg() Called");
-        //System.out.println("grabberBB: " + grabberBB);
         //System.out.println("transferBB: " + transferBB);
-        //System.out.println("indexBB: " + indexBB);
 
         // TODO: call add LED code here
 
@@ -460,17 +451,18 @@ public class Superstructure {
             return superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE);
         }
 
+        /*
         /** 
          * Transfers a coral from the funnel to the indexer 
-         */
         public Command indexCoral() {
             return Commands.sequence(
-                superstructure.applyIndexState(IndexState.CORAL_INTAKE),
+                superstructure.applyIndexState(IndexState.TRANSFER),
                 Commands.waitUntil(m_transferBeamBreak),
-                superstructure.applyIndexState(IndexState.CORAL_IDLE),
+                superstructure.applyIndexState(IndexState.BACKWARDS),
                 Commands.run(() -> {})
             );
         }
+        */
 
         /** 
          * Transfers a coral from the indexer to the grabber, without checking for position 
@@ -492,13 +484,13 @@ public class Superstructure {
             return Commands.sequence(
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
-                    superstructure.applyIndexState(IndexState.CORAL_TRANSFER)
+                    superstructure.applyIndexState(IndexState.TRANSFER)
                 ),
                 Commands.waitUntil(m_transferBeamBreak),
-                superstructure.m_grabber.applyRotationsBangBang(4,4*Math.PI), // Adjust rotations
+                superstructure.m_grabber.applyRadiansBangBang(4,4*Math.PI), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
-                    superstructure.applyIndexState(IndexState.EMPTY_IDLE)
+                    superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
             );
             
@@ -530,7 +522,7 @@ public class Superstructure {
         public Command stopIntake(){
             return 
                 Commands.parallel(
-                    applyIndexState(IndexState.CORAL_IDLE),
+                    applyIndexState(IndexState.BACKWARDS),
                     applyGrabberState(GrabberState.IDLE)
                 );
         }

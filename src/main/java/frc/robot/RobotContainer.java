@@ -407,9 +407,6 @@ public class RobotContainer {
             .and(m_operatorController.leftBumper())
             .onTrue(superstructureCommands.preNet());
 
-        // Set default command for Indexer to continuously run
-        //m_index.setDefaultCommand(superstructureCommands.indexCoral());
-
         // Coral Intake and transfer into Grabber
         m_operatorController.leftTrigger()
             .and(m_operatorController.leftBumper().negate())
