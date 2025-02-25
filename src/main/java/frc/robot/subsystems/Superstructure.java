@@ -196,14 +196,10 @@ public class Superstructure {
      * Folds back wrist, moves elevator, then deploys wrist
      * <p> The wrist and elevator are held in place after they reach their setpoints with a DaemonCommand, which allows
      * the sequential command to move forward but the action doesn't end
-     * @param position the WristevatorState, which consists of elevator height and wrist angle, to transition to
-     * @param acknowledgeClutchExistsForPurposeOfAutonAsWellAsOtherMiscellaneousThingsAndPurposes 
-     * When <code>true</code>, this command will apply a clutch based on {@link WristevatorState}. 
-     * When <code>false</code>, the command will ignore the clutch. 
-     * This is used for auton, when we don't want to apply the clutch.
+     * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position, boolean acknowledgeClutch) {
+    private Command applyWristevatorState(WristevatorState position) {
         
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
@@ -241,9 +237,9 @@ public class Superstructure {
                 () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
                 () -> false
             ))
-            // If acknowledgeClutch == true, apply clutch state found in WristevatorState
-            .alongWith(acknowledgeClutch ? Commands.runOnce(() -> elevatorClutch = position.elevatorClutch) : Commands.runOnce(() -> {}))
-        );
+            // apply clutch trigger state found in WristevatorState
+            .alongWith(Commands.runOnce(() -> elevatorClutch = position.elevatorClutch)
+        ));
         /*
         return Commands.sequence(
             //m_elevator.applyPosition(position.elevatorHeightMeters),
@@ -403,81 +399,81 @@ public class Superstructure {
         /**
          * Retract mechanisms to travel state
          */
-        public Command retractMechanisms(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.TRAVEL,acknowledgeClutch);
+        public Command retractMechanisms(){
+            return superstructure.applyWristevatorState(WristevatorState.TRAVEL);
         }
 
         /**
          * Call this on button releases after scoring game pieces, stops grabber movement and retracts mechanisms to travel state
          */
-        public Command stopAndRetract(boolean acknowledgeClutch){
+        public Command stopAndRetract(){
             return Commands.parallel(
                 stopGrabber(),
-                retractMechanisms(acknowledgeClutch)
+                retractMechanisms()
             );
         }
 
         /**
          * Set elevator and wrist to L1 preset
          */
-        public Command preL1(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.L1,acknowledgeClutch);
+        public Command preL1(){
+            return superstructure.applyWristevatorState(WristevatorState.L1);
         }
 
         /**
          * Set elevator and wrist to L2 preset
          */
-        public Command preL2(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.L2,acknowledgeClutch);
+        public Command preL2(){
+            return superstructure.applyWristevatorState(WristevatorState.L2);
         }
 
         /**
          * Set elevator and wrist to L3 preset
          */
-        public Command preL3(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.L3, acknowledgeClutch);
+        public Command preL3(){
+            return superstructure.applyWristevatorState(WristevatorState.L3);
         }
 
         /**
          * Set elevator and wrist to L4 preset
          */
-        public Command preL4(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.L4,acknowledgeClutch);
+        public Command preL4(){
+            return superstructure.applyWristevatorState(WristevatorState.L4);
         }
 
         /**
          * Set elevator and wrist to net preset
          */
-        public Command preNet(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.NET,acknowledgeClutch);
+        public Command preNet(){
+            return superstructure.applyWristevatorState(WristevatorState.NET);
         }
 
         /**
          * Set elevator and wrist to processor preset
          */
-        public Command preProcessor(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.PROCESSOR,acknowledgeClutch);
+        public Command preProcessor(){
+            return superstructure.applyWristevatorState(WristevatorState.PROCESSOR);
         }
 
         /**
          * Set elevator and wrist to ground algae preset
          */
-        public Command groundAlgaeIntake(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.GROUND_INTAKE,acknowledgeClutch);
+        public Command groundAlgaeIntake(){
+            return superstructure.applyWristevatorState(WristevatorState.GROUND_INTAKE);
         }
 
         /**
          * Set elevator and wrist to low algae preset
          */
-        public Command lowAlgaeIntake(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE,acknowledgeClutch);  
+        public Command lowAlgaeIntake(){
+            return superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE);  
         }
 
         /**
          * Set elevator and wrist to high algae preset
          */
-        public Command highAlgaeIntake(boolean acknowledgeClutch){
-            return superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE,acknowledgeClutch);
+        public Command highAlgaeIntake(){
+            return superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE);
         }
 
         /** 
@@ -534,14 +530,14 @@ public class Superstructure {
          * @param safeSignal a supplier indicating whether or not is safe to transfer the coral from the indexer to the grabber
          * @return a command sequence
          */
-        public Command intakeCoral(boolean acknowledgeClutch){ // (BooleanSupplier safeSignal)
+        public Command intakeCoral(){ // (BooleanSupplier safeSignal)
             return Commands.sequence(
                 /* 
                 superstructure.applyWristevatorState(WristevatorState.TRAVEL),
                 indexCoral(),
                 Commands.waitUntil(safeSignal),
                 */
-                superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER,acknowledgeClutch),
+                superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
                 transferCoral()//,
                 //indexCoral()
             );
