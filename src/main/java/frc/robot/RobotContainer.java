@@ -436,6 +436,12 @@ public class RobotContainer {
         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
 
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
+
+        /* 
+        m_operatorController.start().whileTrue(m_elevator.zeroEncoder(
+            m_operatorController::getLeftX
+        ));
+        */ // TODO: Figure out the elevator rezeroing binding with Andrew
         
     }
 

@@ -92,6 +92,11 @@ public class ElevatorIOHardware implements ElevatorIO {
         return realControlConstants;
     }
 
+    @Override
+    public void resetPosition(double positionMeters) {
+        m_encoder.setPosition(positionMeters);
+    }
+
     /** Used to log elevator status */
     @Override
     public void updateInputs(ElevatorIOInputs inputs) {

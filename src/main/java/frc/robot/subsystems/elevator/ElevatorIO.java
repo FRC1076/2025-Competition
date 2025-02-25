@@ -43,6 +43,8 @@ public interface ElevatorIO {
 
     public abstract void setVoltage(double volts);
 
+    public abstract void resetPosition(double positionMeters);
+
     public default void simulationPeriodic() {}
 
 }

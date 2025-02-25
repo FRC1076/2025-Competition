@@ -133,4 +133,9 @@ public class ElevatorIOSim implements ElevatorIO {
 
         // Update elevator visualization with position
     }
+
+    @Override
+    public void resetPosition(double positionMeters) {
+        m_encoderSim.setPosition(positionMeters);
+    }
 }
