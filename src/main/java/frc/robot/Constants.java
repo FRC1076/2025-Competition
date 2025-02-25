@@ -600,10 +600,11 @@ public final class Constants {
         }
 
         public static enum LEDStates {
-            EMPTY(false, false, false),
-            CORAL_INDEX(true, false, false),
-            CORAL_GRABBER(false, true, false),
-            ALGAE(true, true, false);
+            IDLE(false, false, false),
+            CORAL(true, false, false),
+            HUMAN_PLAYER_CAN_DROP(false, true, false),
+            ALGAE(true, true, false),
+            AUTO_ALIGNED(false, false, true);
 
             public final boolean onesPlace;
             public final boolean twosPlace;
