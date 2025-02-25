@@ -58,6 +58,10 @@ public class GrabberSubsystem extends SubsystemBase{
         return runOnce(() -> runVoltsDifferential(leftMotorVolts, rightMotorVolts));
     }
 
+    public double getAppliedCurrent() {
+        return inputs.leftMotorCurrent;
+    }
+
     /**
      * NOTE: RADIANS ARE RELATIVE, CONTROL IS BASED OFF THE LEFT MOTOR'S ENCODER
      * @param volts

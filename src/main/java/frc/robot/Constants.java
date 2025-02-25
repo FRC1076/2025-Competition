@@ -204,6 +204,8 @@ public final class Constants {
 
     public static class SuperstructureConstants {
 
+        public static double algaePossessionCurrentThreshold = 20.0;
+
         public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
         public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(65);
 

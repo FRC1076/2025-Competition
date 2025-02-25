@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.SuperstructureConstants.algaePossessionCurrentThreshold;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
@@ -126,6 +127,7 @@ public class Superstructure {
 
     //Super State
     private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
+    private final BooleanSupplier algaePossessionSupplier;
 
     private boolean elevatorClutch = false;
 
@@ -156,6 +158,7 @@ public class Superstructure {
         });
         CommandBuilder = new SuperstructureCommandFactory(this, indexBeamBreak, transferBeamBreak, grabberBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
+        algaePossessionSupplier = () -> m_grabber.getAppliedCurrent() > algaePossessionCurrentThreshold;
     }
 
     public MutableSuperState getSuperState() {
@@ -573,7 +576,7 @@ public class Superstructure {
                 () -> superstructure.updatePossessionAndKg(
                     m_indexBeamBreak.getAsBoolean(),
                     m_transferBeamBreak.getAsBoolean(),
-                    m_grabberBeamBreak.getAsBoolean()
+                    algaePossessionSupplier.getAsBoolean()
                 )
             );
         }
