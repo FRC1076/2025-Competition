@@ -33,6 +33,10 @@ public class LEDOnRIO implements LEDBase {
         .solid(Color.kGreen)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
         .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
+    private final LEDPattern rainbow = LEDPattern
+        .rainbow(255, 255)
+        .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
+        .scrollAtRelativeSpeed(Percent.per(Seconds).of(25));
 
 
     public LEDOnRIO() {
