@@ -89,7 +89,6 @@ public class RobotContainer {
     private final WristSubsystem m_wrist;
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
-    private final Trigger m_indexBeamBreak;
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
@@ -134,9 +133,8 @@ public class RobotContainer {
     if constexpr
     Also, ignore the "comparing identical expressions" and "dead code" warnings
     */
-        DigitalInput indexDIO = new DigitalInput(BeamBreakConstants.indexBeamBreakPort);
+    
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
-        m_indexBeamBreak = new Trigger(() -> {return ! indexDIO.get();});//.or(m_beamBreakController.a());
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
@@ -204,7 +202,7 @@ public class RobotContainer {
             m_wrist, 
             m_elastic,
             m_LEDs,
-            m_indexBeamBreak, 
+            () -> false,
             m_transferBeamBreak, 
             () -> false
         );
@@ -446,10 +444,6 @@ public class RobotContainer {
     }
 
     private void configureBeamBreakTriggers() {
-
-        m_indexBeamBreak.onChange(
-            m_superstructure.CommandBuilder.updatePossessionAndKg()
-        );
 
         m_transferBeamBreak.onChange(
             m_superstructure.CommandBuilder.updatePossessionAndKg()

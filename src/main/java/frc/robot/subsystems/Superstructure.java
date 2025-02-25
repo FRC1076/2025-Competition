@@ -55,14 +55,11 @@ public class Superstructure {
         protected WristevatorState WristevatorState;
         protected IndexState indexState;
         protected GrabberPossession grabberPossession;
-        protected IndexPossession indexPossession;
 
-        public MutableSuperState(GrabberState grabberState, WristevatorState WristevatorState, IndexState indexState){
+        public MutableSuperState(GrabberState grabberState, WristevatorState WristevatorState){
             this.grabberState = grabberState;
             this.WristevatorState = WristevatorState;
-            this.indexState = indexState;
             grabberPossession = GrabberPossession.EMPTY;
-            indexPossession = IndexPossession.EMPTY;
         }
 
         public MutableSuperState() {}
@@ -89,10 +86,6 @@ public class Superstructure {
             this.grabberPossession = possession;
         }
 
-        public void setIndexPossession(IndexPossession possession) {
-            this.indexPossession = possession;
-        }
-
         public GrabberState getGrabberState() {
             return grabberState;
         }
@@ -107,10 +100,6 @@ public class Superstructure {
 
         public GrabberPossession getGrabberPossession(){
             return grabberPossession;
-        }
-
-        public IndexPossession getIndexerPossession(){
-            return indexPossession;
         }
     }
 
@@ -136,9 +125,9 @@ public class Superstructure {
         WristSubsystem wrist,
         Elastic elastic,
         LEDSubsystem led,
-        BooleanSupplier indexBeamBreak, //returns true when beam broken
+        BooleanSupplier indexBeamBreak, // REMOVE
         BooleanSupplier transferBeamBreak, //returns true when beam broken
-        BooleanSupplier grabberBeamBreak //returns true when beam broken
+        BooleanSupplier grabberBeamBreak // REMOVE
     ) {
         m_elevator = elevator;
         m_grabber = grabber;
@@ -147,9 +136,7 @@ public class Superstructure {
         m_elastic = elastic;
         m_led = led;
         
-        m_elastic.putBoolean("grabberBB", indexBeamBreak.getAsBoolean());
         m_elastic.putBoolean("transferBB", transferBeamBreak.getAsBoolean());
-        m_elastic.putBoolean("indexBB", grabberBeamBreak.getAsBoolean());
 
         CommandUtils.makePeriodic(() -> {
             Logger.processInputs("Superstructure", superState);
@@ -299,11 +286,13 @@ public class Superstructure {
         boolean transferBB,
         boolean grabberBB
     ) {
+        /*
         IndexPossession indexPossession = indexBB 
             ? IndexPossession.CORAL 
             : IndexPossession.EMPTY;
+        */
         GrabberPossession grabberPossession;
-        // TODO: as coral is shot, the robot will think we have an algae, and kG will increase. Add timeout?
+        
         if (transferBB && grabberBB) {
             grabberPossession = GrabberPossession.CORAL;
         } else if (transferBB) {
@@ -316,14 +305,10 @@ public class Superstructure {
 
         m_elevator.setKg(grabberPossession.elevator_kG);
         m_wrist.setKg(grabberPossession.wrist_kG);
-        superState.setIndexPossession(indexPossession);
         superState.setGrabberPossession(grabberPossession);
         
-        m_elastic.putIndexPossession(indexPossession);
         m_elastic.putGrabberPossession(grabberPossession);
-        m_elastic.putBoolean("grabberBB", grabberBB);
         m_elastic.putBoolean("transferBB", transferBB);
-        m_elastic.putBoolean("indexBB", indexBB);
 
         // For debugging the beambreaks
         //System.out.println("updatePossessionAndKg() Called");
@@ -478,7 +463,7 @@ public class Superstructure {
         public Command indexCoral() {
             return Commands.sequence(
                 superstructure.applyIndexState(IndexState.CORAL_INTAKE),
-                Commands.waitUntil(m_indexBeamBreak),
+                Commands.waitUntil(m_transferBeamBreak),
                 superstructure.applyIndexState(IndexState.CORAL_IDLE),
                 Commands.run(() -> {})
             );
@@ -506,8 +491,8 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.applyIndexState(IndexState.CORAL_TRANSFER)
                 ),
-                Commands.waitUntil(m_indexBeamBreak),
-                superstructure.m_grabber.applyRotationsBangBang(4,4*Math.PI),
+                Commands.waitUntil(m_transferBeamBreak),
+                superstructure.m_grabber.applyRotationsBangBang(4,4*Math.PI), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.EMPTY_IDLE)

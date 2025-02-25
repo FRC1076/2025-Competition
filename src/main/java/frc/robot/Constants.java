@@ -578,7 +578,6 @@ public final class Constants {
     }
 
     public static class BeamBreakConstants{
-        public static final int indexBeamBreakPort = 4;
         public static final int transferBeamBreakPort = 0;
     }
 

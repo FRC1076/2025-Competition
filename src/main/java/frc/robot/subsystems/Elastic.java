@@ -44,11 +44,6 @@ public class Elastic {
         SmartDashboard.putString(key, value);
     }
 
-    public void putIndexPossession(IndexPossession indexPossession) {
-        // System.out.println("indexPossession: " + indexPossession.name);
-        SmartDashboard.putString("indexPossession", indexPossession.name);
-    }
-
     public void putGrabberPossession(GrabberPossession grabberPossession) {
         // System.out.println("grabberPossession: " + grabberPossession.name);
         SmartDashboard.putString("grabberPossession", grabberPossession.name);
