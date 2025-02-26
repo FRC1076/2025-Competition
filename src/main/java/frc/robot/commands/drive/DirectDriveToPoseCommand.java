@@ -46,12 +46,11 @@ public class DirectDriveToPoseCommand extends Command {
         );
 
         // Prevent PathPlanner from treating the start pose as identical to the end pose when they are too close to each other
-        if(targetPose.getTranslation().getDistance(startingWaypoint.getTranslation()) > PathPlannerConstants.pathGenerationToleranceMeters){
+        if (targetPose.getTranslation().getDistance(startingWaypoint.getTranslation()) > PathPlannerConstants.pathGenerationToleranceMeters){
             PathPlannerPath path = new PathPlannerPath(waypoints, PathPlannerConstants.pathConstraints, null, new GoalEndState(0, targetPose.getRotation()));
             path.preventFlipping = true;
             followPathCommand = AutoBuilder.followPath(path);
-        }
-        else{
+        } else {
             followPathCommand = Commands.none();
         }
         followPathCommand.schedule();

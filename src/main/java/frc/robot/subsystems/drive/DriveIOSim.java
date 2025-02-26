@@ -71,7 +71,7 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> imp
                 Daqs.incrementAndGet();
             }
         );
-        if(DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red){
+        if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red){
             super.setOperatorPerspectiveForward(Rotation2d.fromDegrees(180));
         }
         else{

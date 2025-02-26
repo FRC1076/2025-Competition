@@ -380,13 +380,13 @@ public final class Constants {
                 this.leftBranchFudgeTransform = leftBranchFudgeTransform;
                 this.rightBranchFudgeTransform = rightBranchFudgeTransform;
 
-                if(this.leftBranchFudgeTransform == null) {
+                if (this.leftBranchFudgeTransform == null) {
                     this.leftBranch = AprilTag.transformBy(leftBranchTransform);
                 } else {
                     this.leftBranch = AprilTag.transformBy(new Transform2d(0.0, -this.leftBranchFudgeTransform, Rotation2d.kZero));
                 }
                 
-                if(this.rightBranchFudgeTransform == null) {
+                if (this.rightBranchFudgeTransform == null) {
                     this.rightBranch = AprilTag.transformBy(rightBranchTransform);
                 } else {
                     this.rightBranch = AprilTag.transformBy(new Transform2d(0.0, this.rightBranchFudgeTransform, Rotation2d.kZero));

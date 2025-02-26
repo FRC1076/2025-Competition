@@ -26,7 +26,7 @@ public class Elastic {
         startPositionChooser = new SendableChooser<>();
         startPositionChooser.setDefaultOption(GameConstants.kStartPosition.name, GameConstants.kStartPosition);
         // startPositionChooser.addOption(StartPositions.kStartA.name, StartPositions.kStartA);
-        for(StartPositions position : StartPositions.values()) {
+        for (StartPositions position : StartPositions.values()) {
             startPositionChooser.addOption(position.name, position);
         }
     }

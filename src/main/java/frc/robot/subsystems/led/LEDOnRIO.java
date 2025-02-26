@@ -60,7 +60,7 @@ public class LEDOnRIO implements LEDBase {
 
     @Override
     public void setState(LEDStates state) {
-        if(state == LEDStates.IDLE) {
+        if (state == LEDStates.IDLE) {
             // Solid purple
             solidPurple.applyTo(m_buffer);
             m_leds.setData(m_buffer);

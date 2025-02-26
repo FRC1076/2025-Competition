@@ -14,7 +14,7 @@ public final class MathHelpers {
      * @return The clamped value.
      */
     public static double clamp(double value, double min, double max) {
-        if(min > max) {
+        if (min > max) {
             throw new IllegalArgumentException("min must be less than max");
         }
 
