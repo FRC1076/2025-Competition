@@ -335,7 +335,7 @@ public class Superstructure {
             grabberActionCommands.put(WristevatorState.L1, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L2, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
-            grabberActionCommands.put(WristevatorState.L4, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); // TODO: Are there any risks if we have a coral, try to score it, and then hit the button again? The grabber will think it has an algae
+            grabberActionCommands.put(WristevatorState.L4, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.GROUND_INTAKE,
                                         superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
@@ -538,8 +538,6 @@ public class Superstructure {
         public Command holdAlgae(){
             return superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE);
         }
-
-        //TODO: Write separate intake coral command for auton
 
         /**
          * Used to calculate what the robot is possessing based on breambreaks

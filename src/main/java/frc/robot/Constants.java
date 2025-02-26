@@ -427,8 +427,8 @@ public final class Constants {
         public static final int kMotorPort1 = 32; // Right motor consistent with drivetrain right side
         
         public static final double elevatorPositionToleranceMeters = Units.inchesToMeters(0.5);
-        public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0); // TODO: UPDATE
-        public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(82.75);//81.15); // TODO: UPDATE
+        public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0);
+        public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(82.75);//81.15);
         public static final double maxOperatorControlVolts = 4;
 
         public static final boolean leadMotorInverted = false;
