@@ -468,6 +468,12 @@ public final class Constants {
 
             public static final Constraints kProfileConstraints = new Constraints(4, 6);
         }
+
+        public static class Homing {
+            public static final double homingVolts = -2.0;
+            public static final double homingDebounceTime = 0.25;
+            public static final double homingVelocityThreshold = 0.2;
+        }
     }
 
     public static class ElevatorSimConstants {
