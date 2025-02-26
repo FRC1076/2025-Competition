@@ -91,7 +91,7 @@ public class ParallelBidirectional implements ParallelDataBus, Sendable {
         boolean bit;
         for (int i = 0; i < bitWidth; i++) {
             bit = (data & bitmasks[i]) < 0;
-            DIOJNI.setDIO(m_handles[i],bit);
+            DIOJNI.setDIO(m_handles[i], bit);
         }
     }
 

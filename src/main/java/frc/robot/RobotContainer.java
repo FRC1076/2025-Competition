@@ -189,7 +189,7 @@ public class RobotContainer {
                     kDefaultSingleTagStdDevs, 
                     kDefaultMultiTagStdDevs)
                 );
-                m_visionSim.addCamera(new PhotonCameraSim(cam),config.offset);
+                m_visionSim.addCamera(new PhotonCameraSim(cam), config.offset);
             }
             CommandUtils.makePeriodic(() -> m_visionSim.update(m_drive.getPose()));
             */

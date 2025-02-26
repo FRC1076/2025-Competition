@@ -34,7 +34,7 @@ import edu.wpi.first.wpilibj.RobotController;
 
 import org.littletonrobotics.junction.Logger;
 
-public class DriveIOSim extends SwerveDrivetrain<TalonFX,TalonFX,CANcoder> implements DriveIO {
+public class DriveIOSim extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> implements DriveIO {
 
     private static class moduleSignalStruct {
         public StatusSignal<Voltage> turnAppliedVolts;
@@ -79,7 +79,7 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX,TalonFX,CANcoder> imple
         }
         for (int i = 0; i < 4; i++){
             moduleSignalStruct sigStruct = new moduleSignalStruct();
-            SwerveModule<TalonFX,TalonFX,CANcoder> module = getModule(i);
+            SwerveModule<TalonFX, TalonFX, CANcoder> module = getModule(i);
             sigStruct.driveAppliedVolts = module.getDriveMotor().getMotorVoltage(true);
             sigStruct.driveStatorCurrent = module.getDriveMotor().getStatorCurrent(true);
             sigStruct.turnAppliedVolts = module.getSteerMotor().getMotorVoltage(true);
@@ -128,7 +128,7 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX,TalonFX,CANcoder> imple
 
     @Override
     public void updateModuleInputs(ModuleIOInputs inputs, int moduleIndex) {
-        SwerveModule<TalonFX,TalonFX,CANcoder> module = getModule(moduleIndex);
+        SwerveModule<TalonFX,TalonFX, CANcoder> module = getModule(moduleIndex);
         moduleSignalStruct sigStruct = moduleSignals[moduleIndex];
         SwerveModulePosition position = module.getPosition(true);
         SwerveModuleState state = module.getCurrentState();

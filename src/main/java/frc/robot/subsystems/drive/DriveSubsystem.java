@@ -159,9 +159,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     public class DriveCommandFactory {
         private final DriveSubsystem drive;
-        private final Map<ReefFace,Command> leftBranchAlignmentCommands = new HashMap<>();
-        private final Map<ReefFace,Command> reefCenterAlignmentCommands = new HashMap<>();
-        private final Map<ReefFace,Command> rightBranchAlignmentCommands = new HashMap<>();
+        private final Map<ReefFace, Command> leftBranchAlignmentCommands = new HashMap<>();
+        private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
+        private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
         private DriveCommandFactory(DriveSubsystem drive) {
             this.drive = drive;
             for (ReefFace face : ReefFace.values()) {

@@ -112,7 +112,7 @@ public class LQRHolonomicController implements HolonomicController {
             )
         );
 
-        drivePlant = new LinearSystem<>(A,B,C,D); // Models field-oriented state with field-oriented speeds as inputs, as the dynamical system is only nonlinear relative to the chassis
+        drivePlant = new LinearSystem<>(A, B, C, D); // Models field-oriented state with field-oriented speeds as inputs, as the dynamical system is only nonlinear relative to the chassis
         LQRController = new LinearQuadraticRegulator<>(drivePlant, q, r, dt);
     }
 

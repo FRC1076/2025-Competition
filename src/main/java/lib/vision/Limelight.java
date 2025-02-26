@@ -115,7 +115,7 @@ public class Limelight {
         double avgTagDist = poseArray[9];
         double avgTagArea = poseArray[10];
         double adjustedTimestamp = (timestamp / 1000000.0) - (latency / 1000.0);
-        return Optional.of(new LLPoseEstimate(pose,adjustedTimestamp,latency,tagCount,tagSpan,avgTagDist,avgTagArea,fiducials,true));
+        return Optional.of(new LLPoseEstimate(pose, adjustedTimestamp, latency, tagCount, tagSpan, avgTagDist, avgTagArea, fiducials,true));
     }
 
     /** Sets robot orientation used by the MegaTag2 pose estimation algorithm */
