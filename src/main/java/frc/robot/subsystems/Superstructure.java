@@ -487,7 +487,7 @@ public class Superstructure {
                     superstructure.applyIndexState(IndexState.TRANSFER)
                 ),
                 Commands.waitUntil(m_transferBeamBreak),
-                superstructure.m_grabber.applyRadiansBangBang(4,4*Math.PI), // Adjust rotations
+                superstructure.m_grabber.applyRadiansBangBang(4, 4*Math.PI), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)

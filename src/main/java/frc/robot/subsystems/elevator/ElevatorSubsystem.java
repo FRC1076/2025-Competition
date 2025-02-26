@@ -65,7 +65,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         //System.out.println("Elevator: " + this.getPositionMeters());
         io.updateInputs(inputs);
         Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
-        Logger.processInputs("Elevator",inputs);
+        Logger.processInputs("Elevator", inputs);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public void setPosition(double positionMeters) {
         io.setVoltage (
-            m_profiledPIDController.calculate(getPositionMeters(),MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters))
+            m_profiledPIDController.calculate(getPositionMeters(), MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters))
             + m_feedforwardController.calculate(m_profiledPIDController.getSetpoint().velocity)
         );
     }

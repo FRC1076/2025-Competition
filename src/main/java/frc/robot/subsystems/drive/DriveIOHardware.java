@@ -49,7 +49,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
     private int oldDaqs; // Number of successul data acquisitions from previous main loop cycle
     protected AtomicInteger Daqs = new AtomicInteger(0);
     
-    public DriveIOHardware(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, SwerveModuleConstants<?,?,?>... moduleConstants){
+    public DriveIOHardware(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, SwerveModuleConstants<?, ?, ?>... moduleConstants){
         super(
             TalonFX::new,
             TalonFX::new,
@@ -68,7 +68,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
         }
         for (int i = 0; i < 4; i++){
             moduleSignalStruct sigStruct = new moduleSignalStruct();
-            SwerveModule<TalonFX,TalonFX, CANcoder> module = getModule(i);
+            SwerveModule<TalonFX, TalonFX, CANcoder> module = getModule(i);
             // Combines all the signals from the modules for AdvantageKit logging
             sigStruct.driveAppliedVolts = module.getDriveMotor().getMotorVoltage(true);
             sigStruct.driveStatorCurrent = module.getDriveMotor().getStatorCurrent(true);
@@ -89,7 +89,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
         );
     }
 
-    public void addVisionMeasurement(Pose2d poseEstimate,double timestampSeconds,Matrix<N3,N1> StdDevs){
+    public void addVisionMeasurement(Pose2d poseEstimate, double timestampSeconds, Matrix<N3, N1> StdDevs){
         //System.out.println(poseEstimate.toString());
         super.addVisionMeasurement(
             poseEstimate, 
@@ -131,7 +131,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
     /** Updates module inputs, all of the things that will be logged into AdvantageKit */
     @Override
     public void updateModuleInputs(ModuleIOInputs inputs, int moduleIndex) {
-        SwerveModule<TalonFX,TalonFX, CANcoder> module = getModule(moduleIndex);
+        SwerveModule<TalonFX, TalonFX, CANcoder> module = getModule(moduleIndex);
         moduleSignalStruct sigStruct = moduleSignals[moduleIndex];
         SwerveModulePosition position = module.getPosition(true);
         SwerveModuleState state = module.getCurrentState();

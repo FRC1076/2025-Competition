@@ -46,8 +46,8 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> imp
     @Override
     public void addVisionMeasurement(Pose2d visionRobotPoseMeters, double timestampSeconds,
             Matrix<N3, N1> visionMeasurementStdDevs) {
-        Logger.recordOutput("Drive/VisionPoseEstimate",visionRobotPoseMeters);
-        Logger.recordOutput("Drive/VisionEstimateStdDevs",visionMeasurementStdDevs);
+        Logger.recordOutput("Drive/VisionPoseEstimate", visionRobotPoseMeters);
+        Logger.recordOutput("Drive/VisionEstimateStdDevs", visionMeasurementStdDevs);
     }
 
     private moduleSignalStruct[] moduleSignals = new moduleSignalStruct[4];
@@ -56,7 +56,7 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> imp
     private int oldDaqs; //Number of successul daqs from previous main loop cycle
     protected AtomicInteger Daqs = new AtomicInteger(0);
     
-    public DriveIOSim(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, SwerveModuleConstants<?,?,?>... moduleConstants){
+    public DriveIOSim(SwerveDrivetrainConstants drivetrainConstants, double odometryUpdateFrequency, SwerveModuleConstants<?, ?, ?>... moduleConstants){
         super(
             TalonFX::new,
             TalonFX::new,
@@ -128,7 +128,7 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> imp
 
     @Override
     public void updateModuleInputs(ModuleIOInputs inputs, int moduleIndex) {
-        SwerveModule<TalonFX,TalonFX, CANcoder> module = getModule(moduleIndex);
+        SwerveModule<TalonFX, TalonFX, CANcoder> module = getModule(moduleIndex);
         moduleSignalStruct sigStruct = moduleSignals[moduleIndex];
         SwerveModulePosition position = module.getPosition(true);
         SwerveModuleState state = module.getCurrentState();

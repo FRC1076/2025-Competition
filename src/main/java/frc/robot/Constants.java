@@ -77,28 +77,28 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    0,0,0,
-                    0,0,0
+                    0, 0, 0,
+                    0, 0, 0
                 ),
                 REAR_RIGHT_CAM("REAR_RIGHT_CAM",
                     kDefaultSingleTagStdDevs,
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    0,0,0,
-                    0,0,0
+                    0, 0, 0,
+                    0, 0, 0
                 );
 
                 public final String name;
                 public final Transform3d offset;
-                public final Matrix<N3,N1> defaultSingleTagStdDevs;
-                public final Matrix<N3,N1> defaultMultiTagStdDevs;
+                public final Matrix<N3, N1> defaultSingleTagStdDevs;
+                public final Matrix<N3, N1> defaultMultiTagStdDevs;
                 public final PoseStrategy multiTagPoseStrategy;
                 public final PoseStrategy singleTagPoseStrategy;
                 private PhotonConfig(
                     String name, 
-                    Matrix<N3,N1> defaultSingleTagStdDevs,
-                    Matrix<N3,N1> defaultMultiTagStdDevs,
+                    Matrix<N3, N1> defaultSingleTagStdDevs,
+                    Matrix<N3, N1> defaultMultiTagStdDevs,
                     PoseStrategy multiTagPoseStrategy,
                     PoseStrategy singleTagPoseStrategy,
                     double xInch, double yInch, double zInch, 
@@ -308,22 +308,22 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.08128,90,false),
-            ALGAE_TRAVEL(0.08128, 65,false),
+            TRAVEL(0.08128, 90, false),
+            ALGAE_TRAVEL(0.08128, 65 , false),
 
-            CORAL_TRANSFER(0.08128,-23.5,false), // Same as CORAL_DIRECT_INTAKE
+            CORAL_TRANSFER(0.08128, -23.5, false), // Same as CORAL_DIRECT_INTAKE
 
-            L1(0.08128,90,false), // Placeholder
-            L2(0.910, -35,false),//0.71628, -35),
-            L3(1.348 + 2 * 0.00889, -35,true),//1.11252, -35),
-            L4(2.109649 + 3 * 0.00635, -40.4130051,true),//1.8161, -45),
+            L1(0.08128, 90, false), // Placeholder
+            L2(0.910, -35, false), //0.71628, -35),
+            L3(1.348 + 2 * 0.00889, -35, true), //1.11252, -35),
+            L4(2.109649 + 3 * 0.00635, -40.4130051, true), //1.8161, -45),
 
-            GROUND_INTAKE(0.184277,-20,false),
-            LOW_INTAKE(1.13789, -35,false),
-            HIGH_INTAKE(1.7440645, -35,true),
+            GROUND_INTAKE(0.184277, -20, false),
+            LOW_INTAKE(1.13789, -35, false),
+            HIGH_INTAKE(1.7440645, -35, true),
 
-            PROCESSOR(0.184277 + 0.15, 0,false),
-            NET(2.109649 + 3 * 0.00635, 65,true);
+            PROCESSOR(0.184277 + 0.15, 0, false),
+            NET(2.109649 + 3 * 0.00635, 65, true);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
@@ -401,23 +401,23 @@ public final class Constants {
 
             public final Translation2d position;
             private PointOfInterest(double xMeters, double yMeters) {
-                this.position = new Translation2d(xMeters,yMeters);
+                this.position = new Translation2d(xMeters, yMeters);
             }
         }
 
         // Poses of interest
         public enum PoseOfInterest {
-            BLU_PROCESSOR(5.973318,-0.00381,90), //Taken from April Tag coordinates
+            BLU_PROCESSOR(5.973318, -0.00381, 90), //Taken from April Tag coordinates
             RED_PROCESSOR(11.56081,	8.05561,	270), //Taken from April Tag coordinates
-            BLU_RIGHT_STATION(Units.inchesToMeters(33.51),Units.inchesToMeters(25.80),55),
-            BLU_LEFT_STATION(Units.inchesToMeters(33.51),Units.inchesToMeters(291.20),305),
-            RED_RIGHT_STATION(Units.inchesToMeters(657.37),Units.inchesToMeters(291.20),-125),
-            RED_LEFT_STATION(Units.inchesToMeters(657.37),Units.inchesToMeters(25.80),125);
+            BLU_RIGHT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(25.80), 55),
+            BLU_LEFT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(291.20), 305),
+            RED_RIGHT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(291.20), -125),
+            RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125);
 
             public final Pose2d pose;
 
             private PoseOfInterest(double xMeters, double yMeters, double omegaDeg) {
-                this.pose = new Pose2d(xMeters,yMeters,Rotation2d.fromDegrees(omegaDeg));
+                this.pose = new Pose2d(xMeters, yMeters, Rotation2d.fromDegrees(omegaDeg));
             }
         }
     }

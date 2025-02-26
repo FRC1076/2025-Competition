@@ -27,20 +27,20 @@
 // import lib.vision.CameraLocalizer.CommonPoseEstimate;
 
 // public class PhotonVisionTrigLocalizer implements CameraLocalizer {
-//     private static final Matrix<N3,N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+//     private static final Matrix<N3, N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
 //     private final PhotonCamera camera;
 //     private final PhotonPoseEstimator poseEstimator;
 //     private final Supplier<Rotation2d> headingSupplier;
-//     private final Matrix<N3,N1> defaultSingleStdDevs;
-//     private final Matrix<N3,N1> defaultMultiStdDevs;
+//     private final Matrix<N3, N1> defaultSingleStdDevs;
+//     private final Matrix<N3, N1> defaultMultiStdDevs;
 
 //     public PhotonVisionTrigLocalizer(
 //         PhotonCamera camera, 
 //         Transform3d offset,
 //         Supplier<Rotation2d> headingSupplier,
 //         AprilTagFieldLayout field,
-//         Matrix<N3,N1> defaultSingleStdDevs,
-//         Matrix<N3,N1> defaultMultiStdDevs
+//         Matrix<N3, N1> defaultSingleStdDevs,
+//         Matrix<N3, N1> defaultMultiStdDevs
 //     ) {
 //         this.camera = camera;
 //         this.poseEstimator = new PhotonPoseEstimator(field, PoseStrategy.PNP_DISTANCE_TRIG_SOLVE, offset);
@@ -66,7 +66,7 @@
 //      * @param est
 //      * @return Matrix of the standard deviations for the pose estimate
 //      */
-//     private Matrix<N3,N1> calculateStdDevs(EstimatedRobotPose est) {
+//     private Matrix<N3, N1> calculateStdDevs(EstimatedRobotPose est) {
 //         var stdDevs = defaultSingleStdDevs;
 //         int numTargets = 0;
 //         double avgDist = 0;

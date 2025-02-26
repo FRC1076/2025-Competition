@@ -33,7 +33,7 @@ public class ApplyTransformCommand extends Command {
 
     @Override
     public void execute() {
-        m_drive.driveFO(controller.calculateFieldOriented(m_drive.getPose(),targetPose));
+        m_drive.driveFO(controller.calculateFieldOriented(m_drive.getPose(), targetPose));
     }
 
     @Override

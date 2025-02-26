@@ -33,8 +33,8 @@ public class ParallelBidirectional implements ParallelDataBus, Sendable {
             SensorUtil.checkDigitalChannel(m_channels[i]);
             m_handles[i] = DIOJNI.initializeDIOPort(HAL.getPort((byte)m_channels[i]), false);
 
-            HAL.report(tResourceType.kResourceType_DigitalOutput,m_channels[i] + 1);
-            HAL.report(tResourceType.kResourceType_DigitalInput,m_channels[i] + 1);
+            HAL.report(tResourceType.kResourceType_DigitalOutput, m_channels[i] + 1);
+            HAL.report(tResourceType.kResourceType_DigitalInput, m_channels[i] + 1);
 
             bitmasks[i] = (1 << i);
         }
@@ -69,7 +69,7 @@ public class ParallelBidirectional implements ParallelDataBus, Sendable {
     public void toggleDirection() {
         input = !input;
         for (int handle : m_handles) {
-            DIOJNI.setDIODirection(handle,input);
+            DIOJNI.setDIODirection(handle, input);
         }
     }
 
@@ -81,7 +81,7 @@ public class ParallelBidirectional implements ParallelDataBus, Sendable {
 
         this.input = input;
         for (int handle : m_handles) {
-            DIOJNI.setDIODirection(handle,this.input);
+            DIOJNI.setDIODirection(handle, this.input);
         }
     }
 

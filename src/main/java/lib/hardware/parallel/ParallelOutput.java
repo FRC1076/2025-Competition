@@ -14,7 +14,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.SensorUtil;
 
-public class ParallelOutput implements ParallelDataBus,Sendable {
+public class ParallelOutput implements ParallelDataBus, Sendable {
     private final long[] bitmasks;
     private final int[] m_channels;
     private final int bitWidth;
@@ -32,7 +32,7 @@ public class ParallelOutput implements ParallelDataBus,Sendable {
             m_handles[i] = DIOJNI.initializeDIOPort(HAL.getPort((byte)m_channels[i]), false);
 
             
-            HAL.report(tResourceType.kResourceType_DigitalOutput,m_channels[i] + 1);
+            HAL.report(tResourceType.kResourceType_DigitalOutput, m_channels[i] + 1);
 
             bitmasks[i] = (1 << i);
         }

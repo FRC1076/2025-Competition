@@ -17,7 +17,7 @@ public final class MatrixUtils {
     }
     
     public static Vector<N3> poseToVector(Pose2d pose) {
-        return VecBuilder.fill(pose.getX(),pose.getY(),pose.getRotation().getRadians());
+        return VecBuilder.fill(pose.getX(), pose.getY(), pose.getRotation().getRadians());
     }
 
 }

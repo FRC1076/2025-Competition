@@ -16,7 +16,7 @@ import lib.control.LQRHolonomicController.LQRHolonomicDriveControllerTolerances;
 public class PathfollowingLQRHolonomicController extends LQRHolonomicController implements PathFollowingController {
 
     public PathfollowingLQRHolonomicController(LQRHolonomicDriveControllerTolerances tolerances, double dt) {
-        super(tolerances,dt);
+        super(tolerances, dt);
     }
 
     @Override
@@ -33,11 +33,11 @@ public class PathfollowingLQRHolonomicController extends LQRHolonomicController 
     public ChassisSpeeds calculateRobotRelativeSpeeds(Pose2d currentPose, PathPlannerTrajectoryState targetState) {
         double xFF = targetState.fieldSpeeds.vxMetersPerSecond;
         double yFF = targetState.fieldSpeeds.vyMetersPerSecond;
-        var LQRFeedbacks = super.calculateRaw(currentPose,targetState.pose);
+        var LQRFeedbacks = super.calculateRaw(currentPose, targetState.pose);
         return ChassisSpeeds.fromFieldRelativeSpeeds(
-            LQRFeedbacks.get(0,0) + xFF, 
-            LQRFeedbacks.get(1,0) + yFF,
-            LQRFeedbacks.get(2,0),
+            LQRFeedbacks.get(0, 0) + xFF, 
+            LQRFeedbacks.get(1, 0) + yFF,
+            LQRFeedbacks.get(2, 0),
             currentPose.getRotation()
         );
 

@@ -23,7 +23,7 @@ public class SamuraiXboxController extends CommandXboxController {
     private DoubleSupplier rightStickY_DB;
 
     public SamuraiXboxController(int port) {
-        this(port,kDefaultStickDeadband,kDefaultTriggerThreshold);
+        this(port, kDefaultStickDeadband, kDefaultTriggerThreshold);
     }
 
     public SamuraiXboxController(int port, double stickDeadband, double triggerThreshold) {
@@ -47,11 +47,11 @@ public class SamuraiXboxController extends CommandXboxController {
     }
 
     private void configSticks() {
-        leftStickX_DB = () -> MathUtil.applyDeadband(super.getLeftX(),stickDeadband);
-        leftStickY_DB = () -> MathUtil.applyDeadband(super.getLeftY(),stickDeadband);
+        leftStickX_DB = () -> MathUtil.applyDeadband(super.getLeftX(), stickDeadband);
+        leftStickY_DB = () -> MathUtil.applyDeadband(super.getLeftY(), stickDeadband);
         
-        rightStickX_DB = () -> MathUtil.applyDeadband(super.getRightX(),stickDeadband);
-        rightStickY_DB = () -> MathUtil.applyDeadband(super.getRightY(),stickDeadband);
+        rightStickX_DB = () -> MathUtil.applyDeadband(super.getRightX(), stickDeadband);
+        rightStickY_DB = () -> MathUtil.applyDeadband(super.getRightY(), stickDeadband);
     }
 
     @Override

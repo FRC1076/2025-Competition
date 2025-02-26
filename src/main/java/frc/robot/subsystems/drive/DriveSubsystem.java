@@ -64,7 +64,7 @@ public class DriveSubsystem extends SubsystemBase {
                 this::getPose,
                 this::resetPose,
                 () -> driveInputs.Speeds,
-                (speeds,feedforwards) -> driveCO(speeds),
+                (speeds, feedforwards) -> driveCO(speeds),
                 new PPHolonomicDriveController(
                     // PID constants for translation
                     new PIDConstants(5, 0, 0),
@@ -89,15 +89,15 @@ public class DriveSubsystem extends SubsystemBase {
         io.periodic(); //currently just for calling sim
         vision.update();
         io.updateInputs(driveInputs);
-        // io.updateModuleInputs(frontLeftInputs,0);
-        // io.updateModuleInputs(frontRightInputs,1);
-        // io.updateModuleInputs(rearLeftInputs,2);
-        // io.updateModuleInputs(rearRightInputs,3);
+        // io.updateModuleInputs(frontLeftInputs, 0);
+        // io.updateModuleInputs(frontRightInputs, 1);
+        // io.updateModuleInputs(rearLeftInputs, 2);
+        // io.updateModuleInputs(rearRightInputs, 3);
         Logger.processInputs("Drive", driveInputs);
-        // Logger.processInputs("Drive/FrontLeft",frontLeftInputs);
-        // Logger.processInputs("Drive/FrontRight",frontRightInputs);
-        // Logger.processInputs("Drive/RearLeft",rearLeftInputs);
-        // Logger.processInputs("Drive/RearRight",rearRightInputs);
+        // Logger.processInputs("Drive/FrontLeft", frontLeftInputs);
+        // Logger.processInputs("Drive/FrontRight", frontRightInputs);
+        // Logger.processInputs("Drive/RearLeft", rearLeftInputs);
+        // Logger.processInputs("Drive/RearRight", rearRightInputs);
 
         if (DriverStation.getAlliance().isPresent() && !hasSetAlliance) {
             hasSetAlliance = true;
@@ -165,9 +165,9 @@ public class DriveSubsystem extends SubsystemBase {
         private DriveCommandFactory(DriveSubsystem drive) {
             this.drive = drive;
             for (ReefFace face : ReefFace.values()) {
-                leftBranchAlignmentCommands.put(face,directDriveToPose(GeometryUtils.rotatePose(face.leftBranch.transformBy(robotOffset),Rotation2d.k180deg)));
-                reefCenterAlignmentCommands.put(face,directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset),Rotation2d.k180deg)));
-                rightBranchAlignmentCommands.put(face,directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset),Rotation2d.k180deg)));
+                leftBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.leftBranch.transformBy(robotOffset), Rotation2d.k180deg)));
+                reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
+                rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
             }
         }
 
@@ -184,7 +184,7 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public TeleopDriveCommand teleopDrive(DoubleSupplier xSupplier, DoubleSupplier ySupplier, DoubleSupplier omegaSupplier) {
-            return new TeleopDriveCommand(drive,xSupplier,ySupplier,omegaSupplier);
+            return new TeleopDriveCommand(drive, xSupplier, ySupplier, omegaSupplier);
         }
 
         public Command directDriveToPose(Pose2d targetPose) {
@@ -192,15 +192,15 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public Command directDriveToNearestLeftBranch() {
-            return new SelectCommand<>(leftBranchAlignmentCommands,() -> Localization.getClosestReefFace(drive.getPose()));
+            return new SelectCommand<>(leftBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
         public Command directDriveToNearestReefFace() {
-            return new SelectCommand<>(reefCenterAlignmentCommands,() -> Localization.getClosestReefFace(drive.getPose()));
+            return new SelectCommand<>(reefCenterAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
         public Command directDriveToNearestRightBranch() {
-            return new SelectCommand<>(rightBranchAlignmentCommands,() -> Localization.getClosestReefFace(drive.getPose()));
+            return new SelectCommand<>(rightBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
         
         public Command applySwerveRequest(Supplier<SwerveRequest> requestSupplier) {

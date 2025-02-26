@@ -16,7 +16,7 @@ public final class GeometryUtils {
 
     /** rotates a Pose2d */
     public static Pose2d rotatePose(Pose2d pose, Rotation2d rot) {
-        return new Pose2d(pose.getTranslation(),pose.getRotation().rotateBy(rot));
+        return new Pose2d(pose.getTranslation(), pose.getRotation().rotateBy(rot));
     }
 
     /* finds angle from one pose to another pose */

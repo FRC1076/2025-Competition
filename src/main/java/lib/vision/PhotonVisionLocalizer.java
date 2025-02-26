@@ -24,12 +24,12 @@ import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 
 public class PhotonVisionLocalizer implements CameraLocalizer {
-    private static final Matrix<N3,N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+    private static final Matrix<N3, N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     private final PhotonCamera camera;
     private final PhotonPoseEstimator poseEstimator;
     private final Supplier<Rotation2d> headingSupplier;
-    private final Matrix<N3,N1> defaultSingleStdDevs;
-    private final Matrix<N3,N1> defaultMultiStdDevs;
+    private final Matrix<N3, N1> defaultSingleStdDevs;
+    private final Matrix<N3, N1> defaultMultiStdDevs;
 
     public PhotonVisionLocalizer(
         PhotonCamera camera, 
@@ -38,8 +38,8 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
         PhotonPoseEstimator.PoseStrategy multiTagFallbackStrategy,
         Supplier<Rotation2d> headingSupplier,
         AprilTagFieldLayout fieldLayout,
-        Matrix<N3,N1> defaultSingleStdDevs,
-        Matrix<N3,N1> defaultMultiStdDevs
+        Matrix<N3, N1> defaultSingleStdDevs,
+        Matrix<N3, N1> defaultMultiStdDevs
     ) {
         this.camera = camera;
         this.poseEstimator = new PhotonPoseEstimator(fieldLayout, primaryStrategy, offset);
@@ -81,7 +81,7 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
     /**
      * Calculates the standard deviations for the pose estimate based on how many tags are visible and how far they are
      */
-    private Matrix<N3,N1> calculateStdDevs(EstimatedRobotPose est) {
+    private Matrix<N3, N1> calculateStdDevs(EstimatedRobotPose est) {
         var stdDevs = defaultSingleStdDevs;
         int numTargets = 0;
         double avgDist = 0;

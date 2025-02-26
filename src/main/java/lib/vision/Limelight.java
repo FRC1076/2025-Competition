@@ -60,7 +60,7 @@ public class Limelight {
     private final NetworkTable LLNetworkTable;
     
     public Limelight(String name) {
-        this(NetworkTableInstance.getDefault(),name);
+        this(NetworkTableInstance.getDefault(), name);
     }
 
     public Limelight(NetworkTableInstance server, String name) {
@@ -108,19 +108,19 @@ public class Limelight {
         if (fiducials.size() == 0) {
             return Optional.empty(); //Returns empty optional if no fiducials are detected
         }
-        Pose3d pose = new Pose3d(poseArray[0],poseArray[1],poseArray[2],new Rotation3d(poseArray[3],poseArray[4],poseArray[5]));
+        Pose3d pose = new Pose3d(poseArray[0], poseArray[1], poseArray[2], new Rotation3d(poseArray[3], poseArray[4], poseArray[5]));
         double latency = poseArray[6];
         int tagCount = (int)poseArray[7];
         double tagSpan = poseArray[8];
         double avgTagDist = poseArray[9];
         double avgTagArea = poseArray[10];
         double adjustedTimestamp = (timestamp / 1000000.0) - (latency / 1000.0);
-        return Optional.of(new LLPoseEstimate(pose, adjustedTimestamp, latency, tagCount, tagSpan, avgTagDist, avgTagArea, fiducials,true));
+        return Optional.of(new LLPoseEstimate(pose, adjustedTimestamp, latency, tagCount, tagSpan, avgTagDist, avgTagArea, fiducials, true));
     }
 
     /** Sets robot orientation used by the MegaTag2 pose estimation algorithm */
     public void setRobotOrientation(double yaw, double yawRate, double pitch, double pitchRate, double roll, double rollRate) {
-        double[] orientationData = {yaw,yawRate,pitch,pitchRate,roll,rollRate};
+        double[] orientationData = {yaw, yawRate, pitch, pitchRate, roll, rollRate};
         LLNetworkTable.getEntry("robot_orientation_set").setDoubleArray(orientationData);
         server.flush();
     }

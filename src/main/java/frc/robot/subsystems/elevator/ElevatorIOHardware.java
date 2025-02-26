@@ -42,8 +42,8 @@ public class ElevatorIOHardware implements ElevatorIO {
     private final RelativeEncoder m_encoder;
 
     public ElevatorIOHardware() {
-        m_leadMotor = new SparkMax(kMotorPort0,SparkMax.MotorType.kBrushless);
-        m_followMotor = new SparkMax(kMotorPort1,SparkMax.MotorType.kBrushless);
+        m_leadMotor = new SparkMax(kMotorPort0, SparkMax.MotorType.kBrushless);
+        m_followMotor = new SparkMax(kMotorPort1, SparkMax.MotorType.kBrushless);
 
         m_leadMotorConfig = new SparkMaxConfig();
         m_followMotorConfig = new SparkMaxConfig();

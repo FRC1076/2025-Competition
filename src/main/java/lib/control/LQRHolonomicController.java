@@ -60,8 +60,8 @@ public class LQRHolonomicController implements HolonomicController {
         double rotEffortTolerance 
     ) {}
 
-    private final LinearSystem<N3,N3,N3> drivePlant; // A state-space system representing the robot's drivetrain
-    private final LinearQuadraticRegulator<N3,N3,N3> LQRController;
+    private final LinearSystem<N3, N3, N3> drivePlant; // A state-space system representing the robot's drivetrain
+    private final LinearQuadraticRegulator<N3, N3, N3> LQRController;
 
     /**
      * Constructor for an LQR controlled Holonomic Drive Train. All non-dimensionless values should be given in SI base units (seconds, meters, etc.)
@@ -72,7 +72,7 @@ public class LQRHolonomicController implements HolonomicController {
      */
     public LQRHolonomicController(Vector<N3> q, Vector<N3> r, double dt) {
 
-        Matrix<N3,N3> A = new Matrix<>(
+        Matrix<N3, N3> A = new Matrix<>(
             new SimpleMatrix(
                 new double[][] {
                     {0, 0, 0},
@@ -82,7 +82,7 @@ public class LQRHolonomicController implements HolonomicController {
             )
         );
 
-        Matrix<N3,N3> B = new Matrix<>(
+        Matrix<N3, N3> B = new Matrix<>(
             new SimpleMatrix(
                 new double[][] {
                     {1, 0, 0},
@@ -92,7 +92,7 @@ public class LQRHolonomicController implements HolonomicController {
             )
         );
 
-        Matrix<N3,N3> C = new Matrix<>(
+        Matrix<N3, N3> C = new Matrix<>(
             new SimpleMatrix(
                 new double[][] {
                     {1, 0, 0},
@@ -102,7 +102,7 @@ public class LQRHolonomicController implements HolonomicController {
             )
         );
 
-        Matrix<N3,N3> D = new Matrix<>(
+        Matrix<N3, N3> D = new Matrix<>(
             new SimpleMatrix(
                 new double[][] {
                     {dt, 0, 0},
@@ -126,8 +126,8 @@ public class LQRHolonomicController implements HolonomicController {
      */
     public LQRHolonomicController(double errorTolerance, double effortTolerance, double dt) {
         this(
-            VecBuilder.fill(errorTolerance,errorTolerance,errorTolerance),
-            VecBuilder.fill(effortTolerance,effortTolerance,effortTolerance),
+            VecBuilder.fill(errorTolerance, errorTolerance, errorTolerance),
+            VecBuilder.fill(effortTolerance, effortTolerance, effortTolerance),
             dt
         );
     }
@@ -140,8 +140,8 @@ public class LQRHolonomicController implements HolonomicController {
      */
     public LQRHolonomicController(LQRHolonomicDriveControllerTolerances tolerances, double dt) {
         this(
-            VecBuilder.fill(tolerances.transErrorTolerance(),tolerances.transErrorTolerance(),tolerances.rotErrorTolerance()),
-            VecBuilder.fill(tolerances.transEffortTolerance(),tolerances.transEffortTolerance(),tolerances.rotEffortTolerance()),
+            VecBuilder.fill(tolerances.transErrorTolerance(), tolerances.transErrorTolerance(), tolerances.rotErrorTolerance()),
+            VecBuilder.fill(tolerances.transEffortTolerance(), tolerances.transEffortTolerance(), tolerances.rotEffortTolerance()),
             dt
         );
     }
@@ -149,12 +149,12 @@ public class LQRHolonomicController implements HolonomicController {
 
 
     /* Returns a state-space model of the plant */
-    public LinearSystem<N3,N3,N3> getDrivePlant(){
+    public LinearSystem<N3, N3, N3> getDrivePlant(){
         return drivePlant;
     }
 
     /* Returns the internal LQR controller */
-    public LinearQuadraticRegulator<N3,N3,N3> getController(){
+    public LinearQuadraticRegulator<N3, N3, N3> getController(){
         return LQRController;
     }
 
@@ -166,10 +166,10 @@ public class LQRHolonomicController implements HolonomicController {
      * @return
      * the calculated field-oriented controller feedbacks, in the form of a vector
      */
-    public Matrix<N3,N1> calculateRaw(Pose2d pv, Pose2d setpoint) {
+    public Matrix<N3, N1> calculateRaw(Pose2d pv, Pose2d setpoint) {
         var spVec = MatrixUtils.poseToVector(setpoint);
         var pvVec = MatrixUtils.poseToVector(pv);
-        return LQRController.calculate(pvVec,spVec);
+        return LQRController.calculate(pvVec, spVec);
     }
 
     /**
@@ -184,7 +184,7 @@ public class LQRHolonomicController implements HolonomicController {
         var spVec = MatrixUtils.poseToVector(setpoint);
         var pvVec = MatrixUtils.poseToVector(pv);
         var outputFieldRelative = LQRController.calculate(pvVec, spVec);
-        return new ChassisSpeeds(outputFieldRelative.get(0,0),outputFieldRelative.get(1,0),outputFieldRelative.get(2,0));
+        return new ChassisSpeeds(outputFieldRelative.get(0, 0), outputFieldRelative.get(1, 0), outputFieldRelative.get(2, 0));
     }
 
     /**
@@ -199,7 +199,7 @@ public class LQRHolonomicController implements HolonomicController {
         var spVec = MatrixUtils.poseToVector(setpoint);
         var pvVec = MatrixUtils.poseToVector(pv);
         var outputFieldRelative = LQRController.calculate(pvVec, spVec);
-        return ChassisSpeeds.fromFieldRelativeSpeeds(outputFieldRelative.get(0,0),outputFieldRelative.get(1,0),outputFieldRelative.get(2,0),pv.getRotation());
+        return ChassisSpeeds.fromFieldRelativeSpeeds(outputFieldRelative.get(0, 0), outputFieldRelative.get(1, 0), outputFieldRelative.get(2, 0), pv.getRotation());
     }
 
     /**resets the LQR controller*/

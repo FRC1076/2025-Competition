@@ -21,7 +21,7 @@ public interface CameraLocalizer {
     public static record CommonPoseEstimate(
         Pose2d pose,
         double timestampSeconds,
-        Matrix<N3,N1> stdDevs
+        Matrix<N3, N1> stdDevs
     ) {}
 
     public abstract Optional<CommonPoseEstimate> getPoseEstimate();

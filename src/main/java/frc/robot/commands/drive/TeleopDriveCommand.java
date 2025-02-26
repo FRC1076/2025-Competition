@@ -60,12 +60,12 @@ public class TeleopDriveCommand extends Command {
     // The request generator is a function that takes three doubles as parameters and returns a SwerveRequest.
     // During every loop, the requestGenerator is invoked with the values of the three doublesuppliers as parameters,
     // And the resulting SwerveRequest is applied to the Drivetrain
-    private TriFunction<Double,Double,Double,SwerveRequest> requestGenerator;
+    private TriFunction<Double, Double, Double, SwerveRequest> requestGenerator;
 
     // A swerve request override. If this optional is not empty, it signals to the TeleopDriveCommand that the request generator has been overridden, and will not
     // generate a default requestGenerator during reloadCommand()
     // The presence of a requestGeneratorOverride supersedes the presence of a headingSupplier
-    private Optional<TriFunction<Double,Double,Double,SwerveRequest>> requestGeneratorOverride = Optional.empty();
+    private Optional<TriFunction<Double, Double, Double, SwerveRequest>> requestGeneratorOverride = Optional.empty();
 
     // A heading override. If this optional is not empty, it signals to the TeleopDriveCommand that the heading has been locked,
     // And will generate a requestGenerator that returns a FieldCentricFacingAngle request
@@ -119,7 +119,7 @@ public class TeleopDriveCommand extends Command {
         if (requestGeneratorOverride.isPresent()){
             requestGenerator = requestGeneratorOverride.get();
         } else if (headingSupplier.isPresent()) {
-            requestGenerator = (vx,vy,omega) -> {
+            requestGenerator = (vx, vy, omega) -> {
                 FieldCentricFacingAngle request = new FieldCentricFacingAngle()
                     .withVelocityX(vx)
                     .withVelocityY(vy)
@@ -130,9 +130,9 @@ public class TeleopDriveCommand extends Command {
                 return request;
             };
         } else {
-            requestGenerator = (vx,vy,omega) -> {
+            requestGenerator = (vx, vy, omega) -> {
                 return new ApplyFieldSpeeds()
-                    .withSpeeds(new ChassisSpeeds(vx,vy,omega))
+                    .withSpeeds(new ChassisSpeeds(vx, vy, omega))
                     .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
             };
         }
@@ -141,7 +141,7 @@ public class TeleopDriveCommand extends Command {
     /** Overrides the requestGenerator 
      * Used for custom swerve requests, like x-locking and heading-locking, etc
     */
-    private void setRequestGenerator(TriFunction<Double,Double,Double,SwerveRequest> newRequestGenerator){
+    private void setRequestGenerator(TriFunction<Double, Double, Double, SwerveRequest> newRequestGenerator){
         this.requestGeneratorOverride = Optional.of(newRequestGenerator);
         reloadCommand();
     }
@@ -189,7 +189,7 @@ public class TeleopDriveCommand extends Command {
     }
 
     /** Returns a command that applies an arbitrary request generator override */
-    public Command applyRequestGenerator(TriFunction<Double,Double,Double,SwerveRequest> reqgen) {
+    public Command applyRequestGenerator(TriFunction<Double, Double, Double, SwerveRequest> reqgen) {
         return Commands.startEnd(
             () -> setRequestGenerator(reqgen), 
             () -> clearRequestGeneratorOverride()
@@ -199,11 +199,11 @@ public class TeleopDriveCommand extends Command {
     /** Returns a command that makes the drive train drive in chassis-oriented mode, with a clutch applied, for FPV branch alignment */
     public Command applyFPVDrive(){
         return applyRequestGenerator(
-            (vx,vy,omega) -> {
+            (vx, vy, omega) -> {
                 vx *= FPVClutchTranslationFactor;
                 vy *= FPVClutchTranslationFactor;
                 omega *= FPVClutchRotationFactor;
-                return new ApplyRobotSpeeds().withSpeeds(new ChassisSpeeds(vx,vy,omega));
+                return new ApplyRobotSpeeds().withSpeeds(new ChassisSpeeds(vx, vy, omega));
             }
         );
     }

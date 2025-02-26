@@ -39,7 +39,7 @@ public class VisionLocalizationSystem {
     }
 
     //A Consumer that accepts a Pose3d and a Matrix of Standard Deviations, usually should call addVisionMeasurements() on a SwerveDrivePoseEstimator3d
-    private TriConsumer<Pose2d,Double,Matrix<N3,N1>> measurementConsumer = (pose,timestamp,stddevs) -> {}; //A default no-op consumer is instantiated to prevent null pointer dereferences
+    private TriConsumer<Pose2d, Double, Matrix<N3, N1>> measurementConsumer = (pose, timestamp, stddevs) -> {}; //A default no-op consumer is instantiated to prevent null pointer dereferences
 
     private final Map<String, CamStruct> cameras = new HashMap<>();
     
@@ -52,7 +52,7 @@ public class VisionLocalizationSystem {
      * <p> The Double is the timestamp of the measurement in seconds
      * <p> The 3x1 Matrix is the standard deviations of the measurement
      */
-    public void registerMeasurementConsumer(TriConsumer<Pose2d,Double,Matrix<N3,N1>> consumer) {
+    public void registerMeasurementConsumer(TriConsumer<Pose2d, Double, Matrix<N3, N1>> consumer) {
         measurementConsumer = measurementConsumer.andThen(consumer);
     }
 
