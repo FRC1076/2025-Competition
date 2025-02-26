@@ -152,7 +152,7 @@ public class RobotContainer {
             m_elastic = new Elastic();
             m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
             for (PhotonConfig config : PhotonConfig.values()){
-                /*
+                
                 var cam = new PhotonCamera(config.name);
                 m_vision.addCamera(new PhotonVisionLocalizer(
                     cam, 
@@ -163,7 +163,7 @@ public class RobotContainer {
                     fieldLayout,
                     config.defaultSingleTagStdDevs, 
                     config.defaultMultiTagStdDevs)
-                );*/
+                );
             }
         } else if (SystemConstants.currentMode == 1) {
            
