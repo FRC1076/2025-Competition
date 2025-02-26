@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -23,30 +22,30 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
 
-public class PhotonVisionLocalizer implements CameraLocalizer {
-    private static final Matrix<N3,N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+public class PhotonVisionSource implements CameraSource {
+   private static final Matrix<N3,N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     private final PhotonCamera camera;
     private final PhotonPoseEstimator poseEstimator;
-    private final Supplier<Rotation2d> headingSupplier;
     private final Matrix<N3,N1> defaultSingleStdDevs;
     private final Matrix<N3,N1> defaultMultiStdDevs;
+    private final Supplier<Rotation2d> headingSupplier;
 
-    public PhotonVisionLocalizer(
+    public PhotonVisionSource(
         PhotonCamera camera, 
         Transform3d offset,
         PhotonPoseEstimator.PoseStrategy primaryStrategy,
         PhotonPoseEstimator.PoseStrategy multiTagFallbackStrategy,
-        Supplier<Rotation2d> headingSupplier,
         AprilTagFieldLayout fieldLayout,
         Matrix<N3,N1> defaultSingleStdDevs,
-        Matrix<N3,N1> defaultMultiStdDevs
+        Matrix<N3,N1> defaultMultiStdDevs,
+        Supplier<Rotation2d> headingSupplier
     ) {
         this.camera = camera;
         this.poseEstimator = new PhotonPoseEstimator(fieldLayout, primaryStrategy, offset);
         poseEstimator.setMultiTagFallbackStrategy(multiTagFallbackStrategy);
-        this.headingSupplier = headingSupplier;
         this.defaultSingleStdDevs = defaultSingleStdDevs;
         this.defaultMultiStdDevs = defaultMultiStdDevs;
+        this.headingSupplier = headingSupplier;
     }
 
     /**
@@ -54,29 +53,37 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
      * @param offset The offset to set
      * @return The localizer
      */
-    /*
-    public PhotonVisionLocalizer withCameraOffset(Transform3d offset){
+    public PhotonVisionSource withCameraOffset(Transform3d offset){
         setCameraOffset(offset);
         return this;
-    }*/
+    }
 
     /**
      * Sets the camera offset from the robot center
      * @param offset The offset to set
      */
-    /*
     public void setCameraOffset(Transform3d offset){
         this.poseEstimator.setRobotToCameraTransform(offset);
-    }*/
+    }
 
     /**
      * Sets the pose strategy for the camera
-     * @param strategy The pose strategy to use, from {@link PhotonPoseEstimator.PoseStrategy}
+     * 
+     * @param strategy the strategy to set, from {@link PhotonPoseEstimator.PoseStrategy}
      */
-    /*
     public void setPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy){
         poseEstimator.setPrimaryStrategy(strategy);
-    }*/
+    }
+
+    /**
+     * Set the Position Estimation Strategy used in multi-tag mode when only one tag can be seen. Must
+     * NOT be MULTI_TAG_PNP
+     *
+     * @param strategy the strategy to set
+     */
+    public void setFallbackPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy){
+        poseEstimator.setMultiTagFallbackStrategy(strategy);
+    }
 
     /**
      * Calculates the standard deviations for the pose estimate based on how many tags are visible and how far they are
@@ -124,7 +131,7 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
      * @return The pose estimate, or Optional.empty() if no estimate is available
      */
     public Optional<CommonPoseEstimate> getPoseEstimate() {
-        poseEstimator.addHeadingData(Timer.getFPGATimestamp(), headingSupplier.get());
+        poseEstimator.addHeadingData(Timer.getFPGATimestamp(),headingSupplier.get());
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
@@ -145,5 +152,9 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
 
     public String getName() {
         return camera.getName();
+    }
+
+    public PhotonCamera getCamera() {
+        return camera;
     }
 }

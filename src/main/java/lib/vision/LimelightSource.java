@@ -13,14 +13,14 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import lib.vision.Limelight.LLPoseEstimate;
 
-public class LimeLightLocalizer implements CameraLocalizer {
+public class LimelightSource implements CameraSource {
     private static final Matrix<N3,N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     private final Limelight camera;
     private final Transform3d camToBotOffset;
     private final Matrix<N3,N1> defaultSingleStdDevs;
     private final Matrix<N3,N1> defaultMultiStdDevs;
 
-    public LimeLightLocalizer(
+    public LimelightSource(
         Limelight camera,
         Transform3d offset,
         Matrix<N3,N1> defaultSingleStdDevs,

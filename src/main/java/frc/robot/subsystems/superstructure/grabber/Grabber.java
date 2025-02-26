@@ -39,6 +39,10 @@ public class Grabber {
         Logger.processInputs("Grabber", inputs);
     }
 
+    public double getRotations() {
+        return inputs.motorPositionRadians;
+    }
+
     public double getAppliedCurrent() {
         return inputs.leftMotorCurrent;
     }

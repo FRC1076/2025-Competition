@@ -83,6 +83,37 @@ public class Superstructure extends SubsystemBase {
             requirementCommand()
         );
     }
-    
+
+    private Command applyGrabberVolts(double leftVoltsDifferential, double rightVoltsDifferential) {
+        return this.runOnce(() -> m_grabber.runVoltsDifferential(leftVoltsDifferential, rightVoltsDifferential));
+    }
+
+    private Command applyGrabberRotationsBangBang(double volts, double rotations) {
+        double sign = Math.signum(rotations - m_grabber.getRotations());
+        return Commands.sequence(
+            runOnce(() -> m_grabber.runVolts(volts)),
+            Commands.waitUntil(() -> Math.signum(rotations - m_grabber.getRotations()) != sign),
+            runOnce(() -> m_grabber.stop())
+        );
+    }
+
+    private Command applyFunnelVolts(double funnelVolts) {
+        return this.run(() -> m_funnel.setVoltage(funnelVolts));
+    }
+
+    private Command applyGrabberFunnelVolts(double grabberVolts, double funnelVolts) {
+        return Commands.parallel(
+            Commands.runOnce(() -> m_grabber.runVolts(grabberVolts)),
+            Commands.runOnce(() -> m_funnel.setVoltage(funnelVolts)),
+            requirementCommand()
+        );
+    }
+
+    public class SuperstructureCommandFactory {
+
+        private SuperstructureCommandFactory() {
+            
+        }
+    }
 
 }

@@ -506,7 +506,7 @@ public final class Constants {
         
         public static final double kCurrentLimit = 10; 
         public static final double kGearRatio = 45;
-        public static final double kPositionConversionFactor = Math.PI * 2 * (1/kGearRatio);
+        public static final double kPositionConversionFactor = 1/kGearRatio;
 
         public static final boolean kLeftMotorInverted = true;
         public static final boolean kRightMotorInverted = false;

@@ -5,46 +5,44 @@
 package lib.vision;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-
-import org.photonvision.PhotonPoseEstimator;
-
+import java.util.Set;
+import java.util.function.Supplier;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import lib.functional.TriConsumer;
+import lib.vision.CameraSource.CommonPoseEstimate;
 
 
 /**
  * A class that manages robot position estimates from multiple cameras and 
  * sends them to all externally registered consumers using the {@link VisionLocalizationSystem#update()} method
- * <p>Consumers are registered using the {@link VisionLocalizationSystem#registerMeasurementConsumer()} method
+ * <p>Consumers are registered using the {@link VisionLocalizationSystem#addMeasurementConsumer()} method
  */
 public class VisionLocalizationSystem {
 
-    private class CamStruct {
-        public final CameraLocalizer camera;
-        public boolean cameraActive = true; //Signals whether or not the camera reading should be added to vision measurements
+    // A callback to a pose estimate supplier from a CameraSource
+    private class SourceCallback {
+        public final Supplier<Optional<CommonPoseEstimate>> supplier;
+        public boolean enabled;
 
-        /** Sets whether or not the camera is active */ 
-        public void setActive(boolean active) {
-            cameraActive = active;
-        }
-
-        public CamStruct(CameraLocalizer camera) {
-            this.camera = camera;
+        public SourceCallback(Supplier<Optional<CommonPoseEstimate>> supplier) {
+            this.supplier = supplier;
+            enabled = true;
         }
     }
 
     //A Consumer that accepts a Pose3d and a Matrix of Standard Deviations, usually should call addVisionMeasurements() on a SwerveDrivePoseEstimator3d
     private TriConsumer<Pose2d,Double,Matrix<N3,N1>> measurementConsumer = (pose,timestamp,stddevs) -> {}; //A default no-op consumer is instantiated to prevent null pointer dereferences
 
-    private final Map<String,CamStruct> cameras = new HashMap<>();
+    private final Map<String,SourceCallback> sourceCallbacks = new HashMap<>();
     
     /**
-     * Registers a consumer
+     * Adds a consumer
      * <p> This method should be called externally on initialization
      * 
      * @param consumer A consumer that accepts a Pose2d, Double, and 3x1 Matrix
@@ -52,26 +50,25 @@ public class VisionLocalizationSystem {
      * <p> The Double is the timestamp of the measurement in seconds
      * <p> The 3x1 Matrix is the standard deviations of the measurement
      */
-    public void registerMeasurementConsumer(TriConsumer<Pose2d,Double,Matrix<N3,N1>> consumer) {
+    public void addMeasurementConsumer(TriConsumer<Pose2d,Double,Matrix<N3,N1>> consumer) {
         measurementConsumer = measurementConsumer.andThen(consumer);
     }
 
     /**
-     * Adds a camera to the vision system
+     * Adds a source to the vision system
      */
-    public void addCamera(CameraLocalizer camera) {
-        CamStruct camStruct = new CamStruct(camera);
-        cameras.put(camera.getName(),camStruct);
+    public void addSource(CameraSource source) {
+        sourceCallbacks.put(source.getName(),new SourceCallback(source::getPoseEstimate));
     }
 
     /**
-     * Enables or disables selected cameras
-     * @param enabled Whether or not the cameras should be enabled
-     * @param cams The IDs of the cameras to enable or disable
+     * Enables or disables selected sources
+     * @param enabled Whether or not the sources should be enabled
+     * @param sources The IDs of the sources to enable or disable
      */
-    public void enableCameras(boolean enabled, String... cams) {
-        for (String camID : cams) {
-            cameras.get(camID).setActive(enabled);
+    public void enableSources(boolean enabled, String... sources) {
+        for (String sourceID : sources) {
+            sourceCallbacks.get(sourceID).enabled = enabled;
         }
     }
 
@@ -79,29 +76,19 @@ public class VisionLocalizationSystem {
      * Enables or disables all cameras
      * @param enabled Whether or not the cameras should be enabled
      */
-    public void enableAllCameras(boolean enabled) {
-        for (var camStruct : cameras.values()) {
-            camStruct.setActive(enabled);
-        }
-    }
-    
-    /**
-     * For PhotonVision cameras, this method will set the pose estimator strategy from {@link PhotonPoseEstimator#PoseStrategy}
-     * For Limelight cameras, this method will call the default method, which does nothing
-     */
-    public void setPhotonPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy, String... cams){
-        for (String camID : cams) {
-            cameras.get(camID).camera.setPoseStrategy(strategy);
+    public void enableAllSources(boolean enabled) {
+        for (var source : sourceCallbacks.values()) {
+            source.enabled = true;
         }
     }
 
     /**
-     * Fetches pose estimate from cameras and sends them to all consumers. This function should be called exactly once every main function loop
+     * Fetches pose estimates from sources and sends them to all consumers. This function should be called exactly once every main function loop
      */
     public void update() {
-        for (var camStruct : cameras.values()) {
-            if (camStruct.cameraActive) {
-                camStruct.camera.getPoseEstimate().ifPresent(
+        for (var source : sourceCallbacks.values()) {
+            if (source.enabled) {
+                source.supplier.get().ifPresent(
                     (estimate) -> {
                         measurementConsumer.accept(
                             estimate.pose(),
