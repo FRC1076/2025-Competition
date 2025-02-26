@@ -2,10 +2,11 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.superstructure.elevator;
 
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorSimConstants;
+
 import static frc.robot.Constants.ElevatorSimConstants.Control.*;
 import static frc.robot.Constants.ElevatorConstants.kPositionConversionFactor;
 import static frc.robot.Constants.ElevatorConstants.kVelocityConversionFactor;

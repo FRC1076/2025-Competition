@@ -2,7 +2,7 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package frc.robot.subsystems.grabber;
+package frc.robot.subsystems.superstructure.grabber;
 
 /** 
  * A simple boilerplate class to enable full superstructure simulation

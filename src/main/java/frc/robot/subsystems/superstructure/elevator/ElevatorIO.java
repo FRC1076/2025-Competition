@@ -2,7 +2,7 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package frc.robot.subsystems.elevator;
+package frc.robot.subsystems.superstructure.elevator;
 
 import org.littletonrobotics.junction.AutoLog;
 

@@ -2,7 +2,7 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package frc.robot.subsystems.wrist;
+package frc.robot.subsystems.superstructure.wrist;
 
 import frc.robot.Constants.WristConstants;
 import static frc.robot.Constants.WristConstants.Control.*;

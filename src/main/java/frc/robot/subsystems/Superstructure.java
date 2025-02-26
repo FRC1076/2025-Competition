@@ -13,11 +13,10 @@ import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
-import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.led.LEDSubsystem;
-import frc.robot.subsystems.wrist.WristSubsystem;
-
+import frc.robot.subsystems.superstructure.grabber.Grabber;
+import frc.robot.subsystems.superstructure.wrist.WristSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.DaemonCommand;
 import lib.extendedcommands.SelectWithFallbackCommand;
@@ -103,7 +102,7 @@ public class Superstructure {
     }
 
     private final ElevatorSubsystem m_elevator;
-    private final GrabberSubsystem m_grabber;
+    private final Grabber m_grabber;
     private final IndexSubsystem m_index;
     private final WristSubsystem m_wrist;
     private final Elastic m_elastic;
@@ -120,7 +119,7 @@ public class Superstructure {
 
     public Superstructure (
         ElevatorSubsystem elevator,
-        GrabberSubsystem grabber,
+        Grabber grabber,
         IndexSubsystem index,
         WristSubsystem wrist,
         Elastic elastic,
@@ -154,7 +153,7 @@ public class Superstructure {
         return m_elevator;
     }
 
-    public GrabberSubsystem getGrabber() {
+    public Grabber getGrabber() {
         return m_grabber;
     }
 
@@ -234,7 +233,8 @@ public class Superstructure {
             )
             m_wrist.applyAngle(Rotation2d.fromDegrees(80)),
             m_wrist.applyAngle(Rotation2d.fromDegrees(-30))
-        );*/
+        );
+        */
     }
 
     /**
@@ -336,16 +336,13 @@ public class Superstructure {
             grabberActionCommands.put(WristevatorState.L2, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
             grabberActionCommands.put(WristevatorState.L4, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); // TODO: Are there any risks if we have a coral, try to score it, and then hit the button again? The grabber will think it has an algae
-            grabberActionCommands.put(WristevatorState.GROUND_INTAKE,
-                                        superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
-                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
+            grabberActionCommands.put(WristevatorState.GROUND_INTAKE,superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE));
             grabberActionCommands.put(WristevatorState.PROCESSOR, superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
-            grabberActionCommands.put(WristevatorState.LOW_INTAKE,
-                                        superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
-                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
-            grabberActionCommands.put(WristevatorState.HIGH_INTAKE,
-                                        superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
-                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
+            grabberActionCommands.put(WristevatorState.LOW_INTAKE,superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE));
+            grabberActionCommands.put(WristevatorState.HIGH_INTAKE,superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE));
             grabberActionCommands.put(WristevatorState.NET, superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
 
             grabberActionSelectCommand = new SelectWithFallbackCommand<WristevatorState>(

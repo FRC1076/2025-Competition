@@ -2,20 +2,21 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package frc.robot.subsystems.grabber;
+package frc.robot.subsystems.superstructure.grabber;
 
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.grabber.GrabberIOInputsAutoLogged;
 
 import org.littletonrobotics.junction.Logger;
 
-public class GrabberSubsystem extends SubsystemBase{
+public class Grabber {
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
 
-    public GrabberSubsystem(GrabberIO io) {
+    public Grabber(GrabberIO io) {
         this.io = io;
     }
 
@@ -33,35 +34,16 @@ public class GrabberSubsystem extends SubsystemBase{
         runVolts(0);
     }
 
-    @Override
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Grabber", inputs);
-    }
-
-    /* ######################################################################## */
-    /* # Public Command Factories                                             # */
-    /* ######################################################################## */
-
-    /** Returns a command that sets the left and right motors to the same voltage 
-     * @param volts The voltage to set the motors to
-    */
-    public Command applyVoltage(double volts) {
-        return runOnce(() -> runVolts(volts));
-    }
-    
-    /** Returns a command that sets the left and right motors to different voltages 
-     * @param leftMotorVolts The voltage to set the left motor to
-     * @param rightMotorVolts The voltage to set the right motor to
-    */
-    public Command applyDifferentialVolts(double leftMotorVolts, double rightMotorVolts) {
-        return runOnce(() -> runVoltsDifferential(leftMotorVolts, rightMotorVolts));
     }
 
     public double getAppliedCurrent() {
         return inputs.leftMotorCurrent;
     }
 
+    
     /**
      * NOTE: RADIANS ARE RELATIVE, CONTROL IS BASED OFF THE LEFT MOTOR'S ENCODER
      * @param volts
@@ -69,6 +51,7 @@ public class GrabberSubsystem extends SubsystemBase{
      * @return
      *  a command that applies a certain number of rotations to the grabber via a simple Bang-Bang controller.
      */
+    /* 
     public Command applyRadiansBangBang(double volts, double radians) {
         double setpoint = inputs.motorPositionRadians + radians;
         boolean positiveDirection = (setpoint > inputs.motorPositionRadians);
@@ -83,5 +66,6 @@ public class GrabberSubsystem extends SubsystemBase{
         );
         
     }
+    */
     
 }
