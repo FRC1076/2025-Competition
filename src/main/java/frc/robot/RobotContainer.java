@@ -95,7 +95,6 @@ public class RobotContainer {
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
-    private final Trigger m_teamColorTrigger;
     private final Superstructure m_superstructure;
     private final SuperstructureVisualizer superVis;
     private final Elastic m_elastic;
@@ -260,8 +259,7 @@ public class RobotContainer {
         );
         SmartDashboard.putData(m_autoChooser);
 
-        m_teamColorTrigger = new Trigger(() -> m_elastic.getSelectedTeamColor() == Alliance.Blue);
-        m_teamColorTrigger.onChange(Commands.runOnce(() -> m_elastic.putSelectedTeamColor()));
+        CommandUtils.makePeriodic(() -> m_elastic.updateTeamColor(), true);
     }
 
   /**

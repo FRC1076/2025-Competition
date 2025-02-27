@@ -5,7 +5,6 @@
 package frc.robot.subsystems;
 
 import java.util.HashMap;
-import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -22,6 +21,7 @@ public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
     private SendableChooser<FlippedAuton> flippedAutonChooser;
     private HashMap<Alliance, String> AllianceNames; 
+    private Alliance currentAllianceName;
 
     public Elastic() {
         /*
@@ -65,22 +65,30 @@ public class Elastic {
         
     }
 
+    /** Gets the selected team color from the driver station */
     public Alliance getSelectedTeamColor() {
         return DriverStation.getAlliance().orElse(Alliance.Blue);
     }
 
     public void putSelectedTeamColor() {
-        SmartDashboard.putString(
-            "teamColor",
-            AllianceNames.get(this.getSelectedTeamColor()));
+        this.putSelectedTeamColor(this.getSelectedTeamColor());
     }
 
     public void putSelectedTeamColor(Alliance alliance) {
         SmartDashboard.putString(
             "teamColor",
             AllianceNames.get(alliance));
+        this.currentAllianceName = alliance;
     }
 
+    /** Sends the selected team color to the dashboard if it has changed */
+    public void updateTeamColor() {
+        if (this.getSelectedTeamColor() != this.currentAllianceName) {
+            this.putSelectedTeamColor();
+        }
+    }
+
+    /** Returns true to flip the auton when in autonomous mode and the auton is selected as flipped */
     public boolean getPathPlannerFlipped() {
         return DriverStation.isAutonomous() && flippedAutonChooser.getSelected().isFlipped;
     }
