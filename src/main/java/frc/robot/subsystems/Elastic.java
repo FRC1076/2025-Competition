@@ -4,10 +4,12 @@
 
 package frc.robot.subsystems;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.GameConstants;
+import frc.robot.Constants.GameConstants.FlippedAuton;
 import frc.robot.Constants.GameConstants.StartPositions;
 import frc.robot.Constants.GameConstants.TeamColors;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
@@ -15,6 +17,7 @@ import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 //TODO: Either make this a singleton class or make putX methods static
 public class Elastic {
     private SendableChooser<TeamColors> teamChooser;
+    private SendableChooser<FlippedAuton> flippedAutonChooser;
     private SendableChooser<StartPositions> startPositionChooser;
 
     public Elastic() {
@@ -22,6 +25,13 @@ public class Elastic {
         teamChooser.setDefaultOption(GameConstants.kTeamColor.color, GameConstants.kTeamColor);
         teamChooser.addOption(TeamColors.kTeamColorRed.color, TeamColors.kTeamColorRed);
         teamChooser.addOption(TeamColors.kTeamColorBlue.color, TeamColors.kTeamColorBlue);
+        SmartDashboard.putData(teamChooser);
+        
+        flippedAutonChooser = new SendableChooser<>();
+        flippedAutonChooser.setDefaultOption(GameConstants.flippedAuton.name, GameConstants.flippedAuton);
+        flippedAutonChooser.addOption(FlippedAuton.kNotFlipped.name, FlippedAuton.kNotFlipped);
+        flippedAutonChooser.addOption(FlippedAuton.kFlipped.name, FlippedAuton.kFlipped);
+        SmartDashboard.putData(flippedAutonChooser);
 
         startPositionChooser = new SendableChooser<>();
         startPositionChooser.setDefaultOption(GameConstants.kStartPosition.name, GameConstants.kStartPosition);
@@ -29,6 +39,7 @@ public class Elastic {
         for (StartPositions position : StartPositions.values()) {
             startPositionChooser.addOption(position.name, position);
         }
+        SmartDashboard.putData(startPositionChooser);
     }
 
     public void putNumber(String key, double value) {
@@ -54,6 +65,10 @@ public class Elastic {
 
     public TeamColors getSelectedTeamColor() {
         return teamChooser.getSelected();
+    }
+
+    public boolean getPathPlannerFlipped() {
+        return DriverStation.isAutonomous() && flippedAutonChooser.getSelected().isFlipped;
     }
 
     public StartPositions getSelectedStartPosition() {

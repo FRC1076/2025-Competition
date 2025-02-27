@@ -128,6 +128,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static TeamColors kTeamColor = TeamColors.kTeamColorBlue;
+        public static FlippedAuton flippedAuton = FlippedAuton.kNotFlipped;
         public static StartPositions kStartPosition = StartPositions.kStartA;
 
         public enum TeamColors {
@@ -138,6 +139,19 @@ public final class Constants {
 
             private TeamColors(String color) {
                 this.color = color;
+            }
+        }
+
+        public enum FlippedAuton {
+            kNotFlipped(false, "Not Flipped"),
+            kFlipped(true, "Flipped");
+
+            public final boolean isFlipped;
+            public final String name;
+
+            private FlippedAuton(boolean isFlipped, String name) {
+                this.isFlipped = isFlipped;
+                this.name = name;
             }
         }
 
@@ -167,7 +181,7 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 0;
+        public static final int currentMode = 1;
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
@@ -339,6 +353,8 @@ public final class Constants {
 
     /** Contains data about the field */
     public static class FieldConstants {
+        public static final double fieldWidthMeters = Units.inchesToMeters(316.63); // Distance from one processor side to the other. From AprilTag coordinates in https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings.pdf
+
         private static final double branchOffset = Units.inchesToMeters(6.469);
         private static final Transform2d leftBranchTransform = new Transform2d(0.0, -branchOffset, Rotation2d.kZero);
         private static final Transform2d rightBranchTransform = new Transform2d(0.0, branchOffset, Rotation2d.kZero);

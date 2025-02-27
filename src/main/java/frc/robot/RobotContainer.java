@@ -144,12 +144,12 @@ public class RobotContainer {
         
         if (SystemConstants.currentMode == 0) {
             m_visionSim = null;
-            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision);
+            m_elastic = new Elastic();
+            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
             m_elevator = new ElevatorSubsystem(new ElevatorIOHardware());
             m_wrist = new WristSubsystem(new WristIOHardware());
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
             m_index = new IndexSubsystem(new IndexIOHardware());
-            m_elastic = new Elastic();
             m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
             for (PhotonConfig config : PhotonConfig.values()){
                 
@@ -166,14 +166,12 @@ public class RobotContainer {
                 );
             }
         } else if (SystemConstants.currentMode == 1) {
-           
-            
-            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision);
+            m_elastic = new Elastic();
+            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim());
             m_wrist = new WristSubsystem(new WristIOSim());
             m_grabber = new GrabberSubsystem(new GrabberIOSim());
             m_index = new IndexSubsystem(new IndexIOSim());
-            m_elastic = new Elastic();
             m_LEDs = new LEDSubsystem(new LEDIOSim());
             m_visionSim = new VisionSystemSim("main");
             /*
@@ -281,14 +279,14 @@ public class RobotContainer {
     }
 
     private void configureDriverBindings() {
-        /*
+        
         m_driverController.leftTrigger().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );
 
         m_driverController.rightTrigger().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
-        );*/
+        );
 
         // Point to reef
         m_driverController.a().whileTrue(teleopDriveCommand.applyReefHeadingLock());
