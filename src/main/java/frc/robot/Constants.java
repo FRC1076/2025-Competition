@@ -168,7 +168,7 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 0; // 0 is real, 1 is sim
+        public static final int currentMode = 1; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
@@ -190,7 +190,7 @@ public final class Constants {
         }
 
         public static class PathPlannerConstants {
-            public static final PathConstraints pathConstraints = new PathConstraints(1, 1, Units.degreesToRadians(360), Units.degreesToRadians(360));
+            public static final PathConstraints pathConstraints = new PathConstraints(5, 5, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.4572, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
 

@@ -146,7 +146,7 @@ public class RobotContainer {
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
         
-        if (SystemConstants.currentMode == 0) {
+        if (SystemConstants.currentMode == 1) {
             m_visionSim = null;
             m_elastic = new Elastic();
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
@@ -292,14 +292,14 @@ public class RobotContainer {
 
     private void configureDriverBindings() {
         
-        /*
+        
         m_driverController.leftTrigger().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );
 
         m_driverController.rightTrigger().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
-        );*/
+        );
         
 
         // Point to reef

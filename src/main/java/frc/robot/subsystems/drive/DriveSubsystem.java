@@ -34,6 +34,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
@@ -85,9 +86,9 @@ public class DriveSubsystem extends SubsystemBase {
                 },
                 new PPHolonomicDriveController(
                     // PID constants for translation
-                    new PIDConstants(5, 0, 0),
+                    PathPlannerConstants.Control.transPID,
                     // PID constants for rotation
-                    new PIDConstants(5, 0, 0)
+                    PathPlannerConstants.Control.rotPID
                 ),
                 RobotConfig.fromGUISettings(),
                 () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
@@ -143,7 +144,9 @@ public class DriveSubsystem extends SubsystemBase {
     public void driveFO(ChassisSpeeds speeds) {
         io.acceptRequest(new ApplyFieldSpeeds().withSpeeds(speeds).withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));
     }
-
+    
+    //TODO: ADD DRIVE METHOD TO DRIVE WITH PATHPLANNER WHEELFORCE FEEDFORWARDS
+    
     /** Swerve drive request with heading lock */
     public void driveFOHeadingLocked(double xMetersPerSecond, double yMetersPerSecond, Rotation2d targetDirection) {
         FieldCentricFacingAngle request = new FieldCentricFacingAngle()
