@@ -21,7 +21,7 @@ deploy {
             // You can use getTeamOrDefault(team) instead of getTeamNumber if you
             // want to store a team number in this file.
             team = project.frc.getTeamNumber()
-            debug = project.frc.getDebugOrDefault(true)
+            debug = project.frc.getDebugOrDefault(false)
 
             artifacts {
                 // First part is artifact name, 2nd is artifact type
@@ -55,7 +55,7 @@ deploy {
 def deployArtifact = deploy.targets.roborio.artifacts.frcJava
 
 // Set to true to use debug for JNI.
-wpi.java.debugJni = true
+wpi.java.debugJni = false
 
 // Set this to true to enable desktop support.
 def includeDesktopSupport = true
