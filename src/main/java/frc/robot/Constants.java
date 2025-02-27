@@ -56,20 +56,20 @@ public final class Constants {
             /** Contains configs for all photonvision localization cameras */
             public static enum PhotonConfig {
                 
-                ELEVATOR_LEFT_CAM(
-                    "ELEVATOR_LEFT_CAM", 
+                FRONT_LEFT_CAM(
+                    "FRONT_LEFT_CAM", 
                     kDefaultSingleTagStdDevs,
                     kDefaultMultiTagStdDevs,
-                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     12.389, 11.683, 11.513639, // 15 - 7.163, 15 - 2.892, 19.162,
                     0, 0, -20 //11.385, 17.961, -40 
                 ),
-                ELEVATOR_RIGHT_CAM(
-                    "ELEVATOR_RIGHT_CAM",
+                FRONT_RIGHT_CAM(
+                    "FRONT_RIGHT_CAM",
                     kDefaultSingleTagStdDevs,
                     kDefaultMultiTagStdDevs,
-                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     12.389, -11.683, 11.513639, // 15 - 7.163, -(15 - 2.892), 19.162, 
                     0, 0, 20 // -11.385, 17.961, 40
@@ -190,7 +190,7 @@ public final class Constants {
         }
 
         public static class PathPlannerConstants {
-            public static final PathConstraints pathConstraints = new PathConstraints(4.69, 25, Units.degreesToRadians(1080), Units.degreesToRadians(1080));
+            public static final PathConstraints pathConstraints = new PathConstraints(1, 1, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.4572, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
 

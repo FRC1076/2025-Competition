@@ -90,7 +90,6 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
     }
 
     public void addVisionMeasurement(Pose2d poseEstimate, double timestampSeconds, Matrix<N3, N1> StdDevs){
-        //System.out.println(poseEstimate.toString());
         super.addVisionMeasurement(
             poseEstimate, 
             Utils.fpgaToCurrentTime(timestampSeconds), 
