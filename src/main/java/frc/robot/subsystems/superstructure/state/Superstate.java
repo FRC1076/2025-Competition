@@ -1,7 +1,7 @@
 package frc.robot.subsystems.superstructure.state;
 
 public enum SuperState {
-    PRE_L3()
+    PRE_L3(ElevatorHeight.L3,WristAngle.L2L3_SCORE,GrabberState.IDLE,FunnelState.DEFAULT);
     public final ElevatorHeight height;
     public final WristAngle angle;
     public final GrabberState grabberState;

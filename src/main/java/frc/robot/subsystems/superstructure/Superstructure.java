@@ -1,6 +1,7 @@
 package frc.robot.subsystems.superstructure;
 
 import java.util.OptionalDouble;
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
@@ -24,6 +25,7 @@ import frc.robot.subsystems.superstructure.state.SuperState;
 import frc.robot.subsystems.superstructure.state.WristAngle;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
 import frc.robot.utils.VirtualSubsystem;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 
 public class Superstructure extends SubsystemBase {
     
@@ -40,6 +42,7 @@ public class Superstructure extends SubsystemBase {
     private final Wrist m_wrist;
     private final Grabber m_grabber;
     private final Funnel m_funnel;
+    private SuperState currentState;
     private final BooleanSupplier m_grabberBeamBreak;
     private final MutableSuperstate state = new MutableSuperstate();
     private final DoubleSupplier wristTravelAngleSupplier = () -> state.possession == GrabberPossession.ALGAE
@@ -60,8 +63,6 @@ public class Superstructure extends SubsystemBase {
         m_grabberBeamBreak = grabberBeamBreak;
     }
 
-    private boolean goalChanged = false;
-
     @Override
     public void periodic() {
         m_elevator.periodic();
@@ -73,15 +74,16 @@ public class Superstructure extends SubsystemBase {
     //NOTE: All of these commands are instant
     //WARNING: These commands are for internal superstructure use ONLY, as they do not require the superstructure
 
-    private Command setElevatorHeight(double positionMeters) {
+    private Command applyElevatorHeight(double positionMeters) {
         return Commands.runOnce(() -> m_elevator.setPosition(positionMeters)).andThen(
             Commands.idle().until(m_elevator::atPositionSetpoint)
         );
     }
     
-    private Command setWristAngle(double wristAngleRadians) {
+    private Command applyWristAngle(double wristAngleRadians) {
         return Commands.runOnce(() -> m_wrist.setAngleRadians(wristAngleRadians)).andThen(
             Commands.idle().until(m_wrist::atPositionSetpoint)
+            
         );
     }
 
@@ -92,10 +94,9 @@ public class Superstructure extends SubsystemBase {
 
     private Command applyWristevatorStateSafe(double elevatorHeightMeters, double wristAngleRadians) {
         return Commands.sequence(
-            setWristAngle(wristTravelAngleSupplier.getAsDouble()),
-            setElevatorHeight(elevatorHeightMeters),
-            setWristAngle(wristAngleRadians),
-            requirementCommand()
+            applyWristAngle(wristTravelAngleSupplier.getAsDouble()),
+            applyElevatorHeight(elevatorHeightMeters),
+            applyWristAngle(wristAngleRadians)
         );
     }
 
@@ -103,14 +104,6 @@ public class Superstructure extends SubsystemBase {
         return this.runOnce(() -> m_grabber.runVoltsDifferential(leftVoltsDifferential, rightVoltsDifferential));
     }
 
-    private Command applyGrabberRotationsBangBang(double volts, double rotations) {
-        double sign = Math.signum(rotations - m_grabber.getRotations());
-        return Commands.sequence(
-            runOnce(() -> m_grabber.runVolts(volts)),
-            Commands.waitUntil(() -> Math.signum(rotations - m_grabber.getRotations()) != sign),
-            runOnce(() -> m_grabber.stop())
-        );
-    }
 
     private Command applyFunnelVolts(double funnelVolts) {
         return this.run(() -> m_funnel.setVoltage(funnelVolts));
@@ -124,16 +117,61 @@ public class Superstructure extends SubsystemBase {
         );
     }
 
-    private Superstructure getThis() {
+    private Superstructure getSuperstructure() {
         return this;
+    }
+
+    private SuperState getState() {
+        return currentState;
+    }
+
+    private void setState(SuperState newState) {
+        currentState = newState;
     }
 
     public class SuperstructureCommandFactory {
 
         private SuperstructureCommandFactory() {}
+        
+        private Command buildTransCommand(SuperState startState, SuperState goalState) {
+            if (currentState.equals(goalState)) {
+                return runOnce(() -> {});
+            }
+            Command wristevatorCommand;
+            // determines wristevator command
+            if (currentState.height != goalState.height) {
+                wristevatorCommand = applyWristevatorStateSafe(goalState.height.meters,goalState.angle.radians);
+            } else if (currentState.angle != goalState.angle) {
+                wristevatorCommand = applyWristAngle(goalState.angle.radians);
+            } else {
+                wristevatorCommand = Commands.runOnce(() -> {});
+            }
 
-        public Command applyState(SuperState state) {
-            
+            return Commands.sequence(
+                wristevatorCommand,
+                Commands.parallel(
+                    Commands.runOnce(() -> m_funnel.setVoltage(goalState.funnelState.voltage)),
+                    Commands.runOnce(() -> m_grabber.runVoltsDifferential(
+                        goalState.grabberState.leftVolts,
+                        goalState.grabberState.rightVolts
+                    )),
+                    Commands.runOnce(() -> setState(goalState))
+                )
+            );
+        }
+
+        public Command applyState(SuperState goalState) {
+            //return buildTransCommand(getState(),goalState);
+            return new DeferredCommand(() -> buildTransCommand(getState(),goalState),Set.of(getSuperstructure()));
+        }
+
+        public Command applyGrabberRotationsBangBang(double volts, double rotations) {
+            double sign = Math.signum(rotations - m_grabber.getRotations());
+            return Commands.sequence(
+                runOnce(() -> m_grabber.runVolts(volts)),
+                Commands.waitUntil(() -> Math.signum(rotations - m_grabber.getRotations()) != sign),
+                runOnce(() -> m_grabber.stop())
+            );
         }
     }
 
