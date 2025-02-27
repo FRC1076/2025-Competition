@@ -145,7 +145,7 @@ public class RobotContainer {
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
         
-        if (SystemConstants.currentMode == 1) {
+        if (SystemConstants.currentMode == 0) {
             m_visionSim = null;
             m_elastic = new Elastic();
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
