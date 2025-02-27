@@ -156,7 +156,8 @@ public class Superstructure extends SubsystemBase {
                         goalState.grabberState.rightVolts
                     )),
                     Commands.runOnce(() -> setState(goalState))
-                )
+                ),
+                requirementCommand()
             );
         }
 
