@@ -35,6 +35,7 @@ import lib.vision.VisionLocalizationSystem;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
@@ -48,6 +49,7 @@ import static frc.robot.Constants.VisionConstants.fieldLayout;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
@@ -60,6 +62,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -92,6 +95,7 @@ public class RobotContainer {
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
+    private final Trigger m_teamColorTrigger;
     private final Superstructure m_superstructure;
     private final SuperstructureVisualizer superVis;
     private final Elastic m_elastic;
@@ -225,6 +229,11 @@ public class RobotContainer {
             () -> -m_operatorController.getLeftY()
         ));
 
+        m_index.setDefaultCommand(Commands.sequence(
+            m_superstructure.applyIndexState(IndexState.BACKWARDS),
+            Commands.idle(m_index)
+        ));
+
         configureNamedCommands();
 
         // Configure miscellaneous bindings
@@ -250,6 +259,9 @@ public class RobotContainer {
             Commands.runOnce(() -> m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0))))
         );
         SmartDashboard.putData(m_autoChooser);
+
+        m_teamColorTrigger = new Trigger(() -> m_elastic.getSelectedTeamColor() == Alliance.Blue);
+        m_teamColorTrigger.onChange(Commands.runOnce(() -> m_elastic.putSelectedTeamColor()));
     }
 
   /**

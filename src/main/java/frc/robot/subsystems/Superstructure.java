@@ -259,7 +259,7 @@ public class Superstructure {
      * @param state the IndexState
      * @return command to run index as certain state
      */
-    private Command applyIndexState(IndexState state) {
+    public Command applyIndexState(IndexState state) {
         return Commands.sequence(
             Commands.runOnce(() -> superState.setIndexerState(state)),
             m_index.applyVolts(state.volts)//.onlyIf(() -> state.running) //Can do a runOnce because runVolts is sticky

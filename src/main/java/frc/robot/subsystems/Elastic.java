@@ -19,9 +19,9 @@ import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 
 //TODO: Either make this a singleton class or make putX methods static
 public class Elastic {
-    private SendableChooser<TeamColors> teamChooser;
+    // private SendableChooser<TeamColors> teamChooser;
     private SendableChooser<FlippedAuton> flippedAutonChooser;
-    private HashMap<Alliance, String> AllianceNames;
+    private HashMap<Alliance, String> AllianceNames; 
 
     public Elastic() {
         /*
@@ -41,6 +41,7 @@ public class Elastic {
         AllianceNames = new HashMap<>();
         AllianceNames.put(Alliance.Blue, "Blue");
         AllianceNames.put(Alliance.Red, "Red");
+        this.putSelectedTeamColor();
     }
 
     public void putNumber(String key, double value) {
@@ -64,12 +65,20 @@ public class Elastic {
         
     }
 
-    public Optional<Alliance> getSelectedTeamColor() {
-        return Optional.of(DriverStation.getAlliance().orElse(Alliance.Blue));
+    public Alliance getSelectedTeamColor() {
+        return DriverStation.getAlliance().orElse(Alliance.Blue);
+    }
+
+    public void putSelectedTeamColor() {
+        SmartDashboard.putString(
+            "teamColor",
+            AllianceNames.get(this.getSelectedTeamColor()));
     }
 
     public void putSelectedTeamColor(Alliance alliance) {
-        SmartDashboard.putString("teamColor", AllianceNames.get(alliance));
+        SmartDashboard.putString(
+            "teamColor",
+            AllianceNames.get(alliance));
     }
 
     public boolean getPathPlannerFlipped() {
