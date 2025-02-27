@@ -1,5 +1,6 @@
 package frc.robot.subsystems.superstructure.state;
 
-public class WristAngle {
+public enum WristAngle {
     
+    public 
 }

@@ -19,6 +19,9 @@ import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
+import frc.robot.subsystems.superstructure.state.ElevatorHeight;
+import frc.robot.subsystems.superstructure.state.SuperState;
+import frc.robot.subsystems.superstructure.state.WristAngle;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
 import frc.robot.utils.VirtualSubsystem;
 
@@ -129,10 +132,8 @@ public class Superstructure extends SubsystemBase {
 
         private SuperstructureCommandFactory() {}
 
-        public Command applyWristevatorState(WristevatorState state) {
-            return new FunctionalCommand(
-                () -> {}, 
-                null, null, m_grabberBeamBreak, null)
+        public Command applyState(SuperState state) {
+            
         }
     }
 
