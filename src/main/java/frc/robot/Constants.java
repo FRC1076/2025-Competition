@@ -129,7 +129,6 @@ public final class Constants {
 
         public static TeamColors kTeamColor = TeamColors.kTeamColorBlue;
         public static FlippedAuton flippedAuton = FlippedAuton.kNotFlipped;
-        public static StartPositions kStartPosition = StartPositions.kStartA;
 
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -151,23 +150,6 @@ public final class Constants {
 
             private FlippedAuton(boolean isFlipped, String name) {
                 this.isFlipped = isFlipped;
-                this.name = name;
-            }
-        }
-
-        public enum StartPositions {
-            kStartA(0.0, 0.0, 0.0, "kStartA");
-
-            public final Pose2d position;
-            public final String name;
-
-            /** 
-             * @param x x coordinate in meters
-             * @param y y coordinate in meters
-             * @param rotation rotation in radians
-             */
-            private StartPositions(double x, double y, double rotation, String name) {
-                this.position = new Pose2d(x, y, new Rotation2d(rotation));
                 this.name = name;
             }
         }

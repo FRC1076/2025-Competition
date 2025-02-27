@@ -10,7 +10,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.FlippedAuton;
-import frc.robot.Constants.GameConstants.StartPositions;
 import frc.robot.Constants.GameConstants.TeamColors;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 
@@ -18,7 +17,6 @@ import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 public class Elastic {
     private SendableChooser<TeamColors> teamChooser;
     private SendableChooser<FlippedAuton> flippedAutonChooser;
-    private SendableChooser<StartPositions> startPositionChooser;
 
     public Elastic() {
         teamChooser = new SendableChooser<>();
@@ -32,14 +30,6 @@ public class Elastic {
         flippedAutonChooser.addOption(FlippedAuton.kNotFlipped.name, FlippedAuton.kNotFlipped);
         flippedAutonChooser.addOption(FlippedAuton.kFlipped.name, FlippedAuton.kFlipped);
         SmartDashboard.putData(flippedAutonChooser);
-
-        startPositionChooser = new SendableChooser<>();
-        startPositionChooser.setDefaultOption(GameConstants.kStartPosition.name, GameConstants.kStartPosition);
-        // startPositionChooser.addOption(StartPositions.kStartA.name, StartPositions.kStartA);
-        for (StartPositions position : StartPositions.values()) {
-            startPositionChooser.addOption(position.name, position);
-        }
-        SmartDashboard.putData(startPositionChooser);
     }
 
     public void putNumber(String key, double value) {
@@ -69,9 +59,5 @@ public class Elastic {
 
     public boolean getPathPlannerFlipped() {
         return DriverStation.isAutonomous() && flippedAutonChooser.getSelected().isFlipped;
-    }
-
-    public StartPositions getSelectedStartPosition() {
-        return startPositionChooser.getSelected();
     }
 }
