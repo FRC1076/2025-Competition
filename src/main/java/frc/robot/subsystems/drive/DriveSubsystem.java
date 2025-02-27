@@ -5,9 +5,11 @@
 package frc.robot.subsystems.drive;
 
 import frc.robot.Constants.DriveConstants.PathPlannerConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.commands.drive.DirectDriveToPoseCommand;
 import frc.robot.commands.drive.TeleopDriveCommand;
+import frc.robot.subsystems.Elastic;
 import frc.robot.utils.Localization;
 import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
 
@@ -53,18 +55,34 @@ public class DriveSubsystem extends SubsystemBase {
     private Boolean hasSetAlliance = false; // Wait until the driverstation had an alliance before setting it
     public final DriveCommandFactory CommandBuilder;
     private final VisionLocalizationSystem vision;
+    private final Elastic elastic;
 
-    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision) {
+    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision, Elastic elastic) {
         this.io = io;
         this.vision = vision;
+        this.elastic = elastic;
         vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
         
         try {
             AutoBuilder.configure(
-                this::getPose,
-                this::resetPose,
+                () -> elastic.getPathPlannerFlipped() 
+                    ? this.getFlippedPose() 
+                    : this.getPose(),
+                (pose) -> {
+                    if (elastic.getPathPlannerFlipped()) {
+                        this.resetPoseFlipped(pose);
+                    } else {
+                        this.resetPose(pose);
+                    }
+                },
                 () -> driveInputs.Speeds,
-                (speeds, feedforwards) -> driveCO(speeds),
+                (speeds, feedforwards) -> {
+                    if (elastic.getPathPlannerFlipped()) {
+                        driveCOFlipped(speeds);
+                    } else {
+                        driveCO(speeds);
+                    }
+                },
                 new PPHolonomicDriveController(
                     // PID constants for translation
                     new PIDConstants(5, 0, 0),
@@ -114,6 +132,13 @@ public class DriveSubsystem extends SubsystemBase {
         io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
     }
 
+    /** Swerve drive request with chassis-orriented chassisSpeeds, but flips the speeds (used for flipping paths in auton) */
+    public void driveCOFlipped(ChassisSpeeds speeds) {
+        speeds.vyMetersPerSecond *= (-1);  
+        speeds.omegaRadiansPerSecond *= (-1);
+        io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
+    }
+
     /** Swerve drive request with field-oriented chassisSpeeds */
     public void driveFO(ChassisSpeeds speeds) {
         io.acceptRequest(new ApplyFieldSpeeds().withSpeeds(speeds).withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));
@@ -141,6 +166,15 @@ public class DriveSubsystem extends SubsystemBase {
         io.resetPose(pose);
     }
 
+    /** Resets the pose of the robot, but flips the input Pose2d, while remaining on the same side of the field (used for flipping paths in auton) */
+    public void resetPoseFlipped(Pose2d pose) {
+        Pose2d newPose = new Pose2d(
+            pose.getX(),
+            FieldConstants.fieldWidthMeters - pose.getY(),
+            pose.getRotation().unaryMinus());
+        io.resetPose(newPose);
+    }
+
     /** Makes the current heading of the robot the default zero degree heading
      * (Used if forward is the wrong direction)
      */
@@ -155,6 +189,15 @@ public class DriveSubsystem extends SubsystemBase {
     @AutoLogOutput
     public Pose2d getPose() {
         return io.getPose();
+    }
+
+    /** Returns the pose of the robot, but flipped */
+    public Pose2d getFlippedPose() {
+        Pose2d pose = new Pose2d(
+            io.getPose().getX(),
+            FieldConstants.fieldWidthMeters - io.getPose().getY(),
+            io.getPose().getRotation().unaryMinus());
+        return pose;
     }
 
     public class DriveCommandFactory {
