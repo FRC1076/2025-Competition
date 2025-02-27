@@ -606,7 +606,7 @@ public final class Constants {
 
         public static enum LEDStates {
             IDLE(false, false, false),
-            CORAL(true, false, false),
+            CORAL_INDEXED(true, false, false),
             HUMAN_PLAYER_CAN_DROP(false, true, false),
             ALGAE(true, true, false),
             AUTO_ALIGNED(false, false, true);
