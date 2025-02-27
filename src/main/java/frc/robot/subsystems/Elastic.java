@@ -4,7 +4,11 @@
 
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+import java.util.Optional;
+
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -17,19 +21,26 @@ import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 public class Elastic {
     private SendableChooser<TeamColors> teamChooser;
     private SendableChooser<FlippedAuton> flippedAutonChooser;
+    private HashMap<Alliance, String> AllianceNames;
 
     public Elastic() {
+        /*
         teamChooser = new SendableChooser<>();
         teamChooser.setDefaultOption(GameConstants.kTeamColor.color, GameConstants.kTeamColor);
         teamChooser.addOption(TeamColors.kTeamColorRed.color, TeamColors.kTeamColorRed);
         teamChooser.addOption(TeamColors.kTeamColorBlue.color, TeamColors.kTeamColorBlue);
         SmartDashboard.putData(teamChooser);
+        */
         
         flippedAutonChooser = new SendableChooser<>();
         flippedAutonChooser.setDefaultOption(GameConstants.flippedAuton.name, GameConstants.flippedAuton);
         flippedAutonChooser.addOption(FlippedAuton.kNotFlipped.name, FlippedAuton.kNotFlipped);
         flippedAutonChooser.addOption(FlippedAuton.kFlipped.name, FlippedAuton.kFlipped);
         SmartDashboard.putData(flippedAutonChooser);
+
+        AllianceNames = new HashMap<>();
+        AllianceNames.put(Alliance.Blue, "Blue");
+        AllianceNames.put(Alliance.Red, "Red");
     }
 
     public void putNumber(String key, double value) {
@@ -53,8 +64,12 @@ public class Elastic {
         
     }
 
-    public TeamColors getSelectedTeamColor() {
-        return teamChooser.getSelected();
+    public Optional<Alliance> getSelectedTeamColor() {
+        return Optional.of(DriverStation.getAlliance().orElse(Alliance.Blue));
+    }
+
+    public void putSelectedTeamColor(Alliance alliance) {
+        SmartDashboard.putString("teamColor", AllianceNames.get(alliance));
     }
 
     public boolean getPathPlannerFlipped() {

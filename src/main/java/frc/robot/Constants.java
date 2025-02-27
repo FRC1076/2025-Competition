@@ -5,7 +5,9 @@
 package frc.robot;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
@@ -22,6 +24,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
@@ -59,8 +62,8 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    15 - 7.163, 15 - 2.892, 19.162, // 2.892, 7.163, 19.162, 
-                    11.385, 17.961, -40 //11.385, 17.961, 40
+                    12.389, 11.683, 11.513639, // 15 - 7.163, 15 - 2.892, 19.162,
+                    0, 0, -20 //11.385, 17.961, -40 
                 ),
                 ELEVATOR_RIGHT_CAM(
                     "ELEVATOR_RIGHT_CAM",
@@ -68,9 +71,10 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    15 - 7.163, -(15 - 2.892), 19.162, //2.982, -7.163, 19.162, 
-                    -11.385, 17.961, 40 //-11.385, 17.961, -40
-                ),
+                    12.389, -11.683, 11.513639, // 15 - 7.163, -(15 - 2.892), 19.162, 
+                    0, 0, 20 // -11.385, 17.961, 40
+                ); //,
+                /*
                 REAR_LEFT_CAM(
                     "REAR_LEFT_CAM",
                     kDefaultSingleTagStdDevs,
@@ -88,6 +92,7 @@ public final class Constants {
                     0, 0, 0,
                     0, 0, 0
                 );
+                */
 
                 public final String name;
                 public final Transform3d offset;
@@ -129,7 +134,7 @@ public final class Constants {
 
         public static TeamColors kTeamColor = TeamColors.kTeamColorBlue;
         public static FlippedAuton flippedAuton = FlippedAuton.kNotFlipped;
-
+        
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
             kTeamColorRed("RED");
