@@ -37,7 +37,12 @@ public class LEDSubsystem {
         this.io.setState(state);
     }
     
-    /**  */
+    /** Sets the state of the LEDs through the chosen IO layer,
+     * and then reverts the LEDs to the IDLE state.
+     * 
+     * @param state The state to apply to the LEDs
+     * @param seconds The number of seconds to wait before reverting to the IDLE state
+      */
     public Command setStateTimed(LEDStates state, double seconds) {
         return Commands.startEnd(
             () -> setState(state),
@@ -45,6 +50,13 @@ public class LEDSubsystem {
         ).withTimeout(seconds);
     }
 
+    /**
+     * Sets the state of the LEDs through the chosen IO layer,
+     * and then reverts the LEDs to the previous state.
+     * 
+     * @param state The state to apply to the LEDs
+     * @param time The number of seconds to wait before reverting to the previous state
+     */
     public Command setTempStateTimed(LEDStates state, double time) {
         return Commands.startEnd(
             () -> {
