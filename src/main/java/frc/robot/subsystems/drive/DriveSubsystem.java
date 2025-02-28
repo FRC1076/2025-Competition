@@ -11,6 +11,8 @@ import frc.robot.commands.drive.DirectDriveToPoseCommand;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
 import frc.robot.utils.Localization;
+
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
 
 import lib.utils.GeometryUtils;
@@ -22,6 +24,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -138,6 +141,11 @@ public class DriveSubsystem extends SubsystemBase {
         speeds.vyMetersPerSecond *= (-1);  
         speeds.omegaRadiansPerSecond *= (-1);
         io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
+    }
+
+    public double getVelocityMPS() {
+        double velMPS = Math.sqrt(Math.pow(driveInputs.Speeds.vxMetersPerSecond,2.0) + Math.pow(driveInputs.Speeds.vyMetersPerSecond,2.0));
+        return velMPS;
     }
 
     /** Swerve drive request with field-oriented chassisSpeeds */

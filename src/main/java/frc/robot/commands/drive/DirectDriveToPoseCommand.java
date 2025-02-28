@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.IdealStartingState;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
@@ -47,7 +48,12 @@ public class DirectDriveToPoseCommand extends Command {
 
         // Prevent PathPlanner from treating the start pose as identical to the end pose when they are too close to each other
         if (targetPose.getTranslation().getDistance(startingWaypoint.getTranslation()) > PathPlannerConstants.pathGenerationToleranceMeters){
-            PathPlannerPath path = new PathPlannerPath(waypoints, PathPlannerConstants.pathConstraints, null, new GoalEndState(0, targetPose.getRotation()));
+            PathPlannerPath path = new PathPlannerPath(
+                waypoints, 
+                PathPlannerConstants.pathConstraints, 
+                new IdealStartingState(m_drive.getVelocityMPS(), m_drive.getHeading()), 
+                new GoalEndState(0, targetPose.getRotation())
+            );
             path.preventFlipping = true;
             followPathCommand = AutoBuilder.followPath(path);
         } else {
