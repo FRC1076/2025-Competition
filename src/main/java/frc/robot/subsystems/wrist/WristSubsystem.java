@@ -69,7 +69,8 @@ public class WristSubsystem extends SubsystemBase {
             volts = 0;
         }
 
-        io.setVoltage(volts + m_feedforwardController.calculate(inputs.angleRadians, 0));
+        //TODO: comment voltage back in when wrist works
+        //io.setVoltage(volts + m_feedforwardController.calculate(inputs.angleRadians, 0));
     }
 
     /** Sets the desired rotation of the wrist */

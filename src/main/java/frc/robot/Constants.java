@@ -190,7 +190,7 @@ public final class Constants {
         }
 
         public static class PathPlannerConstants {
-            public static final PathConstraints pathConstraints = new PathConstraints(5, 5, Units.degreesToRadians(360), Units.degreesToRadians(360));
+            public static final PathConstraints pathConstraints = new PathConstraints(0.25, 5, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.4572, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
 
@@ -529,8 +529,8 @@ public final class Constants {
 
         // Source: https://docs.revrobotics.com/brushless/spark-max/encoders/alternate-encoder
         public static final int kCountsPerRevolution = 8192;
-        public static final double kPositionConversionFactor = (1/117.1875) * 2 * Math.PI; // rotations to radians
-        public static final double kVelocityConversionFactor = (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
+        public static final double kPositionConversionFactor = (1.0/125.0) * (32.0/50.0) * (2 * Math.PI);// (1/117.1875) * 2 * Math.PI; // rotations to radians
+        public static final double kVelocityConversionFactor = (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60;// (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
 
         public static final class Control {
             // PID constants
@@ -540,7 +540,8 @@ public final class Constants {
 
             // Feedforward constants
             public static final double kS = 0.26649; // static gain in volts
-            public static final double kG = 0.13593; // gravity gain in volts
+            //TODO: comment back in kG when wrist works
+            public static final double kG = 0; //0.13593 // gravity gain in volts
             public static final double kV = 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
