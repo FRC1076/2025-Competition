@@ -51,7 +51,8 @@ public class DirectDriveToPoseCommand extends Command {
             PathPlannerPath path = new PathPlannerPath(
                 waypoints, 
                 PathPlannerConstants.pathConstraints, 
-                new IdealStartingState(m_drive.getVelocityMPS(), m_drive.getHeading()), 
+                //new IdealStartingState(m_drive.getVelocityMPS(), m_drive.getHeading()), 
+                null,
                 new GoalEndState(0, targetPose.getRotation())
             );
             path.preventFlipping = true;
