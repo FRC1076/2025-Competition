@@ -84,6 +84,7 @@ public class TeleopDriveCommand extends Command {
     /* ######################################################################## */
     @Override
     public void initialize() {
+        m_drive.clearAutoAlignedStatus();
         reloadCommand();
     }
 

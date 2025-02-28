@@ -39,6 +39,7 @@ import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
+import frc.robot.Constants.LEDConstants.LEDStates;
 import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
@@ -95,6 +96,9 @@ public class RobotContainer {
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
+    private final Trigger m_safeToFeedCoral;
+    private final Trigger m_safeToMoveElevator;
+    private final Trigger m_isAutoAligned;
     private final Superstructure m_superstructure;
     private final SuperstructureVisualizer superVis;
     private final Elastic m_elastic;
@@ -208,6 +212,11 @@ public class RobotContainer {
             () -> false
         );
 
+        // Drive team status triggers
+        m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
+        m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
+        m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+
         superVis = new SuperstructureVisualizer(m_superstructure);
 
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
@@ -273,6 +282,33 @@ public class RobotContainer {
    */
     private void configureBindings() {
         m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
+
+        m_safeToFeedCoral.onChange(
+            m_LEDs.update(
+                m_superstructure::getSafeToFeedCoral,
+                m_superstructure::getSafeToMoveElevator,
+                m_drive::isAutoAligned)
+            .alongWith(
+                Commands.runOnce(
+                    () -> m_elastic.updateSafeToFeedCoral(m_superstructure::getSafeToFeedCoral))));
+        
+        m_safeToMoveElevator.onChange(
+            m_LEDs.update(
+                m_superstructure::getSafeToFeedCoral,
+                m_superstructure::getSafeToMoveElevator,
+                m_drive::isAutoAligned)
+            .alongWith(
+                Commands.runOnce(
+                    () -> m_elastic.updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator))));
+        
+        m_isAutoAligned.onChange(
+            m_LEDs.update(
+                m_superstructure::getSafeToFeedCoral,
+                m_superstructure::getSafeToMoveElevator,
+                m_drive::isAutoAligned)
+            .alongWith(
+                Commands.runOnce(
+                    () -> m_elastic.updateIsAutoAligned(m_drive::isAutoAligned))));
     }
 
     private void configureNamedCommands(){

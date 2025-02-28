@@ -6,8 +6,11 @@
 // THEY ARE FOR EDUCATIONAL PURPOSES
 package frc.robot.subsystems.led;
 
+import java.util.function.BooleanSupplier;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants.LEDStates;
 
 /** This is kind of like a subsystem.
@@ -16,9 +19,9 @@ import frc.robot.Constants.LEDConstants.LEDStates;
  * <p>
  * All of the methods in this file will call the corresponding method in the chosen IO layer.
  */
-public class LEDSubsystem {
+public class LEDSubsystem extends SubsystemBase{
     private final LEDBase io;
-    private LEDStates previousState;
+    private LEDStates previousState = LEDStates.IDLE;
 
     /** Create the LEDs with one of the IO layers.
      * 
@@ -36,6 +39,18 @@ public class LEDSubsystem {
         this.previousState = this.io.getState();
         this.io.setState(state);
     }
+
+    public Command update(BooleanSupplier safeToFeedCoral, BooleanSupplier safeToMoveElevator, BooleanSupplier isAutoAligned) {
+        if (isAutoAligned.getAsBoolean()) {
+            return setTempStateTimed(LEDStates.AUTO_ALIGNED, 2.0);
+        } else if (safeToFeedCoral.getAsBoolean()) {
+            return Commands.runOnce(() -> this.setState(LEDStates.HUMAN_PLAYER_CAN_DROP));
+        } else if (safeToMoveElevator.getAsBoolean()) {
+            return Commands.runOnce(() -> this.setState(LEDStates.CORAL_INDEXED));
+        } else {
+            return Commands.runOnce(() -> this.setState(LEDStates.IDLE));
+        }
+    }
     
     /** Sets the state of the LEDs through the chosen IO layer,
      * and then reverts the LEDs to the IDLE state.
@@ -46,7 +61,8 @@ public class LEDSubsystem {
     public Command setStateTimed(LEDStates state, double seconds) {
         return Commands.startEnd(
             () -> setState(state),
-            () -> setState(LEDStates.IDLE)
+            () -> setState(LEDStates.IDLE),
+            this
         ).withTimeout(seconds);
     }
 
@@ -62,7 +78,8 @@ public class LEDSubsystem {
             () -> {
                 setState(state);
             },
-            () -> setState(this.previousState)
+            () -> setState(this.previousState),
+            this
         ).withTimeout(seconds);
     }
 }

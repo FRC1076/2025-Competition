@@ -5,6 +5,7 @@
 package frc.robot.subsystems;
 
 import java.util.HashMap;
+import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -61,10 +62,6 @@ public class Elastic {
         SmartDashboard.putString("grabberPossession", grabberPossession.name);
     }
 
-    public void updateInterface() {
-        
-    }
-
     /** Gets the selected team color from the driver station */
     public Alliance getSelectedTeamColor() {
         return DriverStation.getAlliance().orElse(Alliance.Blue);
@@ -86,6 +83,18 @@ public class Elastic {
         if (this.getSelectedTeamColor() != this.currentAllianceName) {
             this.putSelectedTeamColor();
         }
+    }
+
+    public void updateSafeToFeedCoral(BooleanSupplier safeToFeedCoral) {
+        this.putBoolean("safeToFeedCoral", safeToFeedCoral.getAsBoolean());
+    }
+
+    public void updateSafeToMoveElevator(BooleanSupplier safeToMoveElevator) {
+        this.putBoolean("safeToMoveElevator", safeToMoveElevator.getAsBoolean());
+    }
+
+    public void updateIsAutoAligned(BooleanSupplier isAutoAligned) {
+        this.putBoolean("isAutoAligned", isAutoAligned.getAsBoolean());
     }
 
     /** Returns true to flip the auton when in autonomous mode and the auton is selected as flipped */

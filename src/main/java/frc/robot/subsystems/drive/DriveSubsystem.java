@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -57,6 +58,7 @@ public class DriveSubsystem extends SubsystemBase {
     //private final ModuleIOInputsAutoLogged rearLeftInputs = new ModuleIOInputsAutoLogged();
     //private final ModuleIOInputsAutoLogged rearRightInputs = new ModuleIOInputsAutoLogged();
     private Boolean hasSetAlliance = false; // Wait until the driverstation had an alliance before setting it
+    private boolean isAutoAligned = false;
     public final DriveCommandFactory CommandBuilder;
     private final VisionLocalizationSystem vision;
     private final Elastic elastic;
@@ -129,6 +131,15 @@ public class DriveSubsystem extends SubsystemBase {
                 io.setAllianceRotation(Rotation2d.fromDegrees(0));
             }
         }
+    }
+
+    /** This method is not used in any command logic. It is only used for LEDs and Elastic */
+    public boolean isAutoAligned() {
+        return isAutoAligned;
+    }
+
+    public void clearAutoAlignedStatus() {
+        isAutoAligned = false;
     }
 
     /** Swerve drive request with chassis-oriented chassisSpeeds */
@@ -242,7 +253,12 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public Command directDriveToPose(Pose2d targetPose) {
-            return new DirectDriveToPoseCommand(drive, targetPose);
+            return Commands.parallel(
+                    new DirectDriveToPoseCommand(drive, targetPose),
+                    Commands.runOnce(() -> {isAutoAligned = false;}))
+                .andThen(
+                    Commands.runOnce(() -> {isAutoAligned = true;})
+                );
         }
 
         public Command directDriveToNearestLeftBranch() {
