@@ -309,7 +309,7 @@ public final class Constants {
         public enum IndexState {
             TRANSFER(2),
             IDLE(0), // Never implemented, just an option
-            BACKWARDS(-1);
+            BACKWARDS(0); //TODO: Temporarily set to zero for drivetrain characterization, change back to -1 when finished
             
             public final double volts;
 
