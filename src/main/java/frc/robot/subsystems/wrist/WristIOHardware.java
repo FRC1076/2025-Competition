@@ -62,7 +62,7 @@ public class WristIOHardware implements WristIO {
 
     @Override
     public void setVoltage(double volts) {
-        //m_leadMotor.setVoltage(volts);
+        m_leadMotor.setVoltage(volts);
     }
 
     @Override
