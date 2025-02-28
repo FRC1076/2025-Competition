@@ -309,7 +309,7 @@ public final class Constants {
         public enum IndexState {
             TRANSFER(2),
             IDLE(0), // Never implemented, just an option
-            BACKWARDS(0); //TODO: Temporarily set to zero for drivetrain characterization, change back to -1 when finished
+            BACKWARDS(-1); 
             
             public final double volts;
 
@@ -380,7 +380,6 @@ public final class Constants {
             RED_REEF_GH(10, 12.227306, 4.025900, 180.0, null, null),
             RED_REEF_IJ(11, 12.643358, 3.306318, 240.0, null, null),
             RED_REEF_KL(6, 13.474446, 3.306318, 300.0, null, null);
-
 
             public final Double leftBranchFudgeTransform;
             public final Double rightBranchFudgeTransform;
@@ -538,7 +537,7 @@ public final class Constants {
         public static final double maxOperatorControlVolts = 1;
         public static final double kSmartCurrentLimit = 15.0;
 
-        public static final double wristGearing = 125;
+        public static final double wristGearing = 190.0;
 
         public static final boolean kLeadMotorInverted = true;
 
