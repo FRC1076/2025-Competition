@@ -55,14 +55,14 @@ public class LEDSubsystem {
      * and then reverts the LEDs to the previous state.
      * 
      * @param state The state to apply to the LEDs
-     * @param time The number of seconds to wait before reverting to the previous state
+     * @param seconds The number of seconds to wait before reverting to the previous state
      */
-    public Command setTempStateTimed(LEDStates state, double time) {
+    public Command setTempStateTimed(LEDStates state, double seconds) {
         return Commands.startEnd(
             () -> {
                 setState(state);
             },
             () -> setState(this.previousState)
-        ).withTimeout(time);
+        ).withTimeout(seconds);
     }
 }
