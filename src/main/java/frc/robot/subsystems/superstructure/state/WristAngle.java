@@ -5,7 +5,10 @@ import edu.wpi.first.math.util.Units;
 public enum WristAngle {
     ALGAE_TRAVEL(65),
     CORAL_TRAVEL(90),
-    L2L3_SCORE(-35);
+    CORAL_INTAKE(-23.5),
+    L1_SCORE(0), // TODO: UPDATE
+    L2L3_SCORE(-35),
+    L4_SCORE(-40.4130051);
     
     public final double degrees;
     public final double radians;

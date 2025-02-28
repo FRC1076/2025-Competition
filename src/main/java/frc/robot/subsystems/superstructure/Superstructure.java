@@ -26,6 +26,9 @@ import frc.robot.subsystems.superstructure.state.WristAngle;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
 import frc.robot.utils.VirtualSubsystem;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
+import java.util.Map;
+import lib.extendedcommands.SelectWithFallbackCommand;
+import java.util.HashMap;
 
 public class Superstructure extends SubsystemBase {
     
@@ -43,7 +46,7 @@ public class Superstructure extends SubsystemBase {
     private final Grabber m_grabber;
     private final Funnel m_funnel;
     private SuperState currentState;
-    private final BooleanSupplier m_grabberBeamBreak;
+    private final BooleanSupplier m_transferBeamBreak;
     private final MutableSuperstate state = new MutableSuperstate();
     private final DoubleSupplier wristTravelAngleSupplier = () -> state.possession == GrabberPossession.ALGAE
         ? algaeTravelRadians
@@ -60,7 +63,7 @@ public class Superstructure extends SubsystemBase {
         m_wrist = wrist;
         m_grabber = grabber;
         m_funnel = funnel;
-        m_grabberBeamBreak = grabberBeamBreak;
+        m_transferBeamBreak = grabberBeamBreak;
     }
 
     @Override
@@ -89,15 +92,17 @@ public class Superstructure extends SubsystemBase {
 
     //Only serves to add this as a requirement to command compositions
     private Command requirementCommand() {
-        return Commands.runOnce(() -> {},this);
+        return this.runOnce(() -> {});
     }
 
     private Command applyWristevatorStateSafe(double elevatorHeightMeters, double wristAngleRadians) {
+        
         return Commands.sequence(
             applyWristAngle(wristTravelAngleSupplier.getAsDouble()),
             applyElevatorHeight(elevatorHeightMeters),
             applyWristAngle(wristAngleRadians)
         );
+        
     }
 
     private Command applyGrabberVolts(double leftVoltsDifferential, double rightVoltsDifferential) {
@@ -129,19 +134,49 @@ public class Superstructure extends SubsystemBase {
         currentState = newState;
     }
 
-    public class SuperstructureCommandFactory {
+    private Command applyGrabberRotationsBangBang(double volts, double rotations) {
+        double sign = Math.signum(rotations - m_grabber.getRotations());
+        return Commands.sequence(
+            runOnce(() -> m_grabber.runVolts(volts)),
+            Commands.waitUntil(() -> Math.signum(rotations - m_grabber.getRotations()) != sign),
+            runOnce(() -> m_grabber.stop()),
+            requirementCommand()
+        );
+    }
 
-        private SuperstructureCommandFactory() {}
+    public class SuperstructureCommandFactory {
         
-        private Command buildTransCommand(SuperState startState, SuperState goalState) {
-            if (currentState.equals(goalState)) {
-                return runOnce(() -> {});
+        private final Map<SuperState,Command> scoreCommandMap = new HashMap<>();
+        private final Command scoreEdgeCommand; // An edge command that transfers from a pre-scoring state to a scoring state
+        private final Command autoIntakeCommand; // An edge command that transfers from an arbitrary state to the coral intake state to the coral travel state
+
+        private SuperstructureCommandFactory() {
+
+            scoreCommandMap.put(SuperState.PRE_L1,buildEdgeCommand(SuperState.PRE_L1,SuperState.SCORE_L1));
+            scoreCommandMap.put(SuperState.PRE_L2,buildEdgeCommand(SuperState.PRE_L2,SuperState.SCORE_L2));
+            scoreCommandMap.put(SuperState.PRE_L3,buildEdgeCommand(SuperState.PRE_L3,SuperState.SCORE_L3));
+            scoreCommandMap.put(SuperState.PRE_L4,buildEdgeCommand(SuperState.PRE_L4,SuperState.SCORE_L4));
+
+            scoreEdgeCommand = new SelectWithFallbackCommand<SuperState>(scoreCommandMap,requirementCommand(),() -> currentState);
+
+            autoIntakeCommand = Commands.sequence(
+                applyState(SuperState.CORAL_INTAKE),
+                Commands.waitUntil(m_transferBeamBreak),
+                applyGrabberRotationsBangBang(8,2), //TODO: FIX THESE CONSTANTS
+                buildEdgeCommand(SuperState.CORAL_INTAKE,SuperState.CORAL_TRAVEL)
+            );
+            
+        }
+        
+        private Command buildEdgeCommand(SuperState startState, SuperState goalState) {
+            if (startState.equals(goalState)) {
+                return Commands.runOnce(() -> {});
             }
             Command wristevatorCommand;
             // determines wristevator command
-            if (currentState.height != goalState.height) {
+            if (startState.height != goalState.height) {
                 wristevatorCommand = applyWristevatorStateSafe(goalState.height.meters,goalState.angle.radians);
-            } else if (currentState.angle != goalState.angle) {
+            } else if (startState.angle != goalState.angle) {
                 wristevatorCommand = applyWristAngle(goalState.angle.radians);
             } else {
                 wristevatorCommand = Commands.runOnce(() -> {});
@@ -163,16 +198,17 @@ public class Superstructure extends SubsystemBase {
 
         public Command applyState(SuperState goalState) {
             //return buildTransCommand(getState(),goalState);
-            return new DeferredCommand(() -> buildTransCommand(getState(),goalState),Set.of(getSuperstructure()));
+            return new DeferredCommand(() -> buildEdgeCommand(getState(),goalState),Set.of(getSuperstructure()));
         }
 
-        public Command applyGrabberRotationsBangBang(double volts, double rotations) {
-            double sign = Math.signum(rotations - m_grabber.getRotations());
-            return Commands.sequence(
-                runOnce(() -> m_grabber.runVolts(volts)),
-                Commands.waitUntil(() -> Math.signum(rotations - m_grabber.getRotations()) != sign),
-                runOnce(() -> m_grabber.stop())
-            );
+        // Transitions from a pre-score state to a post-score state
+        public Command scoreCommand() {
+            return scoreEdgeCommand;
+        }
+
+
+        public Command autoIntakeCoral() {
+            return autoIntakeCommand;
         }
     }
 
