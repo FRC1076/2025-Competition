@@ -537,14 +537,14 @@ public final class Constants {
         public static final double maxOperatorControlVolts = 1;
         public static final double kSmartCurrentLimit = 15.0;
 
-        public static final double wristGearing = 190.0;
+        public static final double wristGearing = (1/125) * (30/52);
 
         public static final boolean kLeadMotorInverted = true;
 
         // Source: https://docs.revrobotics.com/brushless/spark-max/encoders/alternate-encoder
         public static final int kCountsPerRevolution = 8192;
-        public static final double kPositionConversionFactor = (1/wristGearing) * 2 * Math.PI; // rotations to radians
-        public static final double kVelocityConversionFactor = (1/wristGearing) * (2 * Math.PI) / 60.0; // rpm to radians/second
+        public static final double kPositionConversionFactor = wristGearing * 2 * Math.PI; // rotations to radians
+        public static final double kVelocityConversionFactor = wristGearing * (2 * Math.PI) / 60.0; // rpm to radians/second
 
         public static final class Control {
             // PID constants
