@@ -16,14 +16,24 @@ import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.units.Units.Volts;
+import edu.wpi.first.math.filter.Debouncer;
+import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
+
+    public static final double homingVolts = -2.0;
+    public static final double homingDebounceTime = 0.25;
+    public static final double homingVelocityThreshold = 0.2;
+
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
     private final ProfiledPIDController m_profiledPIDController;
     private final DynamicElevatorFeedforward m_feedforwardController;
+    
+    private boolean homed = false;
+    private Debouncer homingDebouncer;
 
     private final SysIdRoutine m_elevatorSysIdRoutine;
 
@@ -156,4 +166,20 @@ public class ElevatorSubsystem extends SubsystemBase {
         return m_elevatorSysIdRoutine.dynamic(direction);
     }
 
+    public Command autoHome() {
+        return startRun(
+            () -> {
+                homed = false;
+                homingDebouncer = new Debouncer(homingDebounceTime);
+                homingDebouncer.calculate(false);
+                io.setVoltage(homingVolts);
+            },
+            () -> {
+                homed = homingDebouncer.calculate(Math.abs(inputs.velocityMetersPerSecond) <= homingVelocityThreshold);
+            }
+        )
+        .until(() -> homed)
+        .andThen(() -> io.setVoltage(0))
+        .finallyDo(() -> io.resetPosition(0));
+    }
 }

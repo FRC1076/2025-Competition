@@ -290,7 +290,6 @@ public class RobotContainer {
 
     private void configureDriverBindings() {
         
-        
         m_driverController.leftTrigger().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );

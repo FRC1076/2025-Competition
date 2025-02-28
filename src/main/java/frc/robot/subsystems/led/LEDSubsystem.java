@@ -6,6 +6,8 @@
 // THEY ARE FOR EDUCATIONAL PURPOSES
 package frc.robot.subsystems.led;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.LEDConstants.LEDStates;
 
 /** This is kind of like a subsystem.
@@ -16,6 +18,7 @@ import frc.robot.Constants.LEDConstants.LEDStates;
  */
 public class LEDSubsystem {
     private final LEDBase io;
+    private LEDStates previousState;
 
     /** Create the LEDs with one of the IO layers.
      * 
@@ -30,6 +33,24 @@ public class LEDSubsystem {
      * @param state The chosen state in the enum LEDStates.
      */
     public void setState(LEDStates state) {
+        this.previousState = this.io.getState();
         this.io.setState(state);
+    }
+    
+    /**  */
+    public Command setStateTimed(LEDStates state, double seconds) {
+        return Commands.startEnd(
+            () -> setState(state),
+            () -> setState(LEDStates.IDLE)
+        ).withTimeout(seconds);
+    }
+
+    public Command setTempStateTimed(LEDStates state, double time) {
+        return Commands.startEnd(
+            () -> {
+                setState(state);
+            },
+            () -> setState(this.previousState)
+        ).withTimeout(time);
     }
 }

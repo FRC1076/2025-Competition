@@ -25,4 +25,7 @@ public interface LEDBase {
      * @param state The state of the LEDs found in Constants.LEDConstants.LEDStates
      */
     public abstract void setState(LEDStates state);
+    public default LEDStates getState(){
+        return null;
+    }
 }

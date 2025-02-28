@@ -116,6 +116,9 @@ public class Superstructure {
     private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
     private final BooleanSupplier algaePossessionSupplier;
 
+    private boolean safeToFeedCoral = false;
+    private boolean safeToMoveElevator = false;
+
     private boolean elevatorClutch = false;
 
     public Superstructure (
@@ -166,6 +169,16 @@ public class Superstructure {
         return m_index;
     }
 
+    /** This method isn't used for any command logic. It's only used to display on LEDs and Elastic */
+    public boolean getSafeToFeedCoral(){
+        return safeToFeedCoral;
+    }
+
+    /** This method isn't used for any command logic. It's only used to display on LEDs and Elastic */
+    public boolean getSafeToMoveElevator(){
+        return safeToMoveElevator;
+    }
+
     public SuperstructureCommandFactory getCommandBuilder(){
         return CommandBuilder;
     }
@@ -188,7 +201,10 @@ public class Superstructure {
      * @return generic transition command from one state to another 
      */
     private Command applyWristevatorState(WristevatorState position) {
-        
+
+        safeToFeedCoral = false;
+        safeToMoveElevator = false;
+
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
             m_wrist.applyAngle(coralTravelAngle),
@@ -361,7 +377,7 @@ public class Superstructure {
          * Returns a command that does a grabber action differently depending on robot state (scoring coral, scoring algae, intaking algae)
          */
         public Command doGrabberAction() {
-            return grabberActionSelectCommand;
+            return grabberActionSelectCommand.beforeStarting(Commands.runOnce(() -> {safeToMoveElevator = false;}));
         }
 
         /**
@@ -489,6 +505,7 @@ public class Superstructure {
                 Commands.waitUntil(m_transferBeamBreak),
                 superstructure.m_grabber.applyRadiansBangBang(4, 4*Math.PI), // Adjust rotations
                 Commands.parallel(
+                    Commands.runOnce(() -> safeToMoveElevator = true),
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
@@ -514,7 +531,10 @@ public class Superstructure {
                 Commands.waitUntil(safeSignal),
                 */
                 superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
-                transferCoral()//,
+                Commands.parallel(
+                    Commands.runOnce(() -> safeToFeedCoral = true),
+                    transferCoral()
+                )
                 //indexCoral()
             );
         }
