@@ -314,7 +314,7 @@ public final class Constants {
             TRAVEL(0.08128 + 0.0605, 90, false),
             ALGAE_TRAVEL(0.08128 + 0.0605, 65 , false),
 
-            CORAL_TRANSFER(0.08128 + 0.0605, -23.5, false), // Same as CORAL_DIRECT_INTAKE
+            CORAL_TRANSFER(0.08128 + 0.0605, -18, false), // Same as CORAL_DIRECT_INTAKE
 
             L1(0.08128 + 0.0605, 90, false), // Placeholder
             L2(0.910, -35, false), //0.71628, -35),
@@ -461,14 +461,14 @@ public final class Constants {
 
         public static class Control {
             // PID constants
-            public static final double kP = 30;
+            public static final double kP = 30; //30;
             public static final double kI = 0.0;
             public static final double kD = 0.0;
 
             // Feedforward constant
-            public static final double kS = 0.059004; //Static gain (voltage)
-            public static final double kG = 0.77763;//1.2;//0.97369; // 0.6 //Gravity gain (voltage)
-            public static final double kV = 2.8829; // 12.0 // velocity game
+            public static final double kS = 0.082814;  //0.059004; //Static gain (voltage)
+            public static final double kG = 0.74003;  //0.77763;//1.2;//0.97369; // 0.6 //Gravity gain (voltage)
+            public static final double kV = 3.1265;  //2.8829; // 12.0 // velocity game
             public static final double kA = 0.0; //Acceleration Gain
 
             public static final Constraints kProfileConstraints = new Constraints(4, 6);
@@ -509,7 +509,7 @@ public final class Constants {
         public static final int kLeftMotorPort = 41;
         public static final int kRightMotorPort = 42;
         
-        public static final double kCurrentLimit = 10; 
+        public static final double kCurrentLimit = 20; 
         public static final double kGearRatio = 45;
         public static final double kPositionConversionFactor = Math.PI * 2 * (1/kGearRatio);
 
@@ -542,7 +542,7 @@ public final class Constants {
 
             // Feedforward constants
             public static final double kS = 0.16629; //0.26649; // static gain in volts
-            public static final double kG = 0.13459; // 0.13593; // gravity gain in volts
+            public static final double kG = 0; // 0.13459; // 0.13593; // gravity gain in volts
             public static final double kV = 1.8105; // 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 

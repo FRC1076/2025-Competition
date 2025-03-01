@@ -334,6 +334,10 @@ public class RobotContainer {
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
                 .onTrue(superstructureCommands.doGrabberAction());
+
+        m_driverController.rightTrigger()
+            .or(m_operatorController.rightTrigger())
+                .whileFalse(superstructureCommands.stopAndRetract());
     }
 
     private void configureDriverBindings() {
@@ -494,7 +498,7 @@ public class RobotContainer {
         // m_operatorController.rightTrigger().onTrue(superstructureCommands.doGrabberAction());
 
         // Retract mechanisms and stop grabber
-        m_operatorController.rightTrigger().whileFalse(superstructureCommands.stopAndRetract());
+        // m_operatorController.rightTrigger().whileFalse(superstructureCommands.stopAndRetract());
 
         m_operatorController.povRight().onTrue(
             superstructureCommands.holdAlgae()
