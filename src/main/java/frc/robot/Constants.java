@@ -545,7 +545,7 @@ public final class Constants {
             public static final double kV = 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
-            public static final Constraints kProfileConstraints = new Constraints(10 * Math.PI, 6 * Math.PI);
+            public static final Constraints kProfileConstraints = new Constraints(10 * Math.PI, 1 * Math.PI); 
         }
     }
 
