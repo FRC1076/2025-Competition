@@ -43,6 +43,11 @@ public class Elastic {
         AllianceNames.put(Alliance.Blue, "Blue");
         AllianceNames.put(Alliance.Red, "Red");
         this.putSelectedTeamColor();
+        
+        // Initialize fields
+        this.putBoolean("safeToFeedCoral", false);
+        this.putBoolean("safeToMoveElevator", false);
+        this.putBoolean("isAutoAligned", false);
     }
 
     public void putNumber(String key, double value) {

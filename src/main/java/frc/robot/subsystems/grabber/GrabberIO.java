@@ -35,4 +35,9 @@ public interface GrabberIO {
      * @param rightMotorVolts voltage to run the right motor at
      */
     public abstract void runVoltsDifferential(double leftMotorVolts, double rightMotorVolts);
+
+    /** Default implementation for io layers that don't have actual current (like simulation) */
+    public default double getOutputCurrent() {
+        return -1;
+    }
 }

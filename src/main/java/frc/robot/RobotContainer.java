@@ -35,6 +35,7 @@ import lib.vision.VisionLocalizationSystem;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
@@ -325,18 +326,20 @@ public class RobotContainer {
     }
 
     private void configureDriverBindings() {
-        
-        m_driverController.leftTrigger().whileTrue(
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
+        m_driverController.a().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );
 
-        m_driverController.rightTrigger().whileTrue(
+        m_driverController.b().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
         );
-        
 
+        //m_driverController.rightTrigger().onTrue(superstructureCommands.doGrabberAction());
+        
         // Point to reef
-        m_driverController.a().whileTrue(teleopDriveCommand.applyReefHeadingLock());
+        m_driverController.x().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
         // Apply single clutch
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
@@ -350,6 +353,7 @@ public class RobotContainer {
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
             .whileTrue(teleopDriveCommand.applyFPVDrive());
 
+        /*
         m_driverController.x().and(
             m_driverController.leftBumper().and(
                 m_driverController.rightBumper()
@@ -357,6 +361,7 @@ public class RobotContainer {
         ).whileTrue(teleopDriveCommand.applyLeftStationHeadingLock());
 
         m_driverController.b().whileTrue(teleopDriveCommand.applyRightStationHeadingLock());
+        */
 
         m_driverController.y().whileTrue(teleopDriveCommand.applyForwardHeadingLock());
 
@@ -458,6 +463,23 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.intakeCoral())
             .whileFalse(superstructureCommands.stopIntake());
 
+        // Manual coral intake and transfer
+        m_operatorController.povUp()
+            .onTrue(
+                m_superstructure.applyIndexState(IndexState.TRANSFER).alongWith(
+                m_superstructure.applyGrabberState(GrabberState.CORAL_INTAKE)))
+            .onFalse(
+                m_superstructure.applyIndexState(IndexState.BACKWARDS).alongWith(
+                m_superstructure.applyGrabberState(GrabberState.IDLE)));
+
+        // Manual coral intake reverse and transfer
+        m_operatorController.povDown()
+            .onTrue(
+                m_superstructure.applyIndexState(IndexState.BACKWARDS).alongWith(
+                m_superstructure.applyGrabberState(GrabberState.REVERSE_CORAL_INTAKE)))
+            .onFalse(
+                m_superstructure.applyGrabberState(GrabberState.IDLE));
+
         // Ground Algae Intake
         m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
 
@@ -467,20 +489,26 @@ public class RobotContainer {
         // Retract mechanisms and stop grabber
         m_operatorController.rightTrigger().whileFalse(superstructureCommands.stopAndRetract());
 
-        m_operatorController.povDown().onTrue(
+        m_operatorController.povRight().onTrue(
             superstructureCommands.holdAlgae()
         ).onFalse(
             superstructureCommands.stopGrabber()
         );
 
+        // Interrupts any elevator command when the the left joystick is moved
         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
 
+        // Interrupts any wrist command when the right joystick is moved
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
 
-        
+        /*
         m_operatorController.start().whileTrue(m_elevator.zeroEncoderJoystickControl(
             m_operatorController::getLeftX
         ));
+        */
+
+        m_operatorController.start().whileTrue(m_elevator.autoHome());
+        
         // TODO: Figure out the elevator rezeroing binding with Andrew
         
     }

@@ -278,6 +278,7 @@ public final class Constants {
             
             ALGAE_INTAKE(-12, -12),
             CORAL_INTAKE(12, 12),
+            REVERSE_CORAL_INTAKE(-12, -12),
 
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
@@ -309,12 +310,12 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.08128, 90, false),
-            ALGAE_TRAVEL(0.08128, 65 , false),
+            TRAVEL(0.08128 + 0.0605, 90, false),
+            ALGAE_TRAVEL(0.08128 + 0.0605, 65 , false),
 
-            CORAL_TRANSFER(0.08128, -23.5, false), // Same as CORAL_DIRECT_INTAKE
+            CORAL_TRANSFER(0.08128 + 0.0605, -23.5, false), // Same as CORAL_DIRECT_INTAKE
 
-            L1(0.08128, 90, false), // Placeholder
+            L1(0.08128 + 0.0605, 90, false), // Placeholder
             L2(0.910, -35, false), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35, true), //1.11252, -35),
             L4(2.109649 + 3 * 0.00635, -40.4130051, true), //1.8161, -45),
@@ -539,13 +540,12 @@ public final class Constants {
             public static final double kD = 0;
 
             // Feedforward constants
-            public static final double kS = 0.26649; // static gain in volts
-            //TODO: comment back in kG when wrist works
-            public static final double kG = 0.13593; // gravity gain in volts
-            public static final double kV = 0.92013; // velocity gain in volts per radian per second
+            public static final double kS = 0.16629; //0.26649; // static gain in volts
+            public static final double kG = 0.13459; // 0.13593; // gravity gain in volts
+            public static final double kV = 1.8105; // 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
-            public static final Constraints kProfileConstraints = new Constraints(10 * Math.PI, 1 * Math.PI); 
+            public static final Constraints kProfileConstraints = new Constraints(10 * Math.PI, 6 * Math.PI); 
         }
     }
 

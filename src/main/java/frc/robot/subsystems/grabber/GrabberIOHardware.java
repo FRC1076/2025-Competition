@@ -61,6 +61,12 @@ public class GrabberIOHardware implements GrabberIO{
         m_rightMotor.setVoltage(rightMotorVolts);
     }
 
+    /** Returns the average output current of the two grabber motors */
+    @Override
+    public double getOutputCurrent() {
+        return (m_leftMotor.getOutputCurrent() + m_rightMotor.getOutputCurrent()) / 2;
+    }
+
     /** Used for logging */
     @Override
     public void updateInputs(GrabberIOInputs inputs) {

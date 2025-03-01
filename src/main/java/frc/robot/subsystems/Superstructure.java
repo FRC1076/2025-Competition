@@ -258,7 +258,7 @@ public class Superstructure {
      * @param state the GrabberState
      * @return command to run grabber as certain state
      */
-    private Command applyGrabberState(GrabberState state) {
+    public Command applyGrabberState(GrabberState state) {
         return Commands.sequence(
             Commands.runOnce(() -> superState.setGrabberState(state)),
             m_grabber.applyDifferentialVolts(state.leftVoltage, state.rightVoltage) //Can do a runOnce because runVolts is sticky
@@ -502,7 +502,7 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.applyIndexState(IndexState.TRANSFER)
                 ),
-                Commands.waitUntil(m_transferBeamBreak),
+                Commands.waitUntil(() -> m_grabber.getOutPutCurrentAboveNormal()),// Commands.waitUntil(m_transferBeamBreak),
                 superstructure.m_grabber.applyRadiansBangBang(4, 4*Math.PI), // Adjust rotations
                 Commands.parallel(
                     Commands.runOnce(() -> safeToMoveElevator = true),

@@ -5,6 +5,8 @@
 package frc.robot.subsystems.grabber;
 
 import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,9 +16,16 @@ import org.littletonrobotics.junction.Logger;
 public class GrabberSubsystem extends SubsystemBase{
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
+    private final LinearFilter currentFilter;
+    private final Debouncer debouncer;
+    private final double kCoralCurrentThreshold;
+    private double filteredCurrent;
 
     public GrabberSubsystem(GrabberIO io) {
         this.io = io;
+        this.currentFilter = LinearFilter.movingAverage(5);
+        this.debouncer = new Debouncer(0.33);
+        this.kCoralCurrentThreshold = 6;
     }
 
     /** Sets both motors to the same voltage */
@@ -33,8 +42,13 @@ public class GrabberSubsystem extends SubsystemBase{
         runVolts(0);
     }
 
+    public boolean getOutPutCurrentAboveNormal() {
+        return debouncer.calculate(filteredCurrent > kCoralCurrentThreshold);
+    }
+
     @Override
     public void periodic() {
+        filteredCurrent = currentFilter.calculate(io.getOutputCurrent());
         io.updateInputs(inputs);
         Logger.processInputs("Grabber", inputs);
     }
