@@ -89,7 +89,7 @@ public class Robot extends LoggedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    CommandScheduler.getInstance().printWatchdogEpochs();
+    //CommandScheduler.getInstance().printWatchdogEpochs(); // WARNING: Uses a lot of resources
 
     //m_robotContainer.updateInterface();
   }
