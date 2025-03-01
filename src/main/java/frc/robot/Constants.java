@@ -541,7 +541,7 @@ public final class Constants {
             // Feedforward constants
             public static final double kS = 0.26649; // static gain in volts
             //TODO: comment back in kG when wrist works
-            public static final double kG = 0; //0.13593 // gravity gain in volts
+            public static final double kG = 0.13593; // gravity gain in volts
             public static final double kV = 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 

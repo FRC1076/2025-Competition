@@ -23,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
 
-    public static final double homingVolts = -2.0;
+    public static final double homingVolts = 0.1;
     public static final double homingDebounceTime = 0.25;
     public static final double homingVelocityThreshold = 0.2;
 
