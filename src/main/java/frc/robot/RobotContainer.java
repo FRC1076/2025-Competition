@@ -248,7 +248,10 @@ public class RobotContainer {
         // Configure miscellaneous bindings
         configureBindings();
 
-        // Configure the trigger bindings
+        // Configure shared bindings
+        configureSharedBindings();
+
+        // Configure the driver bindings
         configureDriverBindings();
 
         // Configure the operator bindings
@@ -325,9 +328,15 @@ public class RobotContainer {
         
     }
 
-    private void configureDriverBindings() {
+    private void configureSharedBindings() {
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
 
+        m_driverController.rightTrigger()
+            .or(m_operatorController.rightTrigger())
+                .onTrue(superstructureCommands.doGrabberAction());
+    }
+
+    private void configureDriverBindings() {
         m_driverController.a().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );
@@ -335,8 +344,6 @@ public class RobotContainer {
         m_driverController.b().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
         );
-
-        //m_driverController.rightTrigger().onTrue(superstructureCommands.doGrabberAction());
         
         // Point to reef
         m_driverController.x().whileTrue(teleopDriveCommand.applyReefHeadingLock());
@@ -484,7 +491,7 @@ public class RobotContainer {
         m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
 
         // Does Grabber action, ie. outtake coral/algae depending 
-        m_operatorController.rightTrigger().onTrue(superstructureCommands.doGrabberAction());
+        // m_operatorController.rightTrigger().onTrue(superstructureCommands.doGrabberAction());
 
         // Retract mechanisms and stop grabber
         m_operatorController.rightTrigger().whileFalse(superstructureCommands.stopAndRetract());

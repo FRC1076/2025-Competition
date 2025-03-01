@@ -551,6 +551,7 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.applyIndexState(IndexState.TRANSFER)
                 ),
+                Commands.waitSeconds(0.33),
                 Commands.waitUntil(() -> m_grabber.getOutPutCurrentAboveNormal()),// Commands.waitUntil(m_transferBeamBreak),
                 superstructure.m_grabber.applyRadiansBangBang(4, 4*Math.PI), // Adjust rotations
                 Commands.parallel(
