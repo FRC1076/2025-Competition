@@ -133,7 +133,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static TeamColors kTeamColor = TeamColors.kTeamColorBlue;
-        public static FlippedAuton flippedAuton = FlippedAuton.kNotFlipped;
+        public static AutonSides autonSide = AutonSides.kLeft;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -145,16 +145,17 @@ public final class Constants {
                 this.color = color;
             }
         }
+        
+        // States describing whether the auton is on the left or right side of the alliance
+        public enum AutonSides {
+            kLeft(false, "Left"),
+            kRight(true, "Right");
 
-        public enum FlippedAuton {
-            kNotFlipped(false, "Not Flipped"),
-            kFlipped(true, "Flipped");
-
-            public final boolean isFlipped;
+            public final boolean isRightSide;
             public final String name;
 
-            private FlippedAuton(boolean isFlipped, String name) {
-                this.isFlipped = isFlipped;
+            private AutonSides (boolean isRightSide, String name) {
+                this.isRightSide = isRightSide;
                 this.name = name;
             }
         }

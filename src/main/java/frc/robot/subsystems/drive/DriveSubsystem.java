@@ -71,20 +71,20 @@ public class DriveSubsystem extends SubsystemBase {
         
         try {
             AutoBuilder.configure(
-                () -> elastic.getPathPlannerFlipped() 
-                    ? this.getFlippedPose() 
+                () -> elastic.getPathPlannerMirrored() 
+                    ? this.getMirroredPose() 
                     : this.getPose(),
                 (pose) -> {
-                    if (elastic.getPathPlannerFlipped()) {
-                        this.resetPoseFlipped(pose);
+                    if (elastic.getPathPlannerMirrored()) {
+                        this.resetPoseMirrored(pose);
                     } else {
                         this.resetPose(pose);
                     }
                 },
                 () -> driveInputs.Speeds,
                 (speeds, feedforwards) -> {
-                    if (elastic.getPathPlannerFlipped()) {
-                        driveCOFlipped(speeds);
+                    if (elastic.getPathPlannerMirrored()) {
+                        driveCoMirrored(speeds);
                     } else {
                         driveCO(speeds);
                     }
@@ -147,8 +147,8 @@ public class DriveSubsystem extends SubsystemBase {
         io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
     }
 
-    /** Swerve drive request with chassis-orriented chassisSpeeds, but flips the speeds (used for flipping paths in auton) */
-    public void driveCOFlipped(ChassisSpeeds speeds) {
+    /** Swerve drive request with chassis-orriented chassisSpeeds, but mirrors the speeds (used for mirroring paths in auton) */
+    public void driveCoMirrored(ChassisSpeeds speeds) {
         speeds.vyMetersPerSecond *= (-1);  
         speeds.omegaRadiansPerSecond *= (-1);
         io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
@@ -188,8 +188,8 @@ public class DriveSubsystem extends SubsystemBase {
         io.resetPose(pose);
     }
 
-    /** Resets the pose of the robot, but flips the input Pose2d, while remaining on the same side of the field (used for flipping paths in auton) */
-    public void resetPoseFlipped(Pose2d pose) {
+    /** Resets the pose of the robot, but mirrors the input Pose2d, while remaining on the same side of the field (used for mirroring paths in auton) */
+    public void resetPoseMirrored(Pose2d pose) {
         Pose2d newPose = new Pose2d(
             pose.getX(),
             FieldConstants.fieldWidthMeters - pose.getY(),
@@ -213,8 +213,8 @@ public class DriveSubsystem extends SubsystemBase {
         return io.getPose();
     }
 
-    /** Returns the pose of the robot, but flipped */
-    public Pose2d getFlippedPose() {
+    /** Returns the pose of the robot, but mirrored */
+    public Pose2d getMirroredPose() {
         Pose2d pose = new Pose2d(
             io.getPose().getX(),
             FieldConstants.fieldWidthMeters - io.getPose().getY(),

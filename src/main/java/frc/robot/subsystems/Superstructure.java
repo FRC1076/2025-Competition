@@ -210,6 +210,37 @@ public class Superstructure {
             m_wrist.applyAngle(coralTravelAngle),
             () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
         );
+
+        Command wristHoldCommand = Commands.either(
+            m_wrist.holdAngle(algaeTravelAngle), 
+            m_wrist.holdAngle(coralTravelAngle),
+            () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
+        );
+        
+        return Commands.sequence(
+            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))),
+            new ProxyCommand(wristPreMoveCommand),
+            new ProxyCommand(Commands.deadline(
+                m_elevator.applyPosition(position.elevatorHeightMeters),
+                wristHoldCommand
+            )),
+            new ProxyCommand(new DaemonCommand(
+                () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
+                () -> false
+            )),
+            new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
+            new ProxyCommand(new DaemonCommand(
+                () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
+                () -> false
+            )));
+
+        /* Old code, we're not sure why it doesn't work
+        Command wristPreMoveCommand = Commands.either(
+            m_wrist.applyAngle(algaeTravelAngle),
+            m_wrist.applyAngle(coralTravelAngle),
+            () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
+        );
+
         
         // We use parallel commands here to reduce the number of loops that instant commands use
         return Commands.sequence(
@@ -240,6 +271,9 @@ public class Superstructure {
             // apply clutch trigger state found in WristevatorState
             .alongWith(Commands.runOnce(() -> elevatorClutch = position.elevatorClutch)
         ));
+        */
+
+
         /*
         return Commands.sequence(
             //m_elevator.applyPosition(position.elevatorHeightMeters),
@@ -251,6 +285,21 @@ public class Superstructure {
             m_wrist.applyAngle(Rotation2d.fromDegrees(80)),
             m_wrist.applyAngle(Rotation2d.fromDegrees(-30))
         );*/
+    }
+
+    /**
+     * Applies a wristevator state directly without any premoves
+     * @param position
+     * @return
+     */
+    private Command applyWristevatorStateDirect(WristevatorState position) {
+        safeToFeedCoral = false;
+        safeToMoveElevator = false;
+        
+        return Commands.parallel(
+            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            m_elevator.applyPosition(position.elevatorHeightMeters),
+            m_wrist.applyAngle(position.wristAngle));
     }
 
     /**

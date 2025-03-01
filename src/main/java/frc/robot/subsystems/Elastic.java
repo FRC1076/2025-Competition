@@ -13,38 +13,33 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.GameConstants;
-import frc.robot.Constants.GameConstants.FlippedAuton;
-import frc.robot.Constants.GameConstants.TeamColors;
+import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 
 //TODO: Either make this a singleton class or make putX methods static
 public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
-    private SendableChooser<FlippedAuton> flippedAutonChooser;
+    private SendableChooser<AutonSides> autonSideChooser;
     private HashMap<Alliance, String> AllianceNames; 
     private Alliance currentAllianceName;
 
     public Elastic() {
-        /*
-        teamChooser = new SendableChooser<>();
-        teamChooser.setDefaultOption(GameConstants.kTeamColor.color, GameConstants.kTeamColor);
-        teamChooser.addOption(TeamColors.kTeamColorRed.color, TeamColors.kTeamColorRed);
-        teamChooser.addOption(TeamColors.kTeamColorBlue.color, TeamColors.kTeamColorBlue);
-        SmartDashboard.putData(teamChooser);
+        /* This is a dropdown menu on the SmartDashboard that allows the user to select whether 
+        the auton is on the left (default) or the right side of the field.
         */
-        
-        flippedAutonChooser = new SendableChooser<>();
-        flippedAutonChooser.setDefaultOption(GameConstants.flippedAuton.name, GameConstants.flippedAuton);
-        flippedAutonChooser.addOption(FlippedAuton.kNotFlipped.name, FlippedAuton.kNotFlipped);
-        flippedAutonChooser.addOption(FlippedAuton.kFlipped.name, FlippedAuton.kFlipped);
-        SmartDashboard.putData(flippedAutonChooser);
+        autonSideChooser = new SendableChooser<>();
+        autonSideChooser.setDefaultOption(GameConstants.autonSide.name, GameConstants.autonSide);
+        autonSideChooser.addOption(AutonSides.kLeft.name, AutonSides.kLeft);
+        autonSideChooser.addOption(AutonSides.kRight.name, AutonSides.kRight);
+        SmartDashboard.putData(autonSideChooser);
 
+        // Maps the Alliance enum that the Driver Station returns to string names
         AllianceNames = new HashMap<>();
         AllianceNames.put(Alliance.Blue, "Blue");
         AllianceNames.put(Alliance.Red, "Red");
         this.putSelectedTeamColor();
         
-        // Initialize fields
+        // Initialize fields, because otherwise they're only updated when teleop is enabled
         this.putBoolean("safeToFeedCoral", false);
         this.putBoolean("safeToMoveElevator", false);
         this.putBoolean("isAutoAligned", false);
@@ -102,8 +97,9 @@ public class Elastic {
         this.putBoolean("isAutoAligned", isAutoAligned.getAsBoolean());
     }
 
-    /** Returns true to flip the auton when in autonomous mode and the auton is selected as flipped */
-    public boolean getPathPlannerFlipped() {
-        return DriverStation.isAutonomous() && flippedAutonChooser.getSelected().isFlipped;
+    /** Returns true to mirror the auton from the left side to the right side
+     * when in autonomous mode and the auton is selected as mirrored to the right side */
+    public boolean getPathPlannerMirrored() {
+        return DriverStation.isAutonomous() && autonSideChooser.getSelected().isRightSide;
     }
 }
