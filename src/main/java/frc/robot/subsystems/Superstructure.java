@@ -327,7 +327,8 @@ public class Superstructure {
     public Command applyIndexState(IndexState state) {
         return Commands.sequence(
             Commands.runOnce(() -> superState.setIndexerState(state)),
-            m_index.applyVolts(state.volts)//.onlyIf(() -> state.running) //Can do a runOnce because runVolts is sticky
+            m_index.applyVolts(state.volts),
+            Commands.idle(m_index)//.onlyIf(() -> state.running) //Can do a runOnce because runVolts is sticky
         );
     }
 
@@ -550,7 +551,8 @@ public class Superstructure {
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.applyIndexState(IndexState.TRANSFER)
-                ),
+                )
+                /*,
                 Commands.waitSeconds(0.33),
                 Commands.waitUntil(() -> m_grabber.getOutPutCurrentAboveNormal()),// Commands.waitUntil(m_transferBeamBreak),
                 superstructure.m_grabber.applyRadiansBangBang(4, 4*Math.PI), // Adjust rotations
@@ -559,6 +561,7 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
+                */
             );
             
             //.onlyIf(() -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.EMPTY);

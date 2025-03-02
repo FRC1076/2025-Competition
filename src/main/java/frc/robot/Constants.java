@@ -191,7 +191,7 @@ public final class Constants {
         }
 
         public static class PathPlannerConstants {
-            public static final PathConstraints pathConstraints = new PathConstraints(0.25, 5, Units.degreesToRadians(360), Units.degreesToRadians(360));
+            public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.4572, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
 
@@ -208,8 +208,8 @@ public final class Constants {
 
         public static double algaePossessionCurrentThreshold = 20.0;
 
-        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
-        public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(65);
+        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(85);
+        public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(85);
 
         // Grabber Possession State
         public enum GrabberPossession {
@@ -311,15 +311,15 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.08128 + 0.0605, 90, false),
-            ALGAE_TRAVEL(0.08128 + 0.0605, 65 , false),
+            TRAVEL(0.08128, 90, false),
+            ALGAE_TRAVEL(0.08128, 65 , false),
 
-            CORAL_TRANSFER(0.08128 + 0.0605, -18, false), // Same as CORAL_DIRECT_INTAKE
+            CORAL_TRANSFER(0.08128, -10, false), // Same as CORAL_DIRECT_INTAKE
 
-            L1(0.08128 + 0.0605, 90, false), // Placeholder
+            L1(0.08128, 90, false), // Placeholder
             L2(0.910, -35, false), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35, true), //1.11252, -35),
-            L4(2.109649 + 3 * 0.00635, -40.4130051, true), //1.8161, -45),
+            L4(2.109649 + 3 * 0.00635, -30, true),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0.184277, -20, false),
             LOW_INTAKE(1.13789, -35, false),
@@ -531,8 +531,8 @@ public final class Constants {
 
         // Source: https://docs.revrobotics.com/brushless/spark-max/encoders/alternate-encoder
         public static final int kCountsPerRevolution = 8192;
-        public static final double kPositionConversionFactor = (1.0/125.0) * (32.0/50.0) * (2 * Math.PI);// (1/117.1875) * 2 * Math.PI; // rotations to radians
-        public static final double kVelocityConversionFactor = (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60;// (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
+        public static final double kPositionConversionFactor = 2 * Math.PI;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI);// (1/117.1875) * 2 * Math.PI; // rotations to radians
+        public static final double kVelocityConversionFactor = 2 * Math.PI;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60;// (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
 
         public static final class Control {
             // PID constants

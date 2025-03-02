@@ -243,7 +243,7 @@ public class RobotContainer {
             Commands.idle(m_index)
         ));
 
-        configureNamedCommands();
+        //configureNamedCommands();
 
         // Configure miscellaneous bindings
         configureBindings();

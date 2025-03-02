@@ -9,12 +9,16 @@ import static frc.robot.Constants.WristConstants.Control.*;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkMaxAlternateEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.AlternateEncoderConfig;
+import com.revrobotics.spark.config.AbsoluteEncoderConfig;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
@@ -28,7 +32,8 @@ public class WristIOHardware implements WristIO {
 
     private final SparkMaxConfig m_leadMotorConfig;
     //private final RelativeEncoder m_relativeEncoder;
-    private final RelativeEncoder m_alternateEncoder;
+    private final SparkAbsoluteEncoder m_absoluteEncoder;
+    // private final RelativeEncoder m_alternateEncoder;
 
     public WristIOHardware() {
         m_leadMotor = new SparkMax(WristConstants.kLeadMotorPort, MotorType.kBrushless);
@@ -41,20 +46,30 @@ public class WristIOHardware implements WristIO {
             .inverted(WristConstants.kLeadMotorInverted)
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit((int) WristConstants.kSmartCurrentLimit);
-
-        /*
+ 
+            /* 
         m_leadMotorConfig.alternateEncoder
             .setSparkMaxDataPortConfig()
             .countsPerRevolution(WristConstants.kCountsPerRevolution)
             .positionConversionFactor(WristConstants.kPositionConversionFactor)
-            .velocityConversionFactor(WristConstants.kVelocityConversionFactor);
-        */
-        
-        m_leadMotorConfig.alternateEncoder
+            .velocityConversionFactor(WristConstants.kVelocityConversionFactor);*/
+
+        m_leadMotorConfig.absoluteEncoder
             .setSparkMaxDataPortConfig()
-            // .countsPerRevolution(WristConstants.kCountsPerRevolution)
+            .positionConversionFactor(WristConstants.kPositionConversionFactor)
+            .velocityConversionFactor(WristConstants.kVelocityConversionFactor);
+        
+        /*
+        m_leadMotorConfig.alternateEncoder.apply(
+            new AlternateEncoderConfig()
+            .setSparkMaxDataPortConfig()
+            .countsPerRevolution(WristConstants.kCountsPerRevolution)
             .positionConversionFactor(2 * Math.PI)
-            .velocityConversionFactor(2 * Math.PI);
+            .velocityConversionFactor(2 * Math.PI)
+        );
+        */
+            
+        
         
         m_leadMotorConfig.encoder
             .positionConversionFactor(WristConstants.kPositionConversionFactor)
@@ -63,10 +78,13 @@ public class WristIOHardware implements WristIO {
         // configure motors
         m_leadMotor.configure(m_leadMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        // m_relativeEncoder = m_leadMotor.getEncoder();
-        // m_relativeEncoder.setPosition(Rotation2d.kCCW_90deg.getRadians());
-        m_alternateEncoder = m_leadMotor.getAlternateEncoder();
-        m_alternateEncoder.setPosition(Rotation2d.kCCW_90deg.getRadians());
+        //m_relativeEncoder = m_leadMotor.getAlternateEncoder();
+        //m_relativeEncoder.setPosition(Rotation2d.kCCW_90deg.getRadians());
+
+        // m_alternateEncoder = m_leadMotor.Encoder();
+        // m_alternateEncoder.setPosition(Rotation2d.kCCW_90deg.getRadians());
+
+        m_absoluteEncoder = m_leadMotor.getAbsoluteEncoder();
 
     }
 
@@ -84,10 +102,10 @@ public class WristIOHardware implements WristIO {
     public void updateInputs(WristIOInputs inputs) {
         inputs.appliedVolts = m_leadMotor.getAppliedOutput() * m_leadMotor.getBusVoltage();
         inputs.leadCurrentAmps = m_leadMotor.getOutputCurrent();
-        // inputs.angleRadians = m_relativeEncoder.getPosition();
-        // inputs.velocityRadiansPerSecond = m_relativeEncoder.getVelocity();
-        inputs.angleRadians = m_alternateEncoder.getPosition();
-        inputs.velocityRadiansPerSecond = m_alternateEncoder.getVelocity();
+        inputs.angleRadians = m_absoluteEncoder.getPosition();
+        inputs.velocityRadiansPerSecond = m_absoluteEncoder.getVelocity();
+        // inputs.angleRadians = m_alternateEncoder.getPosition();
+        // inputs.velocityRadiansPerSecond = m_alternateEncoder.getVelocity();
     }
 
 }
