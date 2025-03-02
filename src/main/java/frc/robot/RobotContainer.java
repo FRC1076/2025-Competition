@@ -28,6 +28,7 @@ import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristIOHardware;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
+import lib.control.DynamicSlewRateLimiter;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.PhotonVisionLocalizer;
@@ -47,6 +48,7 @@ import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultMultiTagStdDevs;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
+import static frc.robot.Constants.DriveConstants.DriverControlConstants.elevatorAccelerationTable;
 import static frc.robot.Constants.VisionConstants.fieldLayout;
 
 import java.util.HashMap;
@@ -128,6 +130,9 @@ public class RobotContainer {
     private final VisionLocalizationSystem m_vision = new VisionLocalizationSystem();
 
     private final VisionSystemSim m_visionSim;
+
+    private final DynamicSlewRateLimiter xLimiter;
+    private final DynamicSlewRateLimiter yLimiter;
 
    // private final PhotonCamera m_driveCamera;
 
@@ -215,6 +220,16 @@ public class RobotContainer {
             () -> false
         );
 
+        xLimiter = new DynamicSlewRateLimiter(
+            () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
+            m_elevator.getPositionMeters()
+        );
+
+        yLimiter = new DynamicSlewRateLimiter(
+            () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
+            m_elevator.getPositionMeters()
+        );
+
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
         m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
@@ -223,8 +238,8 @@ public class RobotContainer {
         superVis = new SuperstructureVisualizer(m_superstructure);
 
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> -m_driverController.getLeftY(), 
-            () -> -m_driverController.getLeftX(),
+            () -> yLimiter.calculate(-m_driverController.getLeftY()), 
+            () -> xLimiter.calculate(-m_driverController.getLeftX()),
             () -> -m_driverController.getRightX()
         );
 
@@ -275,6 +290,8 @@ public class RobotContainer {
         SmartDashboard.putData(m_autoChooser);
 
         CommandUtils.makePeriodic(() -> m_elastic.updateTeamColor(), true);
+
+
     }
 
   /**
