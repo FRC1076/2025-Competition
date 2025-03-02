@@ -443,7 +443,9 @@ public final class Constants {
         public static final double elevatorPositionToleranceMeters = Units.inchesToMeters(0.5);
         public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0);
         public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(82.75);//81.15);
-        public static final double maxOperatorControlVolts = 4;
+        // TODO: change max operator control voltages based on Andrew's opinion
+        public static final double defaultMaxOperatorControlVolts = 2;
+        public static final double fasterMaxOperatorControlVolts = 4;
 
         public static final boolean leadMotorInverted = false;
         public static final boolean followMotorInverted = false;

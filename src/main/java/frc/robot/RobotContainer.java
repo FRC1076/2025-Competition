@@ -237,7 +237,8 @@ public class RobotContainer {
         ));
 
         m_elevator.setDefaultCommand(m_elevator.applyManualControl(
-            () -> -m_operatorController.getLeftY()
+            () -> -m_operatorController.getLeftY(),
+            () -> m_operatorController.povLeft().getAsBoolean()
         ));
 
         m_index.setDefaultCommand(Commands.sequence(

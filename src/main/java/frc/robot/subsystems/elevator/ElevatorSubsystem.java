@@ -7,6 +7,7 @@ package frc.robot.subsystems.elevator;
 import frc.robot.Constants.ElevatorConstants;
 import lib.control.DynamicElevatorFeedforward;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
@@ -141,20 +142,25 @@ public class ElevatorSubsystem extends SubsystemBase {
         );
     }
     
-    /** Returns a command that sets the voltage of the elevator manually and adds kG
+    /** Returns a command that sets the voltage of the elevator manually and adds kG.
      * @param controlSupplier Supplier that returns the desired voltage of the elevator
+     * @param higherMaxSpeedSupplier Supplier that returns whether or not the max elevator control speed should use the lower (false) or higher (true) max voltage
      */
-    public Command applyManualControl(DoubleSupplier controlSupplier) {
-        return run(() -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.maxOperatorControlVolts));
+    public Command applyManualControl(DoubleSupplier controlSupplier, BooleanSupplier higherMaxSpeedSupplier) {
+        return run(higherMaxSpeedSupplier.getAsBoolean()
+            ? () -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.fasterMaxOperatorControlVolts)
+            : () -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts)
+        );
     }
 
     /** 
      * Temporarily allows the operator unrestricted control over the elevator's position, in order to let
      * them manually move the elevator to the zero position in order to rezero the encoder in the event that it
-     * gets thrown off by acceleration. NOTE: both software stops and gravity compensation are disabled during this command
+     * gets thrown off by acceleration. This version always uses the lower max control voltage.
+     * NOTE: both software stops and gravity compensation are disabled during this command
      */
     public Command zeroEncoderJoystickControl(DoubleSupplier controlSupplier) {
-        return run(() -> io.setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.maxOperatorControlVolts))
+        return run(() -> io.setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts))
             .finallyDo(() -> io.resetPosition(0));
     }
 
