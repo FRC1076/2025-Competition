@@ -17,9 +17,21 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "doGrabberAction"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "I4-LOUT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
           }
         },
         {
@@ -29,9 +41,21 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "doGrabberAction"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "K4-LOUT"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
           }
         },
         {
@@ -41,15 +65,33 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "doGrabberAction"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "L4-LOUT"
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "intakeCoral"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "LOUT-J4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "doGrabberAction"
           }
         }
       ]

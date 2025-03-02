@@ -130,6 +130,7 @@ public class RobotContainer {
 
     private final DynamicSlewRateLimiter xLimiter;
     private final DynamicSlewRateLimiter yLimiter;
+    private boolean slewRateLimiterEnabled = true;
 
    // private final PhotonCamera m_driveCamera;
 
@@ -235,8 +236,12 @@ public class RobotContainer {
         superVis = new SuperstructureVisualizer(m_superstructure);
 
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> yLimiter.calculate(-m_driverController.getLeftY()), 
-            () -> xLimiter.calculate(-m_driverController.getLeftX()),
+            slewRateLimiterEnabled
+                ? () -> yLimiter.calculate(-m_driverController.getLeftY())
+                : () -> -m_driverController.getLeftY(),
+            slewRateLimiterEnabled
+                ? () -> xLimiter.calculate(-m_driverController.getLeftX())
+                : () -> -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()
         );
 
@@ -339,8 +344,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
         NamedCommands.registerCommand("preL3", superstructureCommands.preL3());
         NamedCommands.registerCommand("preL4", superstructureCommands.preL4());
-        // TODO: Change name to match later
-        NamedCommands.registerCommand("scoreGamePiece", superstructureCommands.doGrabberAction());
+        NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
+        NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
+        NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());*/
         
     }
@@ -367,7 +373,7 @@ public class RobotContainer {
         );
         
         // Point to reef
-        m_driverController.x().whileTrue(teleopDriveCommand.applyReefHeadingLock());
+        m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
         // Apply single clutch
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
@@ -381,6 +387,10 @@ public class RobotContainer {
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
             .whileTrue(teleopDriveCommand.applyFPVDrive());
 
+        m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
+
+        m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
+
         /*
         m_driverController.x().and(
             m_driverController.leftBumper().and(
@@ -391,7 +401,7 @@ public class RobotContainer {
         m_driverController.b().whileTrue(teleopDriveCommand.applyRightStationHeadingLock());
         */
 
-        m_driverController.y().whileTrue(teleopDriveCommand.applyForwardHeadingLock());
+        // m_driverController.y().whileTrue(teleopDriveCommand.applyForwardHeadingLock()); Oliver didn't want this
 
         m_driverController.leftBumper().and(
             m_driverController.rightBumper().and(

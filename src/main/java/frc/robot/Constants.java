@@ -183,12 +183,24 @@ public final class Constants {
             public static final double maxTranslationSpeedMPS = 5.0;
             public static final double maxRotationSpeedRadPerSec = 5.0;
 
+            // Calculations from: https://docs.google.com/spreadsheets/d/1ht2fXTaIHJL2nEzKbsCiHQ5DaE7uzN4XHMsRuwxwwmQ/edit?usp=sharing
+            // Input: elevator height from bottom of the elevator in meters
+            // Output: max translation acceleration in m/s/s
+
             public static final InterpolatingDoubleTreeMap elevatorAccelerationTable = new InterpolatingDoubleTreeMap(); // A table that maps elevator heights to slew rate limits
             static {
+                // TODO: add deadzone if needed
                 elevatorAccelerationTable.put(0.0,1000000000.0);
-                elevatorAccelerationTable.put(1.348,1000000000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
-
-                elevatorAccelerationTable.put(1.348 + 2 * 0.00889,3.0); //L3 height (PLACEHOLDER VALUE)
+                // elevatorAccelerationTable.put(1.0,1000000000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
+                // elevatorAccelerationTable.put(0.0, 12.66793578);
+                elevatorAccelerationTable.put(0.254, 10.15773958);
+                elevatorAccelerationTable.put(0.508, 8.477828029);
+                elevatorAccelerationTable.put(0.762, 7.274717623);
+                elevatorAccelerationTable.put(1.016, 6.370643237);
+                elevatorAccelerationTable.put(1.27, 5.666439564);
+                elevatorAccelerationTable.put(1.524, 5.102204373);
+                elevatorAccelerationTable.put(1.778, 4.640342002);
+                elevatorAccelerationTable.put(1.8288, 4.557930098);
             }
         }
 
