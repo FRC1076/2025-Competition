@@ -16,7 +16,6 @@ import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 
-//TODO: Either make this a singleton class or make putX methods static
 public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
     private SendableChooser<AutonSides> autonSideChooser;

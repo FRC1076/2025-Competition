@@ -18,8 +18,16 @@ public class DynamicSlewRateLimiter {
     private double m_prevVal;
     private double m_prevTime;
 
-    //TODO: ADD JAVADOC COMMENTS
-
+    /**
+     * A class that limits the rate of change of an input value. 
+     * Useful for implementing voltage, setpoint, and/or output ramps. 
+     * A slew-rate limit is most appropriate when the quantity being controlled is a velocity or a voltage; 
+     * when controlling a position, consider using a TrapezoidProfile instead.
+     * <p> This slew rate limiter is dynamic so that the rate limit can be changed on the fly, due to changing conditions, like the center of gravity
+     * @param positiveRateLimitSupplier
+     * @param negativeRateLimitSupplier
+     * @param initialValue
+     */
     public DynamicSlewRateLimiter(DoubleSupplier positiveRateLimitSupplier, DoubleSupplier negativeRateLimitSupplier, double initialValue) {
         this.positiveRateLimitSupplier = positiveRateLimitSupplier;
         this.negativeRateLimitSupplier = negativeRateLimitSupplier;
@@ -27,6 +35,15 @@ public class DynamicSlewRateLimiter {
         m_prevTime = MathSharedStore.getTimestamp();
     }
 
+    /**
+     * A class that limits the rate of change of an input value. 
+     * Useful for implementing voltage, setpoint, and/or output ramps. 
+     * A slew-rate limit is most appropriate when the quantity being controlled is a velocity or a voltage; 
+     * when controlling a position, consider using a TrapezoidProfile instead.
+     * <p> This slew rate limiter is dynamic so that the rate limit can be changed on the fly, due to changing conditions, like the center of gravity
+     * @param rateLimitSupplier
+     * @param initialValue
+     */
     public DynamicSlewRateLimiter(DoubleSupplier rateLimitSupplier, double initialValue) {
         this(
             rateLimitSupplier,

@@ -314,8 +314,7 @@ public class Superstructure {
         );
     }
 
-    //TODO: Refactor this to be more in-line with the rest of the superstructure code
-    private Command grabberRotationsBangBang(double volts, double rotations) {
+    private Command grabberRadiansBangBang(double volts, double rotations) {
         return m_grabber.applyRadiansBangBang(volts, rotations);
     }
 
@@ -375,9 +374,6 @@ public class Superstructure {
         // For debugging the beambreaks
         //System.out.println("updatePossessionAndKg() Called");
         //System.out.println("transferBB: " + transferBB);
-
-        // TODO: call add LED code here
-
     }
 
     /** Contains all the command factories for the superstructure */
@@ -538,7 +534,7 @@ public class Superstructure {
                 Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     Commands.waitUntil(m_indexBeamBreak),
-                    superstructure.grabberRotationsBangBang(4, kIndexVoltage),
+                    superstructure.grabberRadiansBangBang(4, kIndexVoltage),
                     superstructure.applyGrabberState(GrabberState.IDLE)
                 ),
                 Commands.sequence(
