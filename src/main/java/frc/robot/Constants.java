@@ -16,6 +16,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
@@ -188,6 +189,14 @@ public final class Constants {
             public static final double ElevatorClutchRotFactor = 0.5;
             public static final double maxTranslationSpeedMPS = 5.0;
             public static final double maxRotationSpeedRadPerSec = 5.0;
+
+            public static final InterpolatingDoubleTreeMap elevatorAccelerationTable = new InterpolatingDoubleTreeMap(); // A table that maps elevator heights to slew rate limits
+            static {
+                elevatorAccelerationTable.put(0.0,1000000000.0);
+                elevatorAccelerationTable.put(1.348,1000000000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
+
+                elevatorAccelerationTable.put(1.348 + 2 * 0.00889,3.0); //L3 height (PLACEHOLDER VALUE)
+            }
         }
 
         public static class PathPlannerConstants {
