@@ -27,8 +27,7 @@ import edu.wpi.first.wpilibj.Timer;
 import lib.vision.CameraLocalizer.CommonPoseEstimate;
 
 public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
-
-    @AutoLog
+    
     public static class PhotonVisionInputs {
         public boolean cameraConnected = false;
         public boolean estimatePresent = false;
@@ -37,7 +36,18 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
         public Pose3d pose = new Pose3d();
         public Matrix<N3,N1> stddevs = VecBuilder.fill(0,0,0);
         public String strategy = "NULL";
+
+        public void log(String key) {
+            Logger.recordOutput(key,cameraConnected);
+            Logger.recordOutput(key,estimatePresent);
+            Logger.recordOutput(key,tagsDetected);
+            Logger.recordOutput(key,fiducialIDs.toString());
+            Logger.recordOutput(key,pose);
+            Logger.recordOutput(key,stddevs);
+            Logger.recordOutput(key,strategy);
+        }
     }
+        
 
     private static final Matrix<N3, N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     private final PhotonCamera camera;
@@ -45,7 +55,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
     private final Supplier<Rotation2d> headingSupplier;
     private final Matrix<N3, N1> defaultSingleStdDevs;
     private final Matrix<N3, N1> defaultMultiStdDevs;
-    private final PhotonVisionInputsAutoLogged inputs = new PhotonVisionInputsAutoLogged();
+    private final PhotonVisionInputs inputs = new PhotonVisionInputs();
 
     public LoggedPhotonVisionLocalizer(
         PhotonCamera camera, 
@@ -139,7 +149,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
             }
         );
 
-        Logger.processInputs("PhotonVision/" + getName(), inputs);
+        inputs.log("PhotonVision/" + getName());
 
         return result;
     }
