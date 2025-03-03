@@ -449,10 +449,11 @@ public class Superstructure {
          * Retract mechanisms to travel state
          */
         public Command retractMechanisms(){
-            return superstructure.applyWristevatorState(
-                this.superstructure.superState.getGrabberPossession() == GrabberPossession.ALGAE
-                    ? WristevatorState.ALGAE_TRAVEL
-                    : WristevatorState.TRAVEL);
+            return Commands.either(
+                superstructure.applyWristevatorState(WristevatorState.ALGAE_TRAVEL),
+                superstructure.applyWristevatorState(WristevatorState.TRAVEL),
+                () -> superstructure.superState.getGrabberPossession() == GrabberPossession.ALGAE
+            );
         }
 
         /**
@@ -461,7 +462,7 @@ public class Superstructure {
         public Command stopAndRetract(){
             return Commands.parallel(
                 stopGrabber(),
-                new DeferredCommand(this::retractMechanisms, Set.of(superstructure.m_elevator, superstructure.m_wrist))
+                retractMechanisms()
             );
         }
 
