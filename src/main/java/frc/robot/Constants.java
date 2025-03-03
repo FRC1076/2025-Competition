@@ -547,7 +547,9 @@ public final class Constants {
         public static final boolean kLeftMotorInverted = true;
         public static final boolean kRightMotorInverted = false;
 
-        public static final double kCoralIntakeVoltage = 12.0;
+        public static final double kCoralEffectorVoltage = 12.0;
+        public static final double kAlgaeEffectorVoltage = 12.0;
+        public static final double kAlgaeHoldingVoltage = 2.0;
     }
 
     public static class WristConstants {

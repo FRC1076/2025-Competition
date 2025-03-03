@@ -8,6 +8,8 @@ import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import com.revrobotics.ColorSensorV3.GainFactor;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -17,7 +19,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
-import static frc.robot.Constants.GrabberConstants.kCoralIntakeVoltage;
+import static frc.robot.Constants.GrabberConstants.kCoralEffectorVoltage;
+import static frc.robot.Constants.GrabberConstants.kAlgaeHoldingVoltage;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
@@ -35,11 +38,7 @@ public class Superstructure extends SubsystemBase {
     private static final double algaeTravelRadians = Units.degreesToRadians(65);
     private static final double coralTravelRadians = Units.degreesToRadians(90);
 
-    private static class MutableSuperstate {
-        GrabberPossession possession;
-        GrabberState grabberState;
-        WristevatorState wristevatorState;
-    } //TODO: Update this dynamically
+    private GrabberPossession possession;
 
     private final Elevator m_elevator;
     private final Wrist m_wrist;
@@ -49,10 +48,12 @@ public class Superstructure extends SubsystemBase {
     private SuperState currentState;
     private SuperState cachedState; // Stores the previous state for tempApplyState commands
     private final BooleanSupplier m_transferBeamBreak;
-    private final MutableSuperstate state = new MutableSuperstate();
-    private final DoubleSupplier wristTravelAngleSupplier = () -> state.possession == GrabberPossession.ALGAE
+    private final DoubleSupplier wristTravelAngleSupplier = () -> possession == GrabberPossession.ALGAE
         ? algaeTravelRadians
         : coralTravelRadians;
+    private final DoubleSupplier grabberTravelVoltSupplier = () -> possession == GrabberPossession.ALGAE
+        ? kAlgaeHoldingVoltage
+        : 0.0;
     
     public final SuperstructureCommandFactory commandBuilder = new SuperstructureCommandFactory();
 
@@ -104,6 +105,7 @@ public class Superstructure extends SubsystemBase {
     private Command applyWristevatorStateSafe(double elevatorHeightMeters, double wristAngleRadians) {
         
         return Commands.sequence(
+            applyGrabberVolts(grabberTravelVoltSupplier.getAsDouble()),
             applyWristAngle(wristTravelAngleSupplier.getAsDouble()),
             applyElevatorHeight(elevatorHeightMeters),
             applyWristAngle(wristAngleRadians)
@@ -115,6 +117,9 @@ public class Superstructure extends SubsystemBase {
         return Commands.runOnce(() -> m_grabber.runVoltsDifferential(leftVoltsDifferential, rightVoltsDifferential));
     }
 
+    private Command applyGrabberVolts(double volts) {
+        return Commands.runOnce(() -> m_grabber.runVolts(volts));
+    }
 
     private Command applyFunnelVolts(double funnelVolts) {
         return Commands.runOnce(() -> m_funnel.setVoltage(funnelVolts));
@@ -326,7 +331,7 @@ public class Superstructure extends SubsystemBase {
                 applyState(SuperState.CORAL_INTAKE).until(getSuperstructure()::atGoal),
                 Commands.waitUntil(m_transferBeamBreak), 
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),//Makes sure the coral has fully passed the transfer beambreak before activating the Bang-Bang controller
-                applyGrabberRotationsBangBang(kCoralIntakeVoltage,0.5), // TODO: Tune these constants
+                applyGrabberRotationsBangBang(kCoralEffectorVoltage,0.5), // TODO: Tune these constants
                 applyState(SuperState.CORAL_TRAVEL) // Moves wristivator into the travel position
             );
         }
