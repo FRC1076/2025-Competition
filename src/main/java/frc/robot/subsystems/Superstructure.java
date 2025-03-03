@@ -437,7 +437,7 @@ public class Superstructure {
                 grabberActionSelectCommand,
                 Commands.runOnce(() -> {safeToMoveElevator = false;}),
                 Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(
-                        algaePossessionMap.get(superstructure.getSuperState().getWristevatorState())
+                        algaePossessionMap.getOrDefault(superstructure.getSuperState().getWristevatorState(), false)
                             ? GrabberPossession.ALGAE
                             : GrabberPossession.EMPTY)
                 )
