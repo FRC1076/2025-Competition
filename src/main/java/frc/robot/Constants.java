@@ -127,7 +127,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static TeamColors kTeamColor = TeamColors.kTeamColorBlue;
-        public static AutonSides autonSide = AutonSides.kLeft;
+        public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -142,8 +142,8 @@ public final class Constants {
         
         // States describing whether the auton is on the left or right side of the alliance
         public enum AutonSides {
-            kLeft(false),
-            kRight(true);
+            Left(false),
+            Right(true);
 
             public final boolean isRightSide;
 

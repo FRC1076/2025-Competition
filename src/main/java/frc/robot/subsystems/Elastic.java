@@ -28,8 +28,8 @@ public class Elastic {
         */
         autonSideChooser = new SendableChooser<>();
         autonSideChooser.setDefaultOption(GameConstants.autonSide.name(), GameConstants.autonSide);
-        autonSideChooser.addOption(AutonSides.kLeft.name(), AutonSides.kLeft);
-        autonSideChooser.addOption(AutonSides.kRight.name(), AutonSides.kRight);
+        autonSideChooser.addOption(AutonSides.Left.name(), AutonSides.Left);
+        autonSideChooser.addOption(AutonSides.Right.name(), AutonSides.Right);
         SmartDashboard.putData(autonSideChooser);
 
         // Maps the Alliance enum that the Driver Station returns to string names
