@@ -308,7 +308,7 @@ public class RobotContainer {
    * joysticks}.
    */
     private void configureBindings() {
-        m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
+        // m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
 
         m_safeToFeedCoral.onChange(
             m_LEDs.update(
@@ -435,10 +435,11 @@ public class RobotContainer {
             m_driverController.rightBumper().and(
                 m_driverController.y()
             ).whileTrue(m_elevator.elevatorSysIdDynamic(SysIdRoutine.Direction.kReverse));
-            */
-
+            
+        */
+        /*
             //Quasistsic and Dynamic control scheme for Wrist Sysid
-            /*
+            
             m_driverController.rightBumper().and(
                 m_driverController.a()
             ).whileTrue(m_wrist.wristSysIdQuasistatic(SysIdRoutine.Direction.kForward));
@@ -453,7 +454,8 @@ public class RobotContainer {
         
             m_driverController.rightBumper().and(
                 m_driverController.y()
-            ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kReverse));*/
+            ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kReverse));
+        */
         //}
          
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();

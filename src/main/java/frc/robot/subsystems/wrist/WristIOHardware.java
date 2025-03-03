@@ -56,6 +56,7 @@ public class WristIOHardware implements WristIO {
 
         m_leadMotorConfig.absoluteEncoder
             .setSparkMaxDataPortConfig()
+            .inverted(true)
             .positionConversionFactor(WristConstants.kPositionConversionFactor)
             .velocityConversionFactor(WristConstants.kVelocityConversionFactor);
         

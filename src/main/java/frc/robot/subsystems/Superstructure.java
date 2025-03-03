@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.SuperstructureConstants.algaePossessionCurrentThreshold;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
@@ -28,6 +27,7 @@ import java.util.Set;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -112,10 +112,9 @@ public class Superstructure {
 
     //Super State
     private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
-    private final BooleanSupplier algaePossessionSupplier;
 
-    private boolean safeToFeedCoral = false;
-    private boolean safeToMoveElevator = false;
+    private Boolean safeToFeedCoral;
+    private Boolean safeToMoveElevator;
 
     private boolean elevatorClutch = false;
 
@@ -144,7 +143,9 @@ public class Superstructure {
         });
         CommandBuilder = new SuperstructureCommandFactory(this, indexBeamBreak, transferBeamBreak, grabberBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
-        algaePossessionSupplier = () -> m_grabber.getAppliedCurrent() > algaePossessionCurrentThreshold;
+
+        this.safeToFeedCoral = false;
+        this.safeToMoveElevator = false;
     }
 
     public MutableSuperState getSuperState() {
@@ -200,9 +201,6 @@ public class Superstructure {
      */
     private Command applyWristevatorState(WristevatorState position) {
 
-        safeToFeedCoral = false;
-        safeToMoveElevator = false;
-
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
             m_wrist.applyAngle(coralTravelAngle),
@@ -216,7 +214,11 @@ public class Superstructure {
         );
         
         return Commands.sequence(
-            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))),
+            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
+                .alongWith(Commands.runOnce(() -> {
+                    safeToFeedCoral = false;
+                    safeToMoveElevator = false;
+                }))),
             new ProxyCommand(wristPreMoveCommand),
             new ProxyCommand(Commands.deadline(
                 m_elevator.applyPosition(position.elevatorHeightMeters),
@@ -447,7 +449,10 @@ public class Superstructure {
          * Retract mechanisms to travel state
          */
         public Command retractMechanisms(){
-            return superstructure.applyWristevatorState(WristevatorState.TRAVEL);
+            return superstructure.applyWristevatorState(
+                this.superstructure.superState.getGrabberPossession() == GrabberPossession.ALGAE
+                    ? WristevatorState.ALGAE_TRAVEL
+                    : WristevatorState.TRAVEL);
         }
 
         /**
@@ -456,7 +461,7 @@ public class Superstructure {
         public Command stopAndRetract(){
             return Commands.parallel(
                 stopGrabber(),
-                retractMechanisms()
+                new DeferredCommand(this::retractMechanisms, Set.of(superstructure.m_elevator, superstructure.m_wrist))
             );
         }
 
@@ -605,7 +610,7 @@ public class Superstructure {
                 () -> superstructure.updatePossessionAndKg(
                     m_indexBeamBreak.getAsBoolean(),
                     m_transferBeamBreak.getAsBoolean(),
-                    algaePossessionSupplier.getAsBoolean()
+                    false
                 )
             );
         }
