@@ -95,7 +95,16 @@ public class GrabberSubsystem extends SubsystemBase{
                 : () -> inputs.motorPositionRadians <= setpoint,
             this
         );
-        
     }
-    
+
+    /**
+     * NOTE: ROTATIONS ARE RELATIVE, CONTROL IS BASED OFF THE LEFT MOTOR'S ENCODER
+     * @param volts
+     * @param rotations
+     * @return
+     *  a command that applies a certain number of rotations to the grabber via a simple Bang-Bang controller.
+     */
+    public Command applyRotationsBangBang(double volts, double rotations) {
+        return applyRadiansBangBang(volts, rotations * 2 * Math.PI);
+    }
 }

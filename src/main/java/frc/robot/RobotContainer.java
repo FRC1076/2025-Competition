@@ -263,6 +263,7 @@ public class RobotContainer {
             Commands.idle(m_index)
         ));
 
+        // Configure named commands for auton in PathPlanner
         //configureNamedCommands();
 
         // Configure miscellaneous bindings
@@ -339,15 +340,17 @@ public class RobotContainer {
 
     private void configureNamedCommands(){
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
-        /* 
+        
         NamedCommands.registerCommand("preL1", superstructureCommands.preL1());
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
         NamedCommands.registerCommand("preL3", superstructureCommands.preL3());
         NamedCommands.registerCommand("preL4", superstructureCommands.preL4());
+        NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
+        NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
-        NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());*/
+        NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
         
     }
 
@@ -520,12 +523,6 @@ public class RobotContainer {
 
         // Ground Algae Intake
         m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
-
-        // Does Grabber action, ie. outtake coral/algae depending 
-        // m_operatorController.rightTrigger().onTrue(superstructureCommands.doGrabberAction());
-
-        // Retract mechanisms and stop grabber
-        // m_operatorController.rightTrigger().whileFalse(superstructureCommands.stopAndRetract());
 
         m_operatorController.povRight().onTrue(
             superstructureCommands.holdAlgae()

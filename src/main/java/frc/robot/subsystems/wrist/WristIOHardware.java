@@ -102,7 +102,13 @@ public class WristIOHardware implements WristIO {
     public void updateInputs(WristIOInputs inputs) {
         inputs.appliedVolts = m_leadMotor.getAppliedOutput() * m_leadMotor.getBusVoltage();
         inputs.leadCurrentAmps = m_leadMotor.getOutputCurrent();
-        inputs.angleRadians = m_absoluteEncoder.getPosition();
+        /** These calculations are to get around the wraparound of the absolute encoder values
+         * 1. Subtract the zero offset to get within a range of 270 (-90) degrees to 90 degrees
+         * 2. Add 180 degrees
+         * 3. Modulo 360 to make the previously negative values, which were technically greater than 180 degrees, less than 180 degrees
+         * 4. Subtract 180 degrees to make values negative
+         */
+        inputs.angleRadians = ((m_absoluteEncoder.getPosition()  - WristConstants.kZeroOffsetRadians + Math.PI) % (2 * Math.PI) - Math.PI);
         inputs.velocityRadiansPerSecond = m_absoluteEncoder.getVelocity();
         // inputs.angleRadians = m_alternateEncoder.getPosition();
         // inputs.velocityRadiansPerSecond = m_alternateEncoder.getVelocity();

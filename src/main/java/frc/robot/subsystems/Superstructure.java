@@ -11,7 +11,6 @@ import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
-import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
@@ -25,13 +24,11 @@ import lib.extendedcommands.SelectWithFallbackCommand;
 import java.util.function.BooleanSupplier;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import edu.wpi.first.math.geometry.Rotation2d;
 
 import org.littletonrobotics.junction.AutoLog;
 import org.littletonrobotics.junction.Logger;
@@ -273,7 +270,7 @@ public class Superstructure {
         ));
         */
 
-
+        // Even older code
         /*
         return Commands.sequence(
             //m_elevator.applyPosition(position.elevatorHeightMeters),
@@ -288,7 +285,8 @@ public class Superstructure {
     }
 
     /**
-     * Applies a wristevator state directly without any premoves
+     * Applies a wristevator state directly without any premoves. Potentially dangerous if used when right up against the
+     * reef, because the grabber could hit the branches
      * @param position
      * @return
      */
@@ -513,19 +511,6 @@ public class Superstructure {
             return superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE);
         }
 
-        /*
-        /** 
-         * Transfers a coral from the funnel to the indexer 
-        public Command indexCoral() {
-            return Commands.sequence(
-                superstructure.applyIndexState(IndexState.TRANSFER),
-                Commands.waitUntil(m_transferBeamBreak),
-                superstructure.applyIndexState(IndexState.BACKWARDS),
-                Commands.run(() -> {})
-            );
-        }
-        */
-
         /** 
          * Transfers a coral from the indexer to the grabber, without checking for position 
          */
@@ -548,10 +533,9 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.applyIndexState(IndexState.TRANSFER)
                 ),
-                Commands.waitSeconds(0.33),
-                Commands.waitUntil(m_transferBeamBreak),
-                superstructure.m_grabber.applyRadiansBangBang(4, 4*Math.PI), // Adjust rotations
-                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),
+                Commands.waitUntil(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
+                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
+                superstructure.m_grabber.applyRotationsBangBang(4, 4), // Adjust rotations
                 Commands.parallel(
                     Commands.runOnce(() -> safeToMoveElevator = true),
                     superstructure.applyGrabberState(GrabberState.IDLE),
@@ -573,17 +557,11 @@ public class Superstructure {
          */
         public Command intakeCoral(){ // (BooleanSupplier safeSignal)
             return Commands.sequence(
-                /* 
-                superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                indexCoral(),
-                Commands.waitUntil(safeSignal),
-                */
                 superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     transferCoral()
                 )
-                //indexCoral()
             );
         }
 
