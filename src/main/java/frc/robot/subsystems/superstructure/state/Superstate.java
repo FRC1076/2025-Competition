@@ -19,12 +19,15 @@ public enum SuperState {
 
     PRE_GROUND_INTAKE(ElevatorHeight.ALGAE_INTAKE_GROUND,WristAngle.ALGAE_GROUND_INTAKE,GrabberState.IDLE,FunnelState.DEFAULT,PossessionState.EMPTY),
     GROUND_INTAKE(ElevatorHeight.ALGAE_INTAKE_GROUND,WristAngle.ALGAE_GROUND_INTAKE,GrabberState.ALGAE_INTAKE,FunnelState.DEFAULT,PossessionState.ALGAE),
+    POST_GROUND_INTAKE(ElevatorHeight.ALGAE_INTAKE_GROUND,WristAngle.ALGAE_GROUND_INTAKE,GrabberState.ALGAE_HOLD,FunnelState.DEFAULT,PossessionState.ALGAE),
 
     PRE_LOW_INTAKE(ElevatorHeight.ALGAE_INTAKE_LOW,WristAngle.ALGAE_INTAKE,GrabberState.IDLE,FunnelState.DEFAULT,PossessionState.EMPTY),
     LOW_INTAKE(ElevatorHeight.ALGAE_INTAKE_LOW,WristAngle.ALGAE_INTAKE,GrabberState.ALGAE_INTAKE,FunnelState.DEFAULT,PossessionState.ALGAE),
+    POST_LOW_INTAKE(ElevatorHeight.ALGAE_INTAKE_LOW,WristAngle.ALGAE_INTAKE,GrabberState.ALGAE_HOLD,FunnelState.DEFAULT,PossessionState.ALGAE),
 
     PRE_HIGH_INTAKE(ElevatorHeight.ALGAE_INTAKE_HIGH,WristAngle.ALGAE_INTAKE,GrabberState.IDLE,FunnelState.DEFAULT,PossessionState.EMPTY),
     HIGH_INTAKE(ElevatorHeight.ALGAE_INTAKE_HIGH,WristAngle.ALGAE_INTAKE,GrabberState.ALGAE_INTAKE,FunnelState.DEFAULT,PossessionState.ALGAE),
+    POST_HIGH_INTAKE(ElevatorHeight.ALGAE_INTAKE_HIGH,WristAngle.ALGAE_INTAKE,GrabberState.ALGAE_HOLD,FunnelState.DEFAULT,PossessionState.ALGAE),
 
     PRE_NET(ElevatorHeight.NET,WristAngle.NET,GrabberState.ALGAE_HOLD,FunnelState.DEFAULT,PossessionState.ALGAE),
     NET_SCORE(ElevatorHeight.NET,WristAngle.NET,GrabberState.ALGAE_OUTTAKE,FunnelState.DEFAULT,PossessionState.EMPTY),

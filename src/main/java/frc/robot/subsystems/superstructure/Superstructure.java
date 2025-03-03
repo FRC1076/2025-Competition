@@ -177,6 +177,10 @@ public class Superstructure extends SubsystemBase {
         cachedState = currentState;
     }
 
+    private void cacheState(SuperState state) {
+        cachedState = state;
+    }
+
     private SuperState getStateCache() {
         return cachedState;
     }
@@ -218,6 +222,7 @@ public class Superstructure extends SubsystemBase {
 
         private static final Set<SuperState> coralTraversalStates = new HashSet<>();
         private static final Set<Edge> coralTraversalEdges = new HashSet<>();
+        private static final Map<Edge,Edge> grabberActionSequenceMap = new HashMap<>();
 
         static {
             coralTraversalStates.add(SuperState.CORAL_TRAVEL);
@@ -241,6 +246,7 @@ public class Superstructure extends SubsystemBase {
         private final Set<Edge> forbiddenEdges = new HashSet<>();
         private final Map<SuperState,Supplier<Command>> scoringCommandSupplierMap = new HashMap<>();
         private final Map<SuperState,Supplier<Command>> algaeIntakeCommandSupplierMap = new HashMap<>();
+        private final Map<SuperState,Supplier<Command>> grabberActionCommandSupplierMap = new HashMap<>();
 
         private final SelectWithFallbackCommandFactory<SuperState> scoreCommandFactory;
         private final SelectWithFallbackCommandFactory<SuperState> algaeIntakeCommandFactory;
@@ -252,16 +258,22 @@ public class Superstructure extends SubsystemBase {
             // Initialize scoring edge commands
             for (Edge edge : scoringEdgeSet) {
                 buildEdgeCommand(edge);
-                scoringCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()));
+                grabberActionCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()));
             }
             // Initialize coral traversal edge commands
             for (Edge edge : coralTraversalEdges) {
                 buildEdgeCommand(edge);
             }
 
+            for (Edge edge : algaeIntakeEdges) {
+                buildEdgeCommand(edge);
+                grabberActionCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()))
+            }
+
             // Initialize algae intake edge commands
             for (Edge edge : algaeIntakeEdges) {
                 buildEdgeCommand(edge);
+                grabberActionCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()));
             }
 
             scoreCommandFactory = new SelectWithFallbackCommandFactory<>(scoringCommandSupplierMap,Commands::none,() -> currentState); //TODO: Should the selector be goalState or currentState?
@@ -349,6 +361,23 @@ public class Superstructure extends SubsystemBase {
         public Command applyState(SuperState newGoal){
             return Commands.runOnce(() -> setGoal(newGoal))
                 .andThen(Commands.idle(getSuperstructure()));
+        }
+
+        /**
+         * Transitions between two states, with a third intermediate state
+         * @param tempGoal
+         * @param endGoal
+         * @return
+         */
+        public Command applyTempEndState(SuperState tempGoal, SuperState endGoal) {
+            return Commands.startEnd(
+                () -> {
+                    cacheState(endGoal);
+                    setGoal(tempGoal);
+                },
+                () -> setGoal(cachedState),
+                getSuperstructure()
+            );
         }
 
         public Command applyTempState(SuperState tempGoal){
