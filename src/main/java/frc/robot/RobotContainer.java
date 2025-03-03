@@ -143,21 +143,8 @@ public class RobotContainer {
             m_funnel = new Funnel(new FunnelIOHardware());
             m_elastic = new Elastic();
             m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
-            for (PhotonConfig config : PhotonConfig.values()){
-                /*
-                var cam = new PhotonCamera(config.name);
-                m_vision.addCamera(new PhotonVisionSource(
-                    cam, 
-                    config.offset,
-                    config.multiTagPoseStrategy,
-                    config.singleTagPoseStrategy,
-                    () -> m_drive.getPose().getRotation(),
-                    fieldLayout,
-                    config.defaultSingleTagStdDevs, 
-                    config.defaultMultiTagStdDevs)
-                );
-                */
-            }
+            m_vision = new VisionSubsystem(m_drive::getPose)
+                .withMeasurementConsumer(m_drive::addVisionMeasurement);
         } else if (SystemConstants.currentMode == 1) {
            
             /* TODO: RE-IMPLEMENT SIM
@@ -208,14 +195,6 @@ public class RobotContainer {
         m_drive.setDefaultCommand(
             teleopDriveCommand
         );
-
-        m_wrist.setDefaultCommand(m_wrist.applyManualControl(
-            () -> -m_operatorController.getRightY()
-        ));
-
-        m_elevator.setDefaultCommand(m_elevator.applyManualControl(
-            () -> -m_operatorController.getLeftY()
-        ));
 
         configureNamedCommands();
 
