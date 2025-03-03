@@ -224,7 +224,7 @@ public class Superstructure extends SubsystemBase {
             scoringCommandMap.put(SuperState.PRE_L3,applyTempState(SuperState.SCORE_L3));
             scoringCommandMap.put(SuperState.PRE_L4,applyTempState(SuperState.SCORE_L4));
 
-            scoreCommand = new SelectWithFallbackCommand<>(scoringCommandMap,Commands.none(),() -> currentState);
+            scoreCommand = new SelectWithFallbackCommand<>(scoringCommandMap,Commands.none(),() -> currentState); //TODO: Should the selector be goalState or currentState?
 
         }
         
@@ -285,9 +285,14 @@ public class Superstructure extends SubsystemBase {
             return edgeCommandMap.getOrDefault(edge, buildEdgeCommand(edge));
         }
 
-        private void setGoal(SuperState goalState) {
+        private void setGoal(SuperState newGoal) {
 
-            var edge = new Edge(currentState,goalState);
+            // Checks if we are already moving towards the goal
+            if (newGoal == goalState) {
+                return;
+            }
+
+            var edge = new Edge(currentState,newGoal);
 
             // Checks if edge is forbidden
             if (forbiddenEdges.contains(edge)) {
@@ -300,16 +305,16 @@ public class Superstructure extends SubsystemBase {
             edgeCommand.schedule();
         }
 
-        public Command applyState(SuperState goalState){
-            return Commands.runOnce(() -> setGoal(goalState))
+        public Command applyState(SuperState newGoal){
+            return Commands.runOnce(() -> setGoal(newGoal))
                 .andThen(Commands.idle(getSuperstructure()));
         }
 
-        public Command applyTempState(SuperState tempGoalState){
+        public Command applyTempState(SuperState tempGoal){
             return Commands.startEnd(
                 () -> {
                     cacheCurrentState();
-                    setGoal(tempGoalState);
+                    setGoal(tempGoal);
                 },
                 () -> setGoal(cachedState),
                 getSuperstructure()
@@ -335,6 +340,7 @@ public class Superstructure extends SubsystemBase {
                 () -> {
                     edgeCommand.cancel();
                     updateCurrentState(SuperState.OVERRIDE);
+                    updateGoalState(null);
                 },
                 () -> {
                     m_elevator.setVoltage(elevatorVoltSupplier.getAsDouble());
