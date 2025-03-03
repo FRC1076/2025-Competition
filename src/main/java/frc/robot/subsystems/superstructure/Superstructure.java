@@ -1,9 +1,14 @@
+// Copyright (c) FRC 1076 PiHi Samurai
+// You may use, distribute, and modify this software under the terms of
+// the license found in the root directory of this project
+
 package frc.robot.subsystems.superstructure;
 
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -12,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
+import static frc.robot.Constants.GrabberConstants.kCoralIntakeVoltage;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
@@ -47,6 +53,8 @@ public class Superstructure extends SubsystemBase {
     private final DoubleSupplier wristTravelAngleSupplier = () -> state.possession == GrabberPossession.ALGAE
         ? algaeTravelRadians
         : coralTravelRadians;
+    
+    public final SuperstructureCommandFactory commandBuilder = new SuperstructureCommandFactory();
 
     public Superstructure(
         Elevator elevator,
@@ -68,6 +76,14 @@ public class Superstructure extends SubsystemBase {
         m_wrist.periodic();
         m_grabber.periodic();
         m_funnel.periodic();
+    }
+
+    public double getElevatorHeightMeters() {
+        return m_elevator.getPositionMeters();
+    }
+
+    public Rotation2d getWristAngle() {
+        return m_wrist.getAngle();
     }
 
     //NOTE: All of these commands are instant
@@ -153,7 +169,9 @@ public class Superstructure extends SubsystemBase {
     }
 
     public class SuperstructureCommandFactory {
- 
+        
+        // STATIC LOADING
+
         private static record Edge (
             SuperState start,
             SuperState end
@@ -183,11 +201,12 @@ public class Superstructure extends SubsystemBase {
         }
         
         
-        //private final Map<SuperState,Command> scoreCommandMap = new HashMap<>();
-        //private final Command scoreEdgeCommand; // An edge command that transfers from a pre-scoring state to a scoring state
-        //private final Command autoIntakeCommand; // An edge command that transfers from an arbitrary state to the coral intake state to the coral travel state
         private final Map<Edge,Command> edgeCommandMap = new HashMap<>();
         private final Set<Edge> forbiddenEdges = new HashSet<>();
+        private final Map<SuperState,Command> scoringCommandMap = new HashMap<>();
+        private final Command scoreCommand;
+        
+
         private Command edgeCommand;
 
         private SuperstructureCommandFactory() {
@@ -199,30 +218,42 @@ public class Superstructure extends SubsystemBase {
             for (Edge edge : coralTraversalEdges) {
                 edgeCommandMap.put(edge,buildEdgeCommand(edge));
             }
-            /* 
-            scoreCommandMap.put(SuperState.PRE_L1,buildEdgeCommand(SuperState.PRE_L1,SuperState.SCORE_L1));
-            scoreCommandMap.put(SuperState.PRE_L2,buildEdgeCommand(SuperState.PRE_L2,SuperState.SCORE_L2));
-            scoreCommandMap.put(SuperState.PRE_L3,buildEdgeCommand(SuperState.PRE_L3,SuperState.SCORE_L3));
-            scoreCommandMap.put(SuperState.PRE_L4,buildEdgeCommand(SuperState.PRE_L4,SuperState.SCORE_L4));
+            
+            scoringCommandMap.put(SuperState.PRE_L1,applyTempState(SuperState.SCORE_L1));
+            scoringCommandMap.put(SuperState.PRE_L2,applyTempState(SuperState.SCORE_L2));
+            scoringCommandMap.put(SuperState.PRE_L3,applyTempState(SuperState.SCORE_L3));
+            scoringCommandMap.put(SuperState.PRE_L4,applyTempState(SuperState.SCORE_L4));
 
-            scoreEdgeCommand = new SelectWithFallbackCommand<SuperState>(scoreCommandMap,requirementCommand(),() -> currentState);
+            scoreCommand = new SelectWithFallbackCommand<>(scoringCommandMap,Commands.none(),() -> currentState);
 
-            autoIntakeCommand = Commands.sequence(
-                applyState(SuperState.CORAL_INTAKE),
-                Commands.waitUntil(m_transferBeamBreak),
-                applyGrabberRotationsBangBang(8,2), //TODO: FIX THESE CONSTANTS
-                buildEdgeCommand(SuperState.CORAL_INTAKE,SuperState.CORAL_TRAVEL)
-            );
-            */    
         }
         
         private Command buildEdgeCommand(Edge edge) {
-            if (edge.start().equals(edge.end)) {
+            
+            if (edge.start() == edge.end()) {
                 return Commands.none();
+            }
+
+            if (edge.start() == SuperState.OVERRIDE) {
+                return Commands.sequence(
+                    Commands.runOnce(() -> updateGoalState(edge.end())),
+                    applyWristevatorStateSafe(
+                        edge.end().height.meters,
+                        edge.end().angle.radians
+                    ),
+                    Commands.parallel(
+                        Commands.runOnce(() -> m_funnel.setVoltage(edge.end().funnelState.voltage)),
+                        Commands.runOnce(() -> m_grabber.runVoltsDifferential(
+                            edge.end().grabberState.leftVolts,
+                            edge.end().grabberState.rightVolts
+                        )),
+                        Commands.runOnce(() -> updateCurrentState(edge.end()))
+                    )
+                );
             }
             Command wristevatorCommand;
             // determines wristevator command
-            if (edge.start().height != edge.end.height) {
+            if (edge.start().height != edge.end().height) {
                 wristevatorCommand = applyWristevatorStateSafe(
                     edge.end().height.meters,
                     edge.end().angle.radians
@@ -290,19 +321,42 @@ public class Superstructure extends SubsystemBase {
                 applyState(SuperState.CORAL_INTAKE).until(getSuperstructure()::atGoal),
                 Commands.waitUntil(m_transferBeamBreak), 
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),//Makes sure the coral has fully passed the transfer beambreak before activating the Bang-Bang controller
-                applyGrabberRotationsBangBang(8,0.5), // TODO: Tune these constants
+                applyGrabberRotationsBangBang(kCoralIntakeVoltage,0.5), // TODO: Tune these constants
                 applyState(SuperState.CORAL_TRAVEL) // Moves wristivator into the travel position
             );
         }
 
+        public Command score() {
+            return scoreCommand.asProxy();
+        }
+
         public Command manualWristevatorControl(DoubleSupplier elevatorVoltSupplier, DoubleSupplier wristVoltSupplier) {
             return Commands.startRun(
-                () -> edgeCommand.cancel(),
+                () -> {
+                    edgeCommand.cancel();
+                    updateCurrentState(SuperState.OVERRIDE);
+                },
                 () -> {
                     m_elevator.setVoltage(elevatorVoltSupplier.getAsDouble());
                     m_wrist.setVoltage(wristVoltSupplier.getAsDouble());
                 }
             );
+        }
+
+        public Command preL1() {
+            return applyState(SuperState.PRE_L1);
+        }
+
+        public Command preL2() {
+            return applyState(SuperState.PRE_L2);
+        }
+
+        public Command preL3() {
+            return applyState(SuperState.PRE_L3);
+        }
+
+        public Command preL4() {
+            return applyState(SuperState.PRE_L4);
         }
 
     }

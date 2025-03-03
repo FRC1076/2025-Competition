@@ -546,6 +546,8 @@ public final class Constants {
 
         public static final boolean kLeftMotorInverted = true;
         public static final boolean kRightMotorInverted = false;
+
+        public static final double kCoralIntakeVoltage = 12.0;
     }
 
     public static class WristConstants {
@@ -605,15 +607,12 @@ public final class Constants {
 
     }
 
-    public static class IndexConstants {
-        public static final int kLeadMotorPort = 51;
-        // public static final int kFollowMotorPort = 52;
+    public static class FunnelConstants {
+        public static final int kMotorPort = 51;
 
         public static final double kCurrentLimit = 20.0;
-        // public static final double kIndexVoltage = 12.0;
 
-        public static final boolean kLeadMotorInverted = false;
-        public static final boolean kFollowMotorInverted = true;
+        public static final boolean kMotorInverted = false;
     }
 
     public static class BeamBreakConstants{

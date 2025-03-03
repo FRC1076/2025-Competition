@@ -2,6 +2,8 @@ package frc.robot.subsystems.superstructure.state;
 
 public enum SuperState {
 
+    OVERRIDE(null,null,null,null), // Operator override
+
     PRE_L1(ElevatorHeight.L1,WristAngle.L1_SCORE,GrabberState.IDLE,FunnelState.DEFAULT),
     SCORE_L1(ElevatorHeight.L1,WristAngle.L1_SCORE,GrabberState.L1_CORAL_OUTTAKE,FunnelState.DEFAULT),
 

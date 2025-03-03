@@ -10,6 +10,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Mechanism2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismRoot2d;
 import edu.wpi.first.wpilibj.smartdashboard.MechanismLigament2d;
 import edu.wpi.first.wpilibj.util.Color8Bit;
+import frc.robot.subsystems.superstructure.Superstructure;
 import lib.extendedcommands.CommandUtils;
 
 /*
@@ -55,8 +56,8 @@ public class SuperstructureVisualizer {
     }
 
     private void updateVisualization() {
-        elevator.setLength(superstructure.getElevator().getPositionMeters() + 0.01); //can't set to min value or else advantage scope visualization disappears
-        wrist.setAngle(superstructure.getWrist().getAngle());
+        elevator.setLength(superstructure.getElevatorHeightMeters() + 0.01); //can't set to min value or else advantage scope visualization disappears
+        wrist.setAngle(superstructure.getWristAngle());
     }
 
 }

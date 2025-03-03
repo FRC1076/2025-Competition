@@ -20,11 +20,14 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
+import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 
@@ -52,13 +55,12 @@ public class DriveSubsystem extends SubsystemBase {
     //private final ModuleIOInputsAutoLogged rearRightInputs = new ModuleIOInputsAutoLogged();
     private Boolean hasSetAlliance = false; // Wait until the driverstation had an alliance before setting it
     public final DriveCommandFactory CommandBuilder;
-    private final VisionLocalizationSystem vision;
+    
 
-    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision) {
+    public DriveSubsystem(DriveIO io) {
         this.io = io;
-        this.vision = vision;
-        vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
         
+
         try {
             AutoBuilder.configure(
                 this::getPose,
@@ -87,7 +89,6 @@ public class DriveSubsystem extends SubsystemBase {
     public void periodic(){
         // updateModuleInputs and processInputs are only used for logging
         io.periodic(); //currently just for calling sim
-        vision.update();
         io.updateInputs(driveInputs);
         // io.updateModuleInputs(frontLeftInputs,0);
         // io.updateModuleInputs(frontRightInputs,1);
@@ -139,6 +140,10 @@ public class DriveSubsystem extends SubsystemBase {
     /** Resets the pose of the robot */
     public void resetPose(Pose2d pose) {
         io.resetPose(pose);
+    }
+
+    public void addVisionMeasurement(Pose2d poseEstimate,Double timestampSeconds,Matrix<N3,N1> stddevs) {
+        this.io.addVisionMeasurement(poseEstimate,timestampSeconds,stddevs);
     }
 
     /** Makes the current heading of the robot the default zero degree heading
