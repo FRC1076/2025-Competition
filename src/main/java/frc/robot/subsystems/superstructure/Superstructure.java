@@ -430,8 +430,31 @@ public class Superstructure extends SubsystemBase {
             return applyState(SuperState.PRE_NET); // TODO: WRITE LOGIC FOR NET SCORING
         }
 
-        public Command algaeIntakeCommand() {
-            return algaeIntakeCommandFactory.buildCommand();
+        public Command algaeGroundIntake() {
+            return Commands.sequence(
+                applyState(SuperState.PRE_GROUND_INTAKE).until(getSuperstructure()::atGoal),
+                applyState(SuperState.GROUND_INTAKE)
+            ).finallyDo(
+                () -> setGoal(SuperState.ALGAE_TRAVEL)
+            );
+        }
+
+        public Command algaeLowIntake() {
+            return Commands.sequence(
+                applyState(SuperState.PRE_LOW_INTAKE).until(getSuperstructure()::atGoal),
+                applyState(SuperState.LOW_INTAKE)
+            ).finallyDo(
+                () -> setGoal(SuperState.ALGAE_TRAVEL)
+            );
+        }
+
+        public Command algaeHighIntake() {
+            return Commands.sequence(
+                applyState(SuperState.PRE_HIGH_INTAKE).until(getSuperstructure()::atGoal),
+                applyState(SuperState.HIGH_INTAKE)
+            ).finallyDo(
+                () -> setGoal(SuperState.ALGAE_TRAVEL)
+            );
         }
 
     }

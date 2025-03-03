@@ -14,7 +14,7 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
-public class GrabberIOHardware implements GrabberIO{
+public class GrabberIOHardware implements GrabberIO {
     private final SparkMax m_leftMotor;
     private final SparkMax m_rightMotor;
 

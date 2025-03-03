@@ -547,6 +547,9 @@ public final class Constants {
         public static final boolean kLeftMotorInverted = true;
         public static final boolean kRightMotorInverted = false;
 
+        public static final double algaeHoldStallCurrent = 10;
+        public static final double algaeHoldDebounceTimeSeconds = 0.2; // TODO: USE INFINITE IMPULSE FILTER WITH RESET + DEBOUNCER TO FILTER CURRENT INPUTS
+
         public static final double kCoralEffectorVoltage = 12.0;
         public static final double kAlgaeEffectorVoltage = 12.0;
         public static final double kAlgaeHoldingVoltage = 2.0;

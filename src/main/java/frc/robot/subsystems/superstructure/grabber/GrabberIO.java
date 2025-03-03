@@ -35,4 +35,6 @@ public interface GrabberIO {
      * @param rightMotorVolts voltage to run the right motor at
      */
     public abstract void runVoltsDifferential(double leftMotorVolts, double rightMotorVolts);
+
+    public abstract boolean algaePossession();
 }
