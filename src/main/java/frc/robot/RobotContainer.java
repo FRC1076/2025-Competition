@@ -30,6 +30,7 @@ import frc.robot.subsystems.wrist.WristSubsystem;
 import lib.control.DynamicSlewRateLimiter;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
+import lib.vision.LoggedPhotonVisionLocalizer;
 import lib.vision.PhotonVisionLocalizer;
 import lib.vision.VisionLocalizationSystem;
 import frc.robot.subsystems.SuperstructureVisualizer;
@@ -167,7 +168,7 @@ public class RobotContainer {
             for (PhotonConfig config : PhotonConfig.values()){
                 
                 var cam = new PhotonCamera(config.name);
-                m_vision.addCamera(new PhotonVisionLocalizer(
+                m_vision.addCamera(new LoggedPhotonVisionLocalizer(
                     cam, 
                     config.offset,
                     config.multiTagPoseStrategy,
