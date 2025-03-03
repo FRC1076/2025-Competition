@@ -7,6 +7,7 @@ package frc.robot.subsystems.superstructure;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.Predicate;
 
 import com.revrobotics.ColorSensorV3.GainFactor;
 
@@ -25,10 +26,13 @@ import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
 import frc.robot.subsystems.superstructure.state.SuperState;
+import frc.robot.subsystems.superstructure.state.SuperState.PossessionState;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import java.util.Map;
 import lib.extendedcommands.SelectWithFallbackCommand;
+
+import java.nio.file.attribute.PosixFileAttributeView;
 import java.util.HashMap;
 import java.util.HashSet;
 import lib.math.Combinatorics;
@@ -36,9 +40,12 @@ import lib.math.Combinatorics;
 public class Superstructure extends SubsystemBase {
     
     private static final double algaeTravelRadians = Units.degreesToRadians(65);
-    private static final double coralTravelRadians = Units.degreesToRadians(90);
+    private static final double coralTravelRadians = Units.degreesToRadians(-80);
+    private static final double emptyTravelRadians = Units.degreesToRadians(80);
 
-    private GrabberPossession possession;
+    private static final double coralTravelHeight = 0.25;
+
+    private PossessionState possession = PossessionState.EMPTY; //TODO: UPDATE DYNAMICALLY
 
     private final Elevator m_elevator;
     private final Wrist m_wrist;
@@ -48,12 +55,15 @@ public class Superstructure extends SubsystemBase {
     private SuperState currentState;
     private SuperState cachedState; // Stores the previous state for tempApplyState commands
     private final BooleanSupplier m_transferBeamBreak;
-    private final DoubleSupplier wristTravelAngleSupplier = () -> possession == GrabberPossession.ALGAE
+    private final DoubleSupplier wristTravelAngleSupplier = () -> possession == PossessionState.ALGAE
         ? algaeTravelRadians
         : coralTravelRadians;
-    private final DoubleSupplier grabberTravelVoltSupplier = () -> possession == GrabberPossession.ALGAE
+    private final DoubleSupplier grabberTravelVoltSupplier = () -> possession == PossessionState.ALGAE
         ? kAlgaeHoldingVoltage
         : 0.0;
+    
+    private final Map<PossessionState,Command> premoveCommandMap = new HashMap<>();
+    private final Command premoveCommand;
     
     public final SuperstructureCommandFactory commandBuilder = new SuperstructureCommandFactory();
 
@@ -69,6 +79,14 @@ public class Superstructure extends SubsystemBase {
         m_grabber = grabber;
         m_funnel = funnel;
         m_transferBeamBreak = grabberBeamBreak;
+
+        premoveCommandMap.put(PossessionState.EMPTY,applyWristAngle(emptyTravelRadians));
+        premoveCommandMap.put(PossessionState.CORAL,Commands.parallel(
+            applyElevatorHeight(coralTravelHeight),
+            applyWristAngle(coralTravelRadians)
+        ));
+        premoveCommandMap.put(PossessionState.ALGAE, applyWristAngle(algaeTravelRadians));
+        premoveCommand = Commands.select(premoveCommandMap, () -> possession);
     }
 
     @Override
@@ -103,10 +121,10 @@ public class Superstructure extends SubsystemBase {
     }
 
     private Command applyWristevatorStateSafe(double elevatorHeightMeters, double wristAngleRadians) {
-        
+
         return Commands.sequence(
             applyGrabberVolts(grabberTravelVoltSupplier.getAsDouble()),
-            applyWristAngle(wristTravelAngleSupplier.getAsDouble()),
+            premoveCommand.asProxy(),
             applyElevatorHeight(elevatorHeightMeters),
             applyWristAngle(wristAngleRadians)
         );
@@ -182,13 +200,15 @@ public class Superstructure extends SubsystemBase {
             SuperState end
         ) {}
 
-        private static final Map<SuperState,Edge> coralScoringEdgeMap = new HashMap<>();
+        private static final Set<Edge> scoringEdgeSet = new HashSet<>();
 
         static {
-            coralScoringEdgeMap.put(SuperState.PRE_L1,new Edge(SuperState.PRE_L1, SuperState.SCORE_L1));
-            coralScoringEdgeMap.put(SuperState.PRE_L2,new Edge(SuperState.PRE_L2, SuperState.SCORE_L2));
-            coralScoringEdgeMap.put(SuperState.PRE_L3,new Edge(SuperState.PRE_L3, SuperState.SCORE_L3));
-            coralScoringEdgeMap.put(SuperState.PRE_L4,new Edge(SuperState.PRE_L4, SuperState.SCORE_L4));
+            scoringEdgeSet.add(new Edge(SuperState.PRE_L1, SuperState.SCORE_L1));
+            scoringEdgeSet.add(new Edge(SuperState.PRE_L2, SuperState.SCORE_L2));
+            scoringEdgeSet.add(new Edge(SuperState.PRE_L3, SuperState.SCORE_L3));
+            scoringEdgeSet.add(new Edge(SuperState.PRE_L4, SuperState.SCORE_L4));
+            scoringEdgeSet.add(new Edge(SuperState.PRE_NET, SuperState.NET_SCORE));
+            scoringEdgeSet.add(new Edge(SuperState.PRE_PROCESSOR, SuperState.PROCESSOR_SCORE));
         }
 
         private static final Set<SuperState> coralTraversalStates = new HashSet<>();
@@ -216,18 +236,14 @@ public class Superstructure extends SubsystemBase {
 
         private SuperstructureCommandFactory() {
             // Initialize coral scoring edge commands
-            for (Edge edge : coralScoringEdgeMap.values()) {
+            for (Edge edge : scoringEdgeSet) {
                 edgeCommandMap.put(edge,buildEdgeCommand(edge));
+                scoringCommandMap.put(edge.start(),applyTempState(edge.end()));
             }
             // Initialize coral traversal edge commands
             for (Edge edge : coralTraversalEdges) {
                 edgeCommandMap.put(edge,buildEdgeCommand(edge));
             }
-            
-            scoringCommandMap.put(SuperState.PRE_L1,applyTempState(SuperState.SCORE_L1));
-            scoringCommandMap.put(SuperState.PRE_L2,applyTempState(SuperState.SCORE_L2));
-            scoringCommandMap.put(SuperState.PRE_L3,applyTempState(SuperState.SCORE_L3));
-            scoringCommandMap.put(SuperState.PRE_L4,applyTempState(SuperState.SCORE_L4));
 
             scoreCommand = new SelectWithFallbackCommand<>(scoringCommandMap,Commands.none(),() -> currentState); //TODO: Should the selector be goalState or currentState?
 

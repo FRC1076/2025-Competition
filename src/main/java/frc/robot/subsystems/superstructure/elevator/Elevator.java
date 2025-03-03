@@ -5,7 +5,7 @@
 package frc.robot.subsystems.superstructure.elevator;
 
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.subsystems.elevator.ElevatorIOInputsAutoLogged;
+import frc.robot.subsystems.superstructure.elevator.ElevatorIOInputsAutoLogged;
 import lib.control.DynamicElevatorFeedforward;
 
 import java.util.Optional;

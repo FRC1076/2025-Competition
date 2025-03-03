@@ -5,7 +5,7 @@
 package frc.robot.subsystems.superstructure.wrist;
 
 import frc.robot.Constants.WristConstants;
-import frc.robot.subsystems.wrist.WristIOInputsAutoLogged;
+import frc.robot.subsystems.superstructure.wrist.WristIOInputsAutoLogged;
 import lib.control.DynamicArmFeedforward;
 
 import java.util.Optional;
