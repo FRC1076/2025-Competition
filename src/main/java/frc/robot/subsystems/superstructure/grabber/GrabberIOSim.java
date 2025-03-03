@@ -33,4 +33,9 @@ public class GrabberIOSim implements GrabberIO {
         inputs.rightMotorAppliedVoltage = rightAppliedVolts;
     }
     
+    @Override
+    public boolean algaePossession() {
+        // TODO Auto-generated method stub, IMPLEMENT WITH DEBOUNCER AND LINEAR FILTER
+        return false;
+    }
 }

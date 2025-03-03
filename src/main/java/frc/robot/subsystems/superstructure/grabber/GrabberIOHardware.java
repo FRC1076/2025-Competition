@@ -72,4 +72,10 @@ public class GrabberIOHardware implements GrabberIO {
 
         inputs.motorPositionRadians = m_encoder.getPosition(); //This is used for bang-bang control
     }
+
+    @Override
+    public boolean algaePossession() {
+        // TODO Auto-generated method stub, IMPLEMENT WITH DEBOUNCER AND LINEAR FILTER
+        return false;
+    }
 }

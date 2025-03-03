@@ -383,15 +383,13 @@ public class RobotContainer {
             .and(m_operatorController.leftBumper())
             .onTrue(superstructureCommands.preNet());
 
-        // Coral Intake and transfer into Grabber
-        m_operatorController.leftTrigger()
-            .and(m_operatorController.leftBumper().negate())
-            .whileTrue(superstructureCommands.intakeCoral())
-            .whileFalse(superstructureCommands.stopIntake());
-
         // Ground Algae Intake
         m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
         */
+
+        m_operatorController.leftTrigger()
+            .and(m_operatorController.leftBumper().negate())
+            .whileTrue(superstructureCommands.autoCoralIntake());
 
         // Does Grabber action, ie. outtake coral/algae depending 
         m_operatorController.rightTrigger().whileTrue(superstructureCommands.score());
