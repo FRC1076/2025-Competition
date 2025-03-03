@@ -569,8 +569,9 @@ public final class Constants {
 
         // Source: https://docs.revrobotics.com/brushless/spark-max/encoders/alternate-encoder
         public static final int kCountsPerRevolution = 8192;
-        public static final double kPositionConversionFactor = (1/117.1875) * 2 * Math.PI; // rotations to radians
-        public static final double kVelocityConversionFactor = (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
+        public static final double kPositionConversionFactor = 2 * Math.PI; // rotations to radians
+        public static final double kVelocityConversionFactor = (2 * Math.PI) / 60.0; // rpm to radians/second
+        public static final double kZeroOffsetRadians = -0.6595923267948967;
 
         public static final class Control {
             // PID constants

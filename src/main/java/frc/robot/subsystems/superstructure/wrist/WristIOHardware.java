@@ -47,11 +47,8 @@ public class WristIOHardware implements WristIO {
             .setSparkMaxDataPortConfig()
             //.countsPerRevolution(WristConstants.kCountsPerRevolution)
             .positionConversionFactor(WristConstants.kPositionConversionFactor)
-            .velocityConversionFactor(WristConstants.kVelocityConversionFactor);
-        
-        m_leadMotorConfig.encoder
-            .positionConversionFactor(WristConstants.kPositionConversionFactor)
-            .velocityConversionFactor(WristConstants.kVelocityConversionFactor);
+            .velocityConversionFactor(WristConstants.kVelocityConversionFactor)
+            .inverted(true);
 
         // configure motors
         m_leadMotor.configure(m_leadMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -74,7 +71,7 @@ public class WristIOHardware implements WristIO {
     public void updateInputs(WristIOInputs inputs) {
         inputs.appliedVolts = m_leadMotor.getAppliedOutput() * m_leadMotor.getBusVoltage();
         inputs.leadCurrentAmps = m_leadMotor.getOutputCurrent();
-        inputs.angleRadians = m_absoluteEncoder.getPosition();
+        inputs.angleRadians = ((m_absoluteEncoder.getPosition() - WristConstants.kZeroOffsetRadians + Math.PI) % (2 * Math.PI) - Math.PI);
         inputs.velocityRadiansPerSecond = m_absoluteEncoder.getVelocity();
     }
 
