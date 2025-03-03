@@ -2,9 +2,11 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package lib.utils;
+package lib.math;
 
-public final class MathHelpers {
+import java.math.BigInteger;
+
+public final class MathUtils {
 
     /**
      * Clamps a value between a minimum and maximum value.
@@ -19,5 +21,23 @@ public final class MathHelpers {
         }
 
         return Math.max(min, Math.min(max, value));
+        
+    }
+
+    /** returns the factorial of n */
+    public static long Factorial(long n) {
+        return n == 0 ? 1 : n * Factorial(n - 1);
+    }
+
+    public static long Factorial(int n) {
+        return Factorial((long) n);
+    }
+
+    public static BigInteger BigFactorial(BigInteger n) {
+        if (n.equals(BigInteger.valueOf(0))) {
+            return BigInteger.valueOf(1);
+        } else {
+            return n.multiply(BigFactorial(n.subtract(BigInteger.valueOf(1))));
+        }
     }
 }

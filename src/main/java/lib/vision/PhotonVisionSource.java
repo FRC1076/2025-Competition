@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.wpilibj.Timer;
 
 public class PhotonVisionSource implements CameraSource {
@@ -29,6 +30,9 @@ public class PhotonVisionSource implements CameraSource {
     private final Matrix<N3,N1> defaultSingleStdDevs;
     private final Matrix<N3,N1> defaultMultiStdDevs;
     private final Supplier<Rotation2d> headingSupplier;
+    private final Optional<Matrix<N3,N3>> cameraMatrix;
+    private final Optional<Matrix<N8,N1>> distCoeffs;
+    private final Optional<PhotonPoseEstimator.ConstrainedSolvepnpParams> cpnpParams;
 
     public PhotonVisionSource(
         PhotonCamera camera, 
@@ -38,14 +42,21 @@ public class PhotonVisionSource implements CameraSource {
         AprilTagFieldLayout fieldLayout,
         Matrix<N3,N1> defaultSingleStdDevs,
         Matrix<N3,N1> defaultMultiStdDevs,
-        Supplier<Rotation2d> headingSupplier
+        Supplier<Rotation2d> headingSupplier,
+        Matrix<N3,N3> cameraMatrix,
+        Matrix<N8,N1> distCoeffs,
+        PhotonPoseEstimator.ConstrainedSolvepnpParams cpnpParams
     ) {
+        
         this.camera = camera;
         this.poseEstimator = new PhotonPoseEstimator(fieldLayout, primaryStrategy, offset);
         poseEstimator.setMultiTagFallbackStrategy(multiTagFallbackStrategy);
         this.defaultSingleStdDevs = defaultSingleStdDevs;
         this.defaultMultiStdDevs = defaultMultiStdDevs;
         this.headingSupplier = headingSupplier;
+        this.cameraMatrix = Optional.of(cameraMatrix);
+        this.distCoeffs = Optional.of(distCoeffs);
+        this.cpnpParams = Optional.of(cpnpParams);
     }
 
     /**
@@ -136,7 +147,12 @@ public class PhotonVisionSource implements CameraSource {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
         for (var res : results) {
-            visionEst = poseEstimator.update(res);
+            visionEst = poseEstimator.update(
+                res,
+                cameraMatrix,
+                distCoeffs,
+                cpnpParams
+            );
         }
 
         return visionEst.map(

@@ -11,7 +11,7 @@ import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.utils.Localization;
 import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
 
-import lib.utils.GeometryUtils;
+import lib.math.GeometryUtils;
 import lib.vision.VisionLocalizationSystem;
 
 import java.util.HashMap;

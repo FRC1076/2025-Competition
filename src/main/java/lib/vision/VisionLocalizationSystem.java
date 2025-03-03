@@ -5,10 +5,8 @@
 package lib.vision;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -83,7 +81,7 @@ public class VisionLocalizationSystem {
     }
 
     /**
-     * Fetches pose estimates from sources and sends them to all consumers. This function should be called exactly once every main function loop
+     * Fetches pose estimates from sources and sends them to all consumers. This function should be called exactly once every main loop
      */
     public void update() {
         for (var source : sourceCallbacks.values()) {

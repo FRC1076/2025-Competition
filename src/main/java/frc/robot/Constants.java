@@ -10,12 +10,15 @@ import java.util.List;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.numbers.N4;
+import edu.wpi.first.math.numbers.N8;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -26,9 +29,11 @@ import edu.wpi.first.math.util.Units;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
 
+import org.photonvision.PhotonPoseEstimator.ConstrainedSolvepnpParams;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.ejml.simple.SimpleMatrix;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean+
@@ -44,28 +49,35 @@ public final class Constants {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
         public static class Photonvision {
 
+            public static final ConstrainedSolvepnpParams kCpnpParams = new ConstrainedSolvepnpParams(false, 1.0); //TODO: TUNE THIS!!!
+
             public static final String driverCamName = "DRIVER_CAM"; //PV name of the driver camera TODO: Add sim driver camera implementation with wireframe
 
             //TODO: Update all of these values
-            public static final Vector<N3> kDefaultSingleTagStdDevs = VecBuilder.fill(1, 1, 1);
-            public static final Vector<N3> kDefaultMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
+            public static final Vector<N3> kDefaultGlobalSingleTagStdDevs = VecBuilder.fill(1, 1, 1);
+            public static final Vector<N3> kDefaultGlobalMultiTagStdDevs = VecBuilder.fill(0.5, 0.5, 0.5);
 
+            //TODO: Add camera calibration data
             /** Contains configs for all photonvision localization cameras */
             public static enum PhotonConfig {
                 
-                ELEVATOR_LEFT_CAM(
-                    "ELEVATOR_LEFT_CAM", 
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
+                FRONT_LEFT_CAM(
+                    "FRONT_LEFT_CAM", 
+                    kDefaultGlobalSingleTagStdDevs,
+                    kDefaultGlobalMultiTagStdDevs,
+                    new double[]{1,1,1,1,1,1,1,1,1},
+                    new double[]{1,1,1,1,1,1,1,1},
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     15 - 7.163, 15 - 2.892, 19.162, // 2.892, 7.163, 19.162, 
                     11.385, 17.961, -40 //11.385, 17.961, 40
                 ),
-                ELEVATOR_RIGHT_CAM(
-                    "ELEVATOR_RIGHT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
+                FRONT_RIGHT_CAM(
+                    "FRONT_RIGHT_CAM",
+                    kDefaultGlobalSingleTagStdDevs,
+                    kDefaultGlobalMultiTagStdDevs,
+                    new double[]{1,1,1,1,1,1,1,1,1},
+                    new double[]{1,1,1,1,1,1,1,1},
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     15 - 7.163, -(15 - 2.892), 19.162, //2.982, -7.163, 19.162, 
@@ -73,16 +85,20 @@ public final class Constants {
                 ),
                 REAR_LEFT_CAM(
                     "REAR_LEFT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
+                    kDefaultGlobalSingleTagStdDevs,
+                    kDefaultGlobalMultiTagStdDevs,
+                    new double[]{1,1,1,1,1,1,1,1,1},
+                    new double[]{1,1,1,1,1,1,1,1},
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     0,0,0,
                     0,0,0
                 ),
                 REAR_RIGHT_CAM("REAR_RIGHT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
+                    kDefaultGlobalSingleTagStdDevs,
+                    kDefaultGlobalMultiTagStdDevs,
+                    new double[]{1,1,1,1,1,1,1,1,1},
+                    new double[]{1,1,1,1,1,1,1,1},
                     PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     0,0,0,
@@ -93,12 +109,16 @@ public final class Constants {
                 public final Transform3d offset;
                 public final Matrix<N3,N1> defaultSingleTagStdDevs;
                 public final Matrix<N3,N1> defaultMultiTagStdDevs;
+                public final Matrix<N3,N3> cameraMatrix;
+                public final Matrix<N8,N1> distCoeffs;
                 public final PoseStrategy multiTagPoseStrategy;
                 public final PoseStrategy singleTagPoseStrategy;
                 private PhotonConfig(
                     String name, 
                     Matrix<N3,N1> defaultSingleTagStdDevs,
                     Matrix<N3,N1> defaultMultiTagStdDevs,
+                    double[] cameraMatrixRowMajorData, //A 3x3 matrix stored as a linear array in row-major form
+                    double[] distCoeffsData, // A double array with 8 elements representing the 8-dimensional DistCoeffs vector
                     PoseStrategy multiTagPoseStrategy,
                     PoseStrategy singleTagPoseStrategy,
                     double xInch, double yInch, double zInch, 
@@ -119,6 +139,16 @@ public final class Constants {
                     this.singleTagPoseStrategy = singleTagPoseStrategy;
                     this.defaultMultiTagStdDevs = defaultMultiTagStdDevs;
                     this.defaultSingleTagStdDevs = defaultSingleTagStdDevs;
+                    this.cameraMatrix = new Matrix<>(
+                        N3.instance,
+                        N3.instance,
+                        cameraMatrixRowMajorData
+                    );
+                    this.distCoeffs = new Matrix<>(
+                        N8.instance,
+                        N1.instance,
+                        distCoeffsData
+                    );
                 }
             }
         }

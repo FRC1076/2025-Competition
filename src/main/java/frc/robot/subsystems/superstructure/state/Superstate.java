@@ -19,7 +19,6 @@ public enum SuperState {
     CORAL_TRAVEL(ElevatorHeight.TRAVEL,WristAngle.CORAL_TRAVEL,GrabberState.IDLE,FunnelState.DEFAULT),
     ALGAE_TRAVEL(ElevatorHeight.TRAVEL,WristAngle.ALGAE_TRAVEL,GrabberState.IDLE,FunnelState.DEFAULT);
 
-
     public final ElevatorHeight height;
     public final WristAngle angle;
     public final GrabberState grabberState;

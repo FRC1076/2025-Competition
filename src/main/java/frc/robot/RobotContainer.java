@@ -31,6 +31,7 @@ import frc.robot.subsystems.superstructure.wrist.WristSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.PhotonVisionLocalizer;
+import lib.vision.PhotonVisionSource;
 import lib.vision.VisionLocalizationSystem;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
@@ -154,7 +155,7 @@ public class RobotContainer {
             for (PhotonConfig config : PhotonConfig.values()){
                 /*
                 var cam = new PhotonCamera(config.name);
-                m_vision.addCamera(new PhotonVisionLocalizer(
+                m_vision.addCamera(new PhotonVisionSource(
                     cam, 
                     config.offset,
                     config.multiTagPoseStrategy,
@@ -163,7 +164,8 @@ public class RobotContainer {
                     fieldLayout,
                     config.defaultSingleTagStdDevs, 
                     config.defaultMultiTagStdDevs)
-                );*/
+                );
+                */
             }
         } else if (SystemConstants.currentMode == 1) {
            

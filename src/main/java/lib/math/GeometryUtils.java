@@ -2,7 +2,7 @@
 // You may use, distribute, and modify this software under the terms of
 // the license found in the root directory of this project
 
-package lib.utils;
+package lib.math;
 
 import org.apache.commons.lang3.NotImplementedException;
 

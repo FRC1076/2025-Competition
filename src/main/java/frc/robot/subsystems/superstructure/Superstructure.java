@@ -1,18 +1,13 @@
 package frc.robot.subsystems.superstructure;
 
-import java.util.OptionalDouble;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-import org.ejml.dense.row.decompose.hessenberg.TridiagonalDecompositionHouseholder_CDRM;
-import org.ejml.dense.row.decomposition.hessenberg.TridiagonalDecompositionHouseholder_DDRM;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
@@ -20,15 +15,14 @@ import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
-import frc.robot.subsystems.superstructure.state.ElevatorHeight;
 import frc.robot.subsystems.superstructure.state.SuperState;
-import frc.robot.subsystems.superstructure.state.WristAngle;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
-import frc.robot.utils.VirtualSubsystem;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import java.util.Map;
 import lib.extendedcommands.SelectWithFallbackCommand;
 import java.util.HashMap;
+import java.util.HashSet;
+import lib.math.Combinatorics;
 
 public class Superstructure extends SubsystemBase {
     
@@ -45,7 +39,9 @@ public class Superstructure extends SubsystemBase {
     private final Wrist m_wrist;
     private final Grabber m_grabber;
     private final Funnel m_funnel;
+    private SuperState goalState;
     private SuperState currentState;
+    private SuperState cachedState; // Stores the previous state for tempApplyState commands
     private final BooleanSupplier m_transferBeamBreak;
     private final MutableSuperstate state = new MutableSuperstate();
     private final DoubleSupplier wristTravelAngleSupplier = () -> state.possession == GrabberPossession.ALGAE
@@ -85,14 +81,8 @@ public class Superstructure extends SubsystemBase {
     
     private Command applyWristAngle(double wristAngleRadians) {
         return Commands.runOnce(() -> m_wrist.setAngleRadians(wristAngleRadians)).andThen(
-            Commands.idle().until(m_wrist::atPositionSetpoint)
-            
+            Commands.idle().until(m_wrist::atPositionSetpoint) 
         );
-    }
-
-    //Only serves to add this as a requirement to command compositions
-    private Command requirementCommand() {
-        return this.runOnce(() -> {});
     }
 
     private Command applyWristevatorStateSafe(double elevatorHeightMeters, double wristAngleRadians) {
@@ -106,19 +96,18 @@ public class Superstructure extends SubsystemBase {
     }
 
     private Command applyGrabberVolts(double leftVoltsDifferential, double rightVoltsDifferential) {
-        return this.runOnce(() -> m_grabber.runVoltsDifferential(leftVoltsDifferential, rightVoltsDifferential));
+        return Commands.runOnce(() -> m_grabber.runVoltsDifferential(leftVoltsDifferential, rightVoltsDifferential));
     }
 
 
     private Command applyFunnelVolts(double funnelVolts) {
-        return this.run(() -> m_funnel.setVoltage(funnelVolts));
+        return Commands.runOnce(() -> m_funnel.setVoltage(funnelVolts));
     }
 
     private Command applyGrabberFunnelVolts(double grabberVolts, double funnelVolts) {
         return Commands.parallel(
             Commands.runOnce(() -> m_grabber.runVolts(grabberVolts)),
-            Commands.runOnce(() -> m_funnel.setVoltage(funnelVolts)),
-            requirementCommand()
+            Commands.runOnce(() -> m_funnel.setVoltage(funnelVolts))
         );
     }
 
@@ -126,12 +115,32 @@ public class Superstructure extends SubsystemBase {
         return this;
     }
 
-    private SuperState getState() {
+    public SuperState getCurrentState() {
         return currentState;
     }
 
-    private void setState(SuperState newState) {
+    public SuperState getGoalState() {
+        return goalState;
+    }
+
+    public boolean atGoal() {
+        return goalState.equals(currentState);
+    }
+
+    private void updateCurrentState(SuperState newState) {
         currentState = newState;
+    }
+
+    private void updateGoalState(SuperState newGoal) {
+        goalState = newGoal;
+    }
+
+    private void cacheCurrentState() {
+        cachedState = currentState;
+    }
+
+    private SuperState getStateCache() {
+        return cachedState;
     }
 
     private Command applyGrabberRotationsBangBang(double volts, double rotations) {
@@ -139,19 +148,58 @@ public class Superstructure extends SubsystemBase {
         return Commands.sequence(
             runOnce(() -> m_grabber.runVolts(volts)),
             Commands.waitUntil(() -> Math.signum(rotations - m_grabber.getRotations()) != sign),
-            runOnce(() -> m_grabber.stop()),
-            requirementCommand()
+            runOnce(() -> m_grabber.stop())
         );
     }
 
     public class SuperstructureCommandFactory {
+ 
+        private static record Edge (
+            SuperState start,
+            SuperState end
+        ) {}
+
+        private static final Set<Edge> coralScoringEdges = new HashSet<>();
+
+        static {
+            coralScoringEdges.add(new Edge(SuperState.PRE_L1, SuperState.SCORE_L1));
+            coralScoringEdges.add(new Edge(SuperState.PRE_L2, SuperState.SCORE_L2));
+            coralScoringEdges.add(new Edge(SuperState.PRE_L3, SuperState.SCORE_L3));
+            coralScoringEdges.add(new Edge(SuperState.PRE_L4, SuperState.SCORE_L4));
+        }
+
+        private static final Set<SuperState> coralTraversalStates = new HashSet<>();
+        private static final Set<Edge> coralTraversalEdges = new HashSet<>();
+
+        static {
+            coralTraversalStates.add(SuperState.CORAL_TRAVEL);
+            coralTraversalStates.add(SuperState.PRE_L1);
+            coralTraversalStates.add(SuperState.PRE_L2);
+            coralTraversalStates.add(SuperState.PRE_L3);
+            coralTraversalStates.add(SuperState.PRE_L4);
+            for (var edgeTuple : Combinatorics.permuteTwo(coralTraversalStates)) {
+                coralTraversalEdges.add(new Edge(edgeTuple.get(0),edgeTuple.get(1)));
+            }
+        }
         
-        private final Map<SuperState,Command> scoreCommandMap = new HashMap<>();
-        private final Command scoreEdgeCommand; // An edge command that transfers from a pre-scoring state to a scoring state
-        private final Command autoIntakeCommand; // An edge command that transfers from an arbitrary state to the coral intake state to the coral travel state
+        
+        //private final Map<SuperState,Command> scoreCommandMap = new HashMap<>();
+        //private final Command scoreEdgeCommand; // An edge command that transfers from a pre-scoring state to a scoring state
+        //private final Command autoIntakeCommand; // An edge command that transfers from an arbitrary state to the coral intake state to the coral travel state
+        private final Map<Edge,Command> edgeCommandMap = new HashMap<>();
+        private final Set<Edge> forbiddenEdges = new HashSet<>();
+        private Command edgeCommand;
 
         private SuperstructureCommandFactory() {
-
+            // Initialize coral scoring edge commands
+            for (Edge edge : coralScoringEdges) {
+                edgeCommandMap.put(edge,buildEdgeCommand(edge));
+            }
+            // Initialize coral traversal edge commands
+            for (Edge edge : coralTraversalEdges) {
+                edgeCommandMap.put(edge,buildEdgeCommand(edge));
+            }
+            /* 
             scoreCommandMap.put(SuperState.PRE_L1,buildEdgeCommand(SuperState.PRE_L1,SuperState.SCORE_L1));
             scoreCommandMap.put(SuperState.PRE_L2,buildEdgeCommand(SuperState.PRE_L2,SuperState.SCORE_L2));
             scoreCommandMap.put(SuperState.PRE_L3,buildEdgeCommand(SuperState.PRE_L3,SuperState.SCORE_L3));
@@ -165,51 +213,78 @@ public class Superstructure extends SubsystemBase {
                 applyGrabberRotationsBangBang(8,2), //TODO: FIX THESE CONSTANTS
                 buildEdgeCommand(SuperState.CORAL_INTAKE,SuperState.CORAL_TRAVEL)
             );
-            
+            */    
         }
         
-        private Command buildEdgeCommand(SuperState startState, SuperState goalState) {
-            if (startState.equals(goalState)) {
-                return Commands.runOnce(() -> {});
+        private Command buildEdgeCommand(Edge edge) {
+            if (edge.start().equals(edge.end)) {
+                return Commands.none();
             }
             Command wristevatorCommand;
             // determines wristevator command
-            if (startState.height != goalState.height) {
-                wristevatorCommand = applyWristevatorStateSafe(goalState.height.meters,goalState.angle.radians);
-            } else if (startState.angle != goalState.angle) {
-                wristevatorCommand = applyWristAngle(goalState.angle.radians);
+            if (edge.start().height != edge.end.height) {
+                wristevatorCommand = applyWristevatorStateSafe(
+                    edge.end().height.meters,
+                    edge.end().angle.radians
+                );
+            } else if (edge.start().angle != edge.end().angle) {
+                wristevatorCommand = applyWristAngle(edge.end().angle.radians);
             } else {
-                wristevatorCommand = Commands.runOnce(() -> {});
+                wristevatorCommand = Commands.none();
             }
 
-            return Commands.sequence(
+            var edgeCommand = Commands.sequence(
+                Commands.runOnce(() -> updateGoalState(edge.end())),
                 wristevatorCommand,
                 Commands.parallel(
-                    Commands.runOnce(() -> m_funnel.setVoltage(goalState.funnelState.voltage)),
+                    Commands.runOnce(() -> m_funnel.setVoltage(edge.end().funnelState.voltage)),
                     Commands.runOnce(() -> m_grabber.runVoltsDifferential(
-                        goalState.grabberState.leftVolts,
-                        goalState.grabberState.rightVolts
+                        edge.end().grabberState.leftVolts,
+                        edge.end().grabberState.rightVolts
                     )),
-                    Commands.runOnce(() -> setState(goalState))
-                ),
-                requirementCommand()
+                    Commands.runOnce(() -> updateCurrentState(edge.end()))
+                )
+            );
+
+            edgeCommandMap.put(edge,edgeCommand);
+            return edgeCommand;
+        }
+
+        private Command getEdgeCommand(Edge edge) {
+            return edgeCommandMap.getOrDefault(edge, buildEdgeCommand(edge));
+        }
+
+        private void setGoal(SuperState goalState) {
+
+            var edge = new Edge(currentState,goalState);
+
+            // Checks if edge is forbidden
+            if (forbiddenEdges.contains(edge)) {
+                return; // Edge is forbidden, do nothing
+            }
+
+            // Edge is valid and we are not already on it, schedule the corresponding edge command
+            edgeCommand.cancel();
+            edgeCommand = getEdgeCommand(edge);
+            edgeCommand.schedule();
+        }
+
+        public Command applyState(SuperState goalState){
+            return Commands.runOnce(() -> setGoal(goalState))
+                .andThen(Commands.idle(getSuperstructure()));
+        }
+
+        public Command applyTempState(SuperState tempGoalState){
+            return Commands.startEnd(
+                () -> {
+                    cacheCurrentState();
+                    setGoal(tempGoalState);
+                },
+                () -> setGoal(cachedState),
+                getSuperstructure()
             );
         }
 
-        public Command applyState(SuperState goalState) {
-            //return buildTransCommand(getState(),goalState);
-            return new DeferredCommand(() -> buildEdgeCommand(getState(),goalState),Set.of(getSuperstructure()));
-        }
-
-        // Transitions from a pre-score state to a post-score state
-        public Command scoreCommand() {
-            return scoreEdgeCommand;
-        }
-
-
-        public Command autoIntakeCoral() {
-            return autoIntakeCommand;
-        }
     }
 
 }
