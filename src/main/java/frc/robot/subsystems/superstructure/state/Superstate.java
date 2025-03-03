@@ -35,6 +35,7 @@ public enum SuperState {
     CORAL_INTAKE(ElevatorHeight.CORAL_INTAKE,WristAngle.CORAL_INTAKE,GrabberState.CORAL_INTAKE,FunnelState.INTAKE,PossessionState.EMPTY),
 
     CORAL_TRAVEL(ElevatorHeight.CORAL_TRAVEL,WristAngle.CORAL_TRAVEL,GrabberState.IDLE,FunnelState.DEFAULT,PossessionState.CORAL),
+    EMPTY_TRAVEL(ElevatorHeight.EMPTY_TRAVEL,WristAngle.EMPTY_TRAVEL,GrabberState.IDLE,FunnelState.DEFAULT,PossessionState.EMPTY),
     ALGAE_TRAVEL(ElevatorHeight.ALGAE_TRAVEL,WristAngle.ALGAE_TRAVEL,GrabberState.ALGAE_HOLD,FunnelState.DEFAULT,PossessionState.ALGAE);
 
     public static enum PossessionState {
