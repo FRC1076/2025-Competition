@@ -142,15 +142,13 @@ public final class Constants {
         
         // States describing whether the auton is on the left or right side of the alliance
         public enum AutonSides {
-            kLeft(false, "Left"),
-            kRight(true, "Right");
+            kLeft(false),
+            kRight(true);
 
             public final boolean isRightSide;
-            public final String name;
 
-            private AutonSides (boolean isRightSide, String name) {
+            private AutonSides (boolean isRightSide) {
                 this.isRightSide = isRightSide;
-                this.name = name;
             }
         }
     }
@@ -231,58 +229,37 @@ public final class Constants {
                     : WristSimConstants.Control.kG,
                 SystemConstants.currentMode == 0
                     ? ElevatorConstants.Control.kG 
-                    : ElevatorSimConstants.Control.kG,
-                "EMPTY"),
+                    : ElevatorSimConstants.Control.kG),
             CORAL(
                 SystemConstants.currentMode == 0
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
                 SystemConstants.currentMode == 0
                     ? ElevatorConstants.Control.kG 
-                    : ElevatorSimConstants.Control.kG,
-                "CORAL"),
+                    : ElevatorSimConstants.Control.kG),
             ALGAE(
                 SystemConstants.currentMode == 0
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
                 SystemConstants.currentMode == 0
                     ? ElevatorConstants.Control.kG 
-                    : ElevatorSimConstants.Control.kG,
-                "ALGAE"),
+                    : ElevatorSimConstants.Control.kG),
             TRANSFERRING(
                 SystemConstants.currentMode == 0
                     ? WristConstants.Control.kG
                     : WristSimConstants.Control.kG,
                 SystemConstants.currentMode == 0
                     ? ElevatorConstants.Control.kG
-                    : ElevatorSimConstants.Control.kG,
-                "TRANSFERRING"
-            );
+                    : ElevatorSimConstants.Control.kG);
 
             public final double wrist_kG;
             public final double elevator_kG;
-            public final String name;
 
-            private GrabberPossession(double wrist_kG, double elevator_kG, String name) {
+            private GrabberPossession(double wrist_kG, double elevator_kG) {
                 this.wrist_kG = wrist_kG;
                 this.elevator_kG = elevator_kG;
-                this.name = name;
             }
         }
-
-        /*
-        // Index Possession State
-        public enum IndexPossession {
-            EMPTY("EMPTY"),
-            CORAL("CORAL");
-
-            public final String name;
-
-            private IndexPossession(String name) {
-                this.name = name;
-            }
-        }
-        */
 
         // Grabber State
         public enum GrabberState {

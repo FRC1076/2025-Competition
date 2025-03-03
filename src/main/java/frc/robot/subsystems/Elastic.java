@@ -27,9 +27,9 @@ public class Elastic {
         the auton is on the left (default) or the right side of the field.
         */
         autonSideChooser = new SendableChooser<>();
-        autonSideChooser.setDefaultOption(GameConstants.autonSide.name, GameConstants.autonSide);
-        autonSideChooser.addOption(AutonSides.kLeft.name, AutonSides.kLeft);
-        autonSideChooser.addOption(AutonSides.kRight.name, AutonSides.kRight);
+        autonSideChooser.setDefaultOption(GameConstants.autonSide.name(), GameConstants.autonSide);
+        autonSideChooser.addOption(AutonSides.kLeft.name(), AutonSides.kLeft);
+        autonSideChooser.addOption(AutonSides.kRight.name(), AutonSides.kRight);
         SmartDashboard.putData(autonSideChooser);
 
         // Maps the Alliance enum that the Driver Station returns to string names
@@ -57,8 +57,8 @@ public class Elastic {
     }
 
     public void putGrabberPossession(GrabberPossession grabberPossession) {
-        // System.out.println("grabberPossession: " + grabberPossession.name);
-        SmartDashboard.putString("grabberPossession", grabberPossession.name);
+        // System.out.println("grabberPossession: " + grabberPossession.name());
+        SmartDashboard.putString("grabberPossession", grabberPossession.name());
     }
 
     /** Gets the selected team color from the driver station */
