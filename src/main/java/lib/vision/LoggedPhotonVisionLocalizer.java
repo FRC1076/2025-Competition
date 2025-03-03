@@ -1,29 +1,43 @@
-// Copyright (c) FRC 1076 PiHi Samurai
-// You may use, distribute, and modify this software under the terms of
-// the license found in the root directory of this project
-
 package lib.vision;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
+import org.littletonrobotics.junction.networktables.LoggedNetworkBoolean;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
-import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
+import lib.vision.CameraLocalizer.CommonPoseEstimate;
 
-public class PhotonVisionLocalizer implements CameraLocalizer {
+public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
+
+    @AutoLog
+    public static class PhotonVisionInputs {
+        public boolean cameraConnected = false;
+        public boolean estimatePresent = false;
+        public int tagsDetected = 0;
+        public Integer[] fiducialIDs = new Integer[]{};
+        public Pose3d pose = new Pose3d();
+        public Matrix<N3,N1> stddevs = VecBuilder.fill(0,0,0);
+        public String strategy = "NULL";
+    }
 
     private static final Matrix<N3, N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     private final PhotonCamera camera;
@@ -31,8 +45,9 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
     private final Supplier<Rotation2d> headingSupplier;
     private final Matrix<N3, N1> defaultSingleStdDevs;
     private final Matrix<N3, N1> defaultMultiStdDevs;
+    private final PhotonVisionInputsAutoLogged inputs = new PhotonVisionInputsAutoLogged();
 
-    public PhotonVisionLocalizer(
+    public LoggedPhotonVisionLocalizer(
         PhotonCamera camera, 
         Transform3d offset,
         PhotonPoseEstimator.PoseStrategy primaryStrategy,
@@ -96,6 +111,10 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
      * @return The pose estimate, or Optional.empty() if no estimate is available
      */
     public Optional<CommonPoseEstimate> getPoseEstimate() {
+
+        inputs.cameraConnected = camera.isConnected();
+        inputs.estimatePresent = false;
+
         poseEstimator.addHeadingData(Timer.getFPGATimestamp(), headingSupplier.get());
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
@@ -104,15 +123,25 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
             visionEst = poseEstimator.update(res);
         }
 
-        return visionEst.map(
+        Optional<CommonPoseEstimate> result = visionEst.map(
             (EstimatedRobotPose estimate) -> {
+                var stddevs = calculateStdDevs(estimate);
+                inputs.tagsDetected = estimate.targetsUsed.size();
+                inputs.fiducialIDs = estimate.targetsUsed.stream().map((tgt) -> tgt.getFiducialId()).toArray((size) -> new Integer[size]);
+                inputs.pose = estimate.estimatedPose;
+                inputs.stddevs = stddevs;
+                inputs.strategy = estimate.strategy.name();
                 return new CommonPoseEstimate(
                     estimate.estimatedPose.toPose2d(),
                     estimate.timestampSeconds,
-                    calculateStdDevs(estimate)
+                    stddevs
                 );
             }
         );
+
+        Logger.processInputs("PhotonVision/" + getName(), inputs);
+
+        return result;
     }
 
     public String getName() {
