@@ -103,6 +103,8 @@ public class WristIOHardware implements WristIO {
         inputs.appliedVolts = m_leadMotor.getAppliedOutput() * m_leadMotor.getBusVoltage();
         inputs.leadCurrentAmps = m_leadMotor.getOutputCurrent();
         /** These calculations are to get around the wraparound of the absolute encoder values
+         * If the value is greater than 180 degrees, it will become negative
+         * 
          * 1. Subtract the zero offset to get within a range of 270 (-90) degrees to 90 degrees
          * 2. Add 180 degrees
          * 3. Modulo 360 to make the previously negative values, which were technically greater than 180 degrees, less than 180 degrees
