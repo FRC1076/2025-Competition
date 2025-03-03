@@ -32,7 +32,7 @@ public class ElevatorIOHardware implements ElevatorIO {
         kP, kI, kD, kProfileConstraints,
         kS, kG, kV, kA
     );
-    // TODO: Figure out which motor is on which side
+    
     private final SparkMax m_leadMotor; 
     private final SparkMax m_followMotor;
 

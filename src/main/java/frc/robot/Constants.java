@@ -222,7 +222,7 @@ public final class Constants {
 
         public static double algaePossessionCurrentThreshold = 20.0;
 
-        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(85);
+        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
         public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(85);
 
         // Grabber Possession State

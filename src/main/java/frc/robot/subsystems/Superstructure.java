@@ -382,6 +382,7 @@ public class Superstructure {
         private final BooleanSupplier m_grabberBeamBreak;
         private final Command grabberActionSelectCommand;
         private final Map<WristevatorState, Command> grabberActionCommands = new HashMap<>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
+        private final Map<WristevatorState, Boolean> algaePossessionMap = new HashMap<>();
         private SuperstructureCommandFactory (
             Superstructure superstructure,
             BooleanSupplier indexBeamBreak,
@@ -414,14 +415,33 @@ public class Superstructure {
                 this.superstructure.getSuperState()::getWristevatorState
             );
 
+            algaePossessionMap.put(WristevatorState.L1, false);
+            algaePossessionMap.put(WristevatorState.L2, false);
+            algaePossessionMap.put(WristevatorState.L3, false); 
+            algaePossessionMap.put(WristevatorState.L4, false);
+            algaePossessionMap.put(WristevatorState.GROUND_INTAKE, true);
+            algaePossessionMap.put(WristevatorState.PROCESSOR, false);
+            algaePossessionMap.put(WristevatorState.LOW_INTAKE, true);
+            algaePossessionMap.put(WristevatorState.HIGH_INTAKE, true);
+            algaePossessionMap.put(WristevatorState.NET, false);
+
             this.updatePossessionAndKg();
         }
 
         /**
          * Returns a command that does a grabber action differently depending on robot state (scoring coral, scoring algae, intaking algae)
+         * and sets the grabber possession depending on the wristevator state
          */
         public Command doGrabberAction() {
-            return grabberActionSelectCommand.beforeStarting(Commands.runOnce(() -> {safeToMoveElevator = false;}));
+            return Commands.parallel(
+                grabberActionSelectCommand,
+                Commands.runOnce(() -> {safeToMoveElevator = false;}),
+                Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(
+                        algaePossessionMap.get(superstructure.getSuperState().getWristevatorState())
+                            ? GrabberPossession.ALGAE
+                            : GrabberPossession.EMPTY)
+                )
+            );
         }
 
         /**
