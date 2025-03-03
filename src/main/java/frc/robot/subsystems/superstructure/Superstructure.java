@@ -332,7 +332,11 @@ public class Superstructure extends SubsystemBase {
         }
 
         public Command score() {
-            return scoreCommand.asProxy();
+            return Commands.either(
+                scoreCommand.asProxy(),
+                Commands.none(),
+                getSuperstructure()::atGoal
+            );
         }
 
         public Command manualWristevatorControl(DoubleSupplier elevatorVoltSupplier, DoubleSupplier wristVoltSupplier) {
