@@ -159,13 +159,13 @@ public class Superstructure extends SubsystemBase {
             SuperState end
         ) {}
 
-        private static final Set<Edge> coralScoringEdges = new HashSet<>();
+        private static final Map<SuperState,Edge> coralScoringEdgeMap = new HashMap<>();
 
         static {
-            coralScoringEdges.add(new Edge(SuperState.PRE_L1, SuperState.SCORE_L1));
-            coralScoringEdges.add(new Edge(SuperState.PRE_L2, SuperState.SCORE_L2));
-            coralScoringEdges.add(new Edge(SuperState.PRE_L3, SuperState.SCORE_L3));
-            coralScoringEdges.add(new Edge(SuperState.PRE_L4, SuperState.SCORE_L4));
+            coralScoringEdgeMap.put(SuperState.PRE_L1,new Edge(SuperState.PRE_L1, SuperState.SCORE_L1));
+            coralScoringEdgeMap.put(SuperState.PRE_L2,new Edge(SuperState.PRE_L2, SuperState.SCORE_L2));
+            coralScoringEdgeMap.put(SuperState.PRE_L3,new Edge(SuperState.PRE_L3, SuperState.SCORE_L3));
+            coralScoringEdgeMap.put(SuperState.PRE_L4,new Edge(SuperState.PRE_L4, SuperState.SCORE_L4));
         }
 
         private static final Set<SuperState> coralTraversalStates = new HashSet<>();
@@ -192,7 +192,7 @@ public class Superstructure extends SubsystemBase {
 
         private SuperstructureCommandFactory() {
             // Initialize coral scoring edge commands
-            for (Edge edge : coralScoringEdges) {
+            for (Edge edge : coralScoringEdgeMap.values()) {
                 edgeCommandMap.put(edge,buildEdgeCommand(edge));
             }
             // Initialize coral traversal edge commands
@@ -282,6 +282,26 @@ public class Superstructure extends SubsystemBase {
                 },
                 () -> setGoal(cachedState),
                 getSuperstructure()
+            );
+        }
+
+        public Command autoCoralIntake() {
+            return Commands.sequence(
+                applyState(SuperState.CORAL_INTAKE).until(getSuperstructure()::atGoal),
+                Commands.waitUntil(m_transferBeamBreak), 
+                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),//Makes sure the coral has fully passed the transfer beambreak before activating the Bang-Bang controller
+                applyGrabberRotationsBangBang(8,0.5), // TODO: Tune these constants
+                applyState(SuperState.CORAL_TRAVEL) // Moves wristivator into the travel position
+            );
+        }
+
+        public Command manualWristevatorControl(DoubleSupplier elevatorVoltSupplier, DoubleSupplier wristVoltSupplier) {
+            return Commands.startRun(
+                () -> edgeCommand.cancel(),
+                () -> {
+                    m_elevator.setVoltage(elevatorVoltSupplier.getAsDouble());
+                    m_wrist.setVoltage(wristVoltSupplier.getAsDouble());
+                }
             );
         }
 
