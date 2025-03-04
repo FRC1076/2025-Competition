@@ -197,7 +197,7 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 0;
+        public static final int currentMode = 1;
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;

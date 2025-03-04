@@ -21,7 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class Elevator {
 
-    Optional<TrapezoidProfile.State> profileGoal;
+    Optional<TrapezoidProfile.State> profileGoal = Optional.empty();
 
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();

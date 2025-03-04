@@ -23,8 +23,8 @@ import static edu.wpi.first.units.Units.Volts;
 
 import org.littletonrobotics.junction.Logger;
 
-public class Wrist extends SubsystemBase {
-    private Optional<TrapezoidProfile.State> autoControlGoal;
+public class Wrist {
+    private Optional<TrapezoidProfile.State> autoControlGoal = Optional.empty();
 
     private final WristIO io;
     private final ProfiledPIDController m_feedbackController;
@@ -114,6 +114,10 @@ public class Wrist extends SubsystemBase {
                 );
             }
         );
+    }
+
+    public void simulationPeriodic() {
+        io.simulationPeriodic();
     }
 
     public boolean atPositionSetpoint() {

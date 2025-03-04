@@ -20,6 +20,7 @@ import frc.robot.subsystems.superstructure.elevator.ElevatorIOHardware;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOSim;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.funnel.FunnelIOHardware;
+import frc.robot.subsystems.superstructure.funnel.FunnelIOSim;
 import frc.robot.subsystems.superstructure.grabber.GrabberIOHardware;
 import frc.robot.subsystems.superstructure.grabber.GrabberIOSim;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
@@ -34,9 +35,12 @@ import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.Constants.SystemConstants;
 import frc.robot.Constants.OIConstants;
+import frc.robot.Constants.SuperstructureConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
 import frc.robot.subsystems.superstructure.Superstructure;
+import frc.robot.subsystems.superstructure.Superstructure.SuperstructureCommandFactory;
+
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
@@ -91,7 +95,6 @@ public class RobotContainer {
     private final Trigger m_interruptWrist;
     private final Superstructure m_superstructure;
     private final SuperstructureVisualizer superVis;
-    private final Elastic m_elastic;
     private final LEDSubsystem m_LEDs;
 
 
@@ -141,38 +144,18 @@ public class RobotContainer {
             m_wrist = new Wrist(new WristIOHardware());
             m_grabber = new Grabber(new GrabberIOHardware());
             m_funnel = new Funnel(new FunnelIOHardware());
-            m_elastic = new Elastic();
             m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
             m_vision = new VisionSubsystem(m_drive::getPose)
                 .withMeasurementConsumer(m_drive::addVisionMeasurement);
         } else if (SystemConstants.currentMode == 1) {
            
-            /* TODO: RE-IMPLEMENT SIM
-            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision);
-            m_elevator = new ElevatorSubsystem(new ElevatorIOSim());
-            m_wrist = new WristSubsystem(new WristIOSim());
+            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()));
+            m_elevator = new Elevator(new ElevatorIOSim());
+            m_wrist = new Wrist(new WristIOSim());
             m_grabber = new Grabber(new GrabberIOSim());
-            m_index = new IndexSubsystem(new IndexIOSim());
-            m_elastic = new Elastic();
-            m_LEDs = new LEDSubsystem(new LEDIOSim());
-            m_visionSim = new VisionSystemSim("main");
-            /*
-            for (PhotonConfig config : PhotonConfig.values()){
-                var cam = new PhotonCamera(config.name);
-                m_vision.addCamera(new PhotonVisionLocalizer(
-                    cam, 
-                    config.offset,
-                    config.multiTagPoseStrategy,
-                    config.singleTagPoseStrategy,
-                    () -> m_drive.getPose().getRotation(),
-                    fieldLayout,
-                    kDefaultSingleTagStdDevs, 
-                    kDefaultMultiTagStdDevs)
-                );
-                m_visionSim.addCamera(new PhotonCameraSim(cam),config.offset);
-            }
-            CommandUtils.makePeriodic(() -> m_visionSim.update(m_drive.getPose()));
-            */
+            m_funnel = new Funnel(new FunnelIOSim());
+            m_vision = null;
+            m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
         }
         
 
@@ -237,15 +220,15 @@ public class RobotContainer {
     }
 
     private void configureNamedCommands(){
-        //final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
-        /* 
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.commandBuilder;
+        //TODO: CONFIGURE PROPER AUTON COMMANDS
         NamedCommands.registerCommand("preL1", superstructureCommands.preL1());
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
         NamedCommands.registerCommand("preL3", superstructureCommands.preL3());
         NamedCommands.registerCommand("preL4", superstructureCommands.preL4());
         // TODO: Change name to match later
         NamedCommands.registerCommand("scoreGamePiece", superstructureCommands.doGrabberAction());
-        NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());*/
+        NamedCommands.registerCommand("stopAndRetract", Commands.none());
         
     }
 
@@ -392,7 +375,7 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.autoCoralIntake());
 
         // Does Grabber action, ie. outtake coral/algae depending 
-        m_operatorController.rightTrigger().whileTrue(superstructureCommands.score());
+        m_operatorController.rightTrigger().whileTrue(superstructureCommands.doGrabberAction());
 
         // Retract mechanisms and stop grabber
         //m_operatorController.rightTrigger().whileFalse(superstructureCommands.stopAndRetract());

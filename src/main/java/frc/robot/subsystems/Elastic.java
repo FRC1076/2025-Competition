@@ -11,13 +11,18 @@ import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.StartPositions;
 import frc.robot.Constants.GameConstants.TeamColors;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
+import frc.robot.subsystems.superstructure.state.SuperState;
+import frc.robot.subsystems.superstructure.state.Possession.PossessionState;
 
 //TODO: Either make this a singleton class or make putX methods static
 public class Elastic {
+
+    private static Elastic inst = new Elastic();
+
     private SendableChooser<TeamColors> teamChooser;
     private SendableChooser<StartPositions> startPositionChooser;
 
-    public Elastic() {
+    private Elastic() {
         teamChooser = new SendableChooser<>();
         teamChooser.setDefaultOption(GameConstants.kTeamColor.color, GameConstants.kTeamColor);
         teamChooser.addOption(TeamColors.kTeamColorRed.color, TeamColors.kTeamColorRed);
@@ -29,6 +34,10 @@ public class Elastic {
         for(StartPositions position : StartPositions.values()) {
             startPositionChooser.addOption(position.name, position);
         }
+    }
+
+    public static Elastic getInstance() {
+        return inst;
     }
 
     public void putNumber(String key, double value) {
@@ -43,10 +52,19 @@ public class Elastic {
         SmartDashboard.putString(key, value);
     }
 
-    public void putGrabberPossession(GrabberPossession grabberPossession) {
-        // System.out.println("grabberPossession: " + grabberPossession.name);
-        SmartDashboard.putString("grabberPossession", grabberPossession.name);
+    public void putPossessionState(PossessionState possessionState) {
+        SmartDashboard.putString("Possession", possessionState.name());
     }
+
+    public void putSuperState(SuperState superState) {
+        SmartDashboard.putString("Superstate", superState.name());
+    }
+
+    public void putGoalState(SuperState goalState) {
+        SmartDashboard.putString("Goalstate", goalState.name());
+    }
+
+
 
     public void updateInterface() {
         

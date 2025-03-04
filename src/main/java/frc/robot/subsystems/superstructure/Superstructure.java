@@ -9,6 +9,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
@@ -17,11 +18,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.GrabberConstants.kCoralEffectorVoltage;
 import static frc.robot.Constants.GrabberConstants.kAlgaeHoldingVoltage;
+import static frc.robot.subsystems.superstructure.state.Possession.*;
+
+import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.funnel.Funnel;
 import frc.robot.subsystems.superstructure.grabber.Grabber;
 import frc.robot.subsystems.superstructure.state.SuperState;
-import frc.robot.subsystems.superstructure.state.SuperState.PossessionState;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
 
 import java.util.Map;
@@ -39,15 +42,67 @@ public class Superstructure extends SubsystemBase {
 
     private static final double coralTravelHeight = 0.25;
 
-    private PossessionState possession = PossessionState.EMPTY; //TODO: UPDATE DYNAMICALLY
+    // State machine static loading
+
+    private static record Edge (
+        SuperState start,
+        SuperState end
+    ) {}
+
+    private static class EdgeSet extends HashSet<Edge> {
+        public EdgeSet(Edge... edges) {
+            for (var edge : edges) {
+                super.add(edge);
+            }
+        }
+    }
+
+    private static final Set<Edge> scoringEdgeSet = new EdgeSet(
+        new Edge(SuperState.ALIGN_L1, SuperState.SCORE_L1),
+        new Edge(SuperState.ALIGN_L2, SuperState.SCORE_L2),
+        new Edge(SuperState.ALIGN_L3, SuperState.SCORE_L3),
+        new Edge(SuperState.ALIGN_L4, SuperState.SCORE_L4),
+        new Edge(SuperState.PRE_NET, SuperState.NET_SCORE),
+        new Edge(SuperState.PRE_PROCESSOR, SuperState.PROCESSOR_SCORE)
+    );
+
+    private static final Set<SuperState> coralTraversalStates = new HashSet<>();
+    private static final Set<Edge> coralTraversalEdges = new HashSet<>();
+
+    static {
+        coralTraversalStates.add(SuperState.CORAL_TRAVEL);
+        coralTraversalStates.add(SuperState.ALIGN_L1);
+        coralTraversalStates.add(SuperState.ALIGN_L2);
+        coralTraversalStates.add(SuperState.ALIGN_L3);
+        coralTraversalStates.add(SuperState.ALIGN_L4);
+        for (var edgeTuple : Combinatorics.permuteTwo(coralTraversalStates)) {
+            coralTraversalEdges.add(new Edge(edgeTuple.get(0),edgeTuple.get(1)));
+        }
+    }
+
+    private static final EdgeSet algaeIntakeEdges = new EdgeSet(
+        new Edge(SuperState.PRE_GROUND_INTAKE,SuperState.GROUND_INTAKE),
+        new Edge(SuperState.PRE_LOW_INTAKE,SuperState.LOW_INTAKE),
+        new Edge(SuperState.PRE_HIGH_INTAKE,SuperState.HIGH_INTAKE)
+    );
+
+    // State Machine Runtime Loading
+
+    private final Map<Edge,Command> edgeCommandMap = new HashMap<>();
+    private final Set<Edge> forbiddenEdges = new HashSet<>();
+
+    private Command edgeCommand = Commands.idle();
+
 
     private final Elevator m_elevator;
     private final Wrist m_wrist;
     private final Grabber m_grabber;
     private final Funnel m_funnel;
+
     private SuperState goalState;
-    private SuperState currentState;
-    private SuperState cachedState; // Stores the previous state for tempApplyState commands
+    private SuperState currentState = SuperState.EMPTY_TRAVEL;
+    private SuperState cachedState; // Stores the previous state for tempApplyState commands, or the end state for applyTempEnd commands
+    private PossessionState possession = PossessionState.EMPTY;
     private final BooleanSupplier m_transferBeamBreak;
     private final DoubleSupplier grabberTravelVoltSupplier = () -> possession == PossessionState.ALGAE
         ? kAlgaeHoldingVoltage
@@ -78,6 +133,20 @@ public class Superstructure extends SubsystemBase {
         ));
         premoveCommandSupplierMap.put(PossessionState.ALGAE, () -> applyWristAngle(algaeTravelRadians));
         premoveCommandFactory = new SelectWithFallbackCommandFactory<>(premoveCommandSupplierMap, Commands::none, () -> possession);
+
+        // Initialize scoring edge commands
+        for (Edge edge : scoringEdgeSet) {
+            buildEdgeCommand(edge);
+        }
+        // Initialize coral traversal edge commands
+        for (Edge edge : coralTraversalEdges) {
+            buildEdgeCommand(edge);
+        }
+
+        // Initialize algae intake edge commands and userland commands
+        for (Edge edge : algaeIntakeEdges) {
+            buildEdgeCommand(edge);
+        }
     }
 
     @Override
@@ -87,6 +156,91 @@ public class Superstructure extends SubsystemBase {
         m_grabber.periodic();
         m_funnel.periodic();
     }
+
+    @Override
+    public void simulationPeriodic() {
+        m_elevator.simulationPeriodic();
+        m_wrist.simulationPeriodic();
+        // TODO: ADD WPILIB SIMMING TO GRABBER AND FUNNEL SIM IO
+    }
+
+    private Command buildEdgeCommand(Edge edge) {
+            
+        if (edge.start() == edge.end()) {
+            return Commands.none();
+        }
+
+        if (edge.start() == SuperState.OVERRIDE) {
+            return Commands.sequence(
+                Commands.runOnce(() -> updateGoalState(edge.end())),
+                applyWristevatorStateSafe(
+                    edge.end().height.meters,
+                    edge.end().angle.radians
+                ),
+                Commands.parallel(
+                    Commands.runOnce(() -> m_funnel.setVoltage(edge.end().funnelState.voltage)),
+                    Commands.runOnce(() -> m_grabber.runVoltsDifferential(
+                        edge.end().grabberState.leftVolts,
+                        edge.end().grabberState.rightVolts
+                    )),
+                    Commands.runOnce(() -> updateCurrentState(edge.end()))
+                )
+            );
+        }
+        Command wristevatorCommand;
+        // determines wristevator command
+        if (edge.start().height != edge.end().height) {
+            wristevatorCommand = applyWristevatorStateSafe(
+                edge.end().height.meters,
+                edge.end().angle.radians
+            );
+        } else if (edge.start().angle != edge.end().angle) {
+            wristevatorCommand = applyWristAngle(edge.end().angle.radians);
+        } else {
+            wristevatorCommand = Commands.none();
+        }
+
+        var edgeCommand = Commands.sequence(
+            Commands.runOnce(() -> updateGoalState(edge.end())),
+            wristevatorCommand,
+            Commands.parallel(
+                Commands.runOnce(() -> m_funnel.setVoltage(edge.end().funnelState.voltage)),
+                Commands.runOnce(() -> m_grabber.runVoltsDifferential(
+                    edge.end().grabberState.leftVolts,
+                    edge.end().grabberState.rightVolts
+                )),
+                Commands.runOnce(() -> updateCurrentState(edge.end()))
+            )
+        );
+
+        edgeCommandMap.put(edge,edgeCommand);
+        return edgeCommand;
+    }
+
+    private Command getEdgeCommand(Edge edge) {
+        return edgeCommandMap.getOrDefault(edge, buildEdgeCommand(edge));
+    }
+
+    private void setGoal(SuperState newGoal) {
+
+        // Checks if we are already moving towards the goal
+        if (newGoal == goalState) {
+            return;
+        }
+
+        var edge = new Edge(currentState,newGoal);
+
+        // Checks if edge is forbidden
+        if (forbiddenEdges.contains(edge)) {
+            return; // Edge is forbidden, do nothing
+        }
+
+        // Edge is valid and we are not already on it, schedule the corresponding edge command
+        edgeCommand.cancel();
+        edgeCommand = getEdgeCommand(edge);
+        edgeCommand.schedule();
+    }
+
 
     public double getElevatorHeightMeters() {
         return m_elevator.getPositionMeters();
@@ -167,10 +321,14 @@ public class Superstructure extends SubsystemBase {
 
     private void updateCurrentState(SuperState newState) {
         currentState = newState;
+        possession = currentState.possessionMap.map(possession);
+        Logger.recordOutput("Superstructure/Possession",possession.name());
+        Logger.recordOutput("Superstructure/State",currentState.name());
     }
 
     private void updateGoalState(SuperState newGoal) {
         goalState = newGoal;
+        Logger.recordOutput("Superstructure/Goal",newGoal.name());
     }
 
     private void cacheCurrentState() {
@@ -195,169 +353,32 @@ public class Superstructure extends SubsystemBase {
     }
 
     public class SuperstructureCommandFactory {
-        
-        // STATIC LOADING
 
-        private static record Edge (
-            SuperState start,
-            SuperState end
-        ) {}
-
-        private static class EdgeSet extends HashSet<Edge> {
-            public EdgeSet(Edge... edges) {
-                for (var edge : edges) {
-                    super.add(edge);
-                }
-            }
-        }
-
-        private static final Set<Edge> scoringEdgeSet = new EdgeSet(
-            new Edge(SuperState.PRE_L1, SuperState.SCORE_L1),
-            new Edge(SuperState.PRE_L2, SuperState.SCORE_L2),
-            new Edge(SuperState.PRE_L3, SuperState.SCORE_L3),
-            new Edge(SuperState.PRE_L4, SuperState.SCORE_L4),
-            new Edge(SuperState.PRE_NET, SuperState.NET_SCORE),
-            new Edge(SuperState.PRE_PROCESSOR, SuperState.PROCESSOR_SCORE)
-        );
-
-        private static final Set<SuperState> coralTraversalStates = new HashSet<>();
-        private static final Set<Edge> coralTraversalEdges = new HashSet<>();
-        private static final Map<Edge,Edge> grabberActionSequenceMap = new HashMap<>();
-
-        static {
-            coralTraversalStates.add(SuperState.CORAL_TRAVEL);
-            coralTraversalStates.add(SuperState.PRE_L1);
-            coralTraversalStates.add(SuperState.PRE_L2);
-            coralTraversalStates.add(SuperState.PRE_L3);
-            coralTraversalStates.add(SuperState.PRE_L4);
-            for (var edgeTuple : Combinatorics.permuteTwo(coralTraversalStates)) {
-                coralTraversalEdges.add(new Edge(edgeTuple.get(0),edgeTuple.get(1)));
-            }
-        }
-
-        private static final EdgeSet algaeIntakeEdges = new EdgeSet(
-            new Edge(SuperState.PRE_GROUND_INTAKE,SuperState.GROUND_INTAKE),
-            new Edge(SuperState.PRE_LOW_INTAKE,SuperState.LOW_INTAKE),
-            new Edge(SuperState.PRE_HIGH_INTAKE,SuperState.HIGH_INTAKE)
-        );
-        
-        
-        private final Map<Edge,Command> edgeCommandMap = new HashMap<>();
-        private final Set<Edge> forbiddenEdges = new HashSet<>();
         private final Map<SuperState,Supplier<Command>> scoringCommandSupplierMap = new HashMap<>();
         private final Map<SuperState,Supplier<Command>> algaeIntakeCommandSupplierMap = new HashMap<>();
         private final Map<SuperState,Supplier<Command>> grabberActionCommandSupplierMap = new HashMap<>();
 
         private final SelectWithFallbackCommandFactory<SuperState> scoreCommandFactory;
         private final SelectWithFallbackCommandFactory<SuperState> algaeIntakeCommandFactory;
-
-        private Command edgeCommand;
-
+        private final SelectWithFallbackCommandFactory<SuperState> grabberActionCommandFactory;
 
         private SuperstructureCommandFactory() {
-            // Initialize scoring edge commands
+            // Initialize scoring edge userland commands
             for (Edge edge : scoringEdgeSet) {
-                buildEdgeCommand(edge);
-                grabberActionCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()));
-            }
-            // Initialize coral traversal edge commands
-            for (Edge edge : coralTraversalEdges) {
-                buildEdgeCommand(edge);
+                grabberActionCommandSupplierMap.put(edge.start(),() -> applyState(edge.end()).finallyDo(() -> setGoal(SuperState.EMPTY_TRAVEL)));
             }
 
+            // Initialize algae intake edge commands and userland commands
             for (Edge edge : algaeIntakeEdges) {
-                buildEdgeCommand(edge);
-                grabberActionCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()))
-            }
-
-            // Initialize algae intake edge commands
-            for (Edge edge : algaeIntakeEdges) {
-                buildEdgeCommand(edge);
-                grabberActionCommandSupplierMap.put(edge.start(),() -> applyTempState(edge.end()));
+                grabberActionCommandSupplierMap.put(edge.start(),() -> applyState(edge.end()).finallyDo(() -> setGoal(SuperState.ALGAE_TRAVEL)));
             }
 
             scoreCommandFactory = new SelectWithFallbackCommandFactory<>(scoringCommandSupplierMap,Commands::none,() -> currentState); //TODO: Should the selector be goalState or currentState?
             algaeIntakeCommandFactory = new SelectWithFallbackCommandFactory<>(algaeIntakeCommandSupplierMap,Commands::none,() -> currentState);
+            grabberActionCommandFactory = new SelectWithFallbackCommandFactory<>(grabberActionCommandSupplierMap, Commands::none, () -> currentState);
 
         }
         
-        private Command buildEdgeCommand(Edge edge) {
-            
-            if (edge.start() == edge.end()) {
-                return Commands.none();
-            }
-
-            if (edge.start() == SuperState.OVERRIDE) {
-                return Commands.sequence(
-                    Commands.runOnce(() -> updateGoalState(edge.end())),
-                    applyWristevatorStateSafe(
-                        edge.end().height.meters,
-                        edge.end().angle.radians
-                    ),
-                    Commands.parallel(
-                        Commands.runOnce(() -> m_funnel.setVoltage(edge.end().funnelState.voltage)),
-                        Commands.runOnce(() -> m_grabber.runVoltsDifferential(
-                            edge.end().grabberState.leftVolts,
-                            edge.end().grabberState.rightVolts
-                        )),
-                        Commands.runOnce(() -> updateCurrentState(edge.end()))
-                    )
-                );
-            }
-            Command wristevatorCommand;
-            // determines wristevator command
-            if (edge.start().height != edge.end().height) {
-                wristevatorCommand = applyWristevatorStateSafe(
-                    edge.end().height.meters,
-                    edge.end().angle.radians
-                );
-            } else if (edge.start().angle != edge.end().angle) {
-                wristevatorCommand = applyWristAngle(edge.end().angle.radians);
-            } else {
-                wristevatorCommand = Commands.none();
-            }
-
-            var edgeCommand = Commands.sequence(
-                Commands.runOnce(() -> updateGoalState(edge.end())),
-                wristevatorCommand,
-                Commands.parallel(
-                    Commands.runOnce(() -> m_funnel.setVoltage(edge.end().funnelState.voltage)),
-                    Commands.runOnce(() -> m_grabber.runVoltsDifferential(
-                        edge.end().grabberState.leftVolts,
-                        edge.end().grabberState.rightVolts
-                    )),
-                    Commands.runOnce(() -> updateCurrentState(edge.end()))
-                )
-            );
-
-            edgeCommandMap.put(edge,edgeCommand);
-            return edgeCommand;
-        }
-
-        private Command getEdgeCommand(Edge edge) {
-            return edgeCommandMap.getOrDefault(edge, buildEdgeCommand(edge));
-        }
-
-        private void setGoal(SuperState newGoal) {
-
-            // Checks if we are already moving towards the goal
-            if (newGoal == goalState) {
-                return;
-            }
-
-            var edge = new Edge(currentState,newGoal);
-
-            // Checks if edge is forbidden
-            if (forbiddenEdges.contains(edge)) {
-                return; // Edge is forbidden, do nothing
-            }
-
-            // Edge is valid and we are not already on it, schedule the corresponding edge command
-            edgeCommand.cancel();
-            edgeCommand = getEdgeCommand(edge);
-            edgeCommand.schedule();
-        }
-
         public Command applyState(SuperState newGoal){
             return Commands.runOnce(() -> setGoal(newGoal))
                 .andThen(Commands.idle(getSuperstructure()));
@@ -401,9 +422,9 @@ public class Superstructure extends SubsystemBase {
             );
         }
 
-        public Command score() {
+        public Command doGrabberAction() {
             return Commands.either(
-                scoreCommandFactory.buildCommand(),
+                grabberActionCommandFactory.buildCommand(),
                 Commands.none(),
                 getSuperstructure()::atGoal
             );
@@ -414,7 +435,7 @@ public class Superstructure extends SubsystemBase {
                 () -> {
                     edgeCommand.cancel();
                     updateCurrentState(SuperState.OVERRIDE);
-                    updateGoalState(null);
+                    updateGoalState(SuperState.OVERRIDE); // TODO: Make goalstate an optional
                 },
                 () -> {
                     m_elevator.setVoltage(elevatorVoltSupplier.getAsDouble());
@@ -424,19 +445,19 @@ public class Superstructure extends SubsystemBase {
         }
 
         public Command preL1() {
-            return applyState(SuperState.PRE_L1);
+            return applyState(SuperState.ALIGN_L1);
         }
 
         public Command preL2() {
-            return applyState(SuperState.PRE_L2);
+            return applyState(SuperState.ALIGN_L2);
         }
 
         public Command preL3() {
-            return applyState(SuperState.PRE_L3);
+            return applyState(SuperState.ALIGN_L3);
         }
 
         public Command preL4() {
-            return applyState(SuperState.PRE_L4);
+            return applyState(SuperState.ALIGN_L4);
         }
 
         public Command preGroundIntake() {
@@ -457,33 +478,6 @@ public class Superstructure extends SubsystemBase {
 
         public Command preNet() {
             return applyState(SuperState.PRE_NET); // TODO: WRITE LOGIC FOR NET SCORING
-        }
-
-        public Command algaeGroundIntake() {
-            return Commands.sequence(
-                applyState(SuperState.PRE_GROUND_INTAKE).until(getSuperstructure()::atGoal),
-                applyState(SuperState.GROUND_INTAKE)
-            ).finallyDo(
-                () -> setGoal(SuperState.ALGAE_TRAVEL)
-            );
-        }
-
-        public Command algaeLowIntake() {
-            return Commands.sequence(
-                applyState(SuperState.PRE_LOW_INTAKE).until(getSuperstructure()::atGoal),
-                applyState(SuperState.LOW_INTAKE)
-            ).finallyDo(
-                () -> setGoal(SuperState.ALGAE_TRAVEL)
-            );
-        }
-
-        public Command algaeHighIntake() {
-            return Commands.sequence(
-                applyState(SuperState.PRE_HIGH_INTAKE).until(getSuperstructure()::atGoal),
-                applyState(SuperState.HIGH_INTAKE)
-            ).finallyDo(
-                () -> setGoal(SuperState.ALGAE_TRAVEL)
-            );
         }
 
     }
