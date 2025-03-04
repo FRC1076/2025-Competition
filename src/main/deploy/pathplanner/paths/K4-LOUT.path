@@ -33,7 +33,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "stopAndRetract",
+      "name": "intakeCoral",
       "waypointRelativePos": 0,
       "endWaypointRelativePos": null,
       "command": {

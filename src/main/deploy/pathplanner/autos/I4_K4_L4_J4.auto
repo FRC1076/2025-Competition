@@ -19,25 +19,13 @@
         {
           "type": "named",
           "data": {
-            "name": "doGrabberAction"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "name": "autonShoot"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "I4-LOUT"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeCoral"
           }
         },
         {
@@ -49,25 +37,13 @@
         {
           "type": "named",
           "data": {
-            "name": "doGrabberAction"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "name": "autonShoot"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "K4-LOUT"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeCoral"
           }
         },
         {
@@ -79,25 +55,13 @@
         {
           "type": "named",
           "data": {
-            "name": "doGrabberAction"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "name": "autonShoot"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "L4-LOUT"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "intakeCoral"
           }
         },
         {
@@ -109,13 +73,7 @@
         {
           "type": "named",
           "data": {
-            "name": "doGrabberAction"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.0
+            "name": "autonShoot"
           }
         }
       ]

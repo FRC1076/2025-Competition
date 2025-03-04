@@ -313,8 +313,8 @@ public final class Constants {
             L4(2.109649 + 3 * 0.00635, -38, false),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0.184277, -20, false),
-            LOW_INTAKE(1.0483, -35, false),
-            HIGH_INTAKE(1.58822, -35, false),
+            LOW_INTAKE(0.98407, -27.02, false),
+            HIGH_INTAKE(1.44998, -27.02, false),
 
             PROCESSOR(0.184277 + 0.15, 0, false),
             NET(2.109649 + 3 * 0.00635, 65, false);

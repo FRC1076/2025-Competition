@@ -196,6 +196,7 @@ public class Superstructure {
 
     /**
      * Folds back wrist, moves elevator, then deploys wrist
+     * <p> If the robot is already in the chosen state, it will skip the premoves
      * <p> The wrist and elevator are held in place after they reach their setpoints with a DaemonCommand, which allows
      * the sequential command to move forward but the action doesn't end
      * @param position the WristevatorState, which consists of elevator height and wrist angle
@@ -215,26 +216,28 @@ public class Superstructure {
             () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
         );
         
-        return Commands.sequence(
-            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
-                .alongWith(Commands.runOnce(() -> {
-                    safeToFeedCoral = false;
-                    safeToMoveElevator = false;
-                }))),
-            new ProxyCommand(wristPreMoveCommand),
-            new ProxyCommand(Commands.deadline(
-                m_elevator.applyPosition(position.elevatorHeightMeters),
-                wristHoldCommand
-            )),
-            new ProxyCommand(new DaemonCommand(
-                () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                () -> false
-            )),
-            new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
-            new ProxyCommand(new DaemonCommand(
-                () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
-                () -> false
-            )));
+        return Commands.either(
+            applyWristevatorStateDirect(position),
+            Commands.sequence(
+                new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
+                    .alongWith(Commands.runOnce(() -> {
+                        safeToFeedCoral = false;
+                        safeToMoveElevator = false;
+                    }))),
+                new ProxyCommand(wristPreMoveCommand),
+                new ProxyCommand(Commands.deadline(
+                    m_elevator.applyPosition(position.elevatorHeightMeters),
+                    wristHoldCommand
+                )),
+                new ProxyCommand(new DaemonCommand(
+                    () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
+                    () -> false
+                )),
+                new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
+                new ProxyCommand(new DaemonCommand(
+                    () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
+                    () -> false))),
+            () -> superState.getWristevatorState() == position);
 
         /* Old code, we're not sure why it doesn't work
         Command wristPreMoveCommand = Commands.either(
@@ -299,10 +302,20 @@ public class Superstructure {
         safeToFeedCoral = false;
         safeToMoveElevator = false;
         
-        return Commands.parallel(
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
-            m_elevator.applyPosition(position.elevatorHeightMeters),
-            m_wrist.applyAngle(position.wristAngle));
+        return Commands.sequence(
+            Commands.parallel(
+                Commands.runOnce(() -> superState.setWristevatorState(position)),
+                m_elevator.applyPosition(position.elevatorHeightMeters),
+                m_wrist.applyAngle(position.wristAngle)),
+            Commands.parallel(
+                new DaemonCommand(
+                    () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
+                    () -> false),
+                new DaemonCommand(
+                    () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
+                    () -> false)
+            )
+        );
     }
 
     /**
@@ -559,6 +572,8 @@ public class Superstructure {
                     superstructure.holdIndexState(IndexState.TRANSFER)
                 )
                 .until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
+                Commands.waitSeconds(1),
+                Commands.waitUntil(m_transferBeamBreak),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.7), // Adjust rotations
                 Commands.parallel(
@@ -579,19 +594,19 @@ public class Superstructure {
          * @param safeSignal a supplier indicating whether or not is safe to transfer the coral from the indexer to the grabber
          * @return a command sequence
          */
-        public Command intakeCoral(){ // (BooleanSupplier safeSignal)
+        public Command intakeCoral() { // (BooleanSupplier safeSignal)
             return Commands.sequence(
                 superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
-                    transferCoral(),
-                    Commands.runOnce(() -> safeToMoveElevator = true)
+                    transferCoral()
                 ),
-                superstructure.applyWristevatorState(WristevatorState.TRAVEL)
+                superstructure.applyWristevatorState(WristevatorState.TRAVEL),
+                Commands.runOnce(() -> safeToMoveElevator = true)
             );
         }
 
-        public Command stopIntake(){
+        public Command stopIntake() {
             return 
                 Commands.parallel(
                     holdIndexState(IndexState.BACKWARDS),
@@ -599,24 +614,35 @@ public class Superstructure {
                 );
         }
 
-        public Command interruptElevator(){
+        public Command interruptElevator() {
             return superstructure.interruptElevator();
         }
 
-        public Command interruptWrist(){
+        public Command interruptWrist() {
             return superstructure.interruptWrist();
         }
 
-        public Command holdAlgae(){
+        public Command holdAlgae() {
             return Commands.parallel(
                 Commands.runOnce(() -> superstructure.superState.setGrabberPossession(GrabberPossession.ALGAE)),
                 superstructure.applyGrabberState(GrabberState.ALGAE_HOLD));
         }
 
+        public Command autonShoot() {
+            return m_grabber.applyRotationsBangBang(12, 3);
+        }
+
+        public Command autonAlgaeIntakeAndHold() {
+            return Commands.sequence(
+                m_grabber.applyRotationsBangBang(-12, 3),
+                holdAlgae()
+            );
+        }
+
         /**
          * Used to calculate what the robot is possessing based on breambreaks
          */
-        public Command updatePossessionAndKg(){
+        public Command updatePossessionAndKg() {
             return Commands.runOnce(
                 () -> superstructure.updatePossessionAndKg(
                     m_indexBeamBreak.getAsBoolean(),
@@ -625,5 +651,6 @@ public class Superstructure {
                 )
             );
         }
+
     }
 }
