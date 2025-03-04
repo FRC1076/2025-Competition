@@ -235,6 +235,11 @@ public class Superstructure extends SubsystemBase {
             return; // Edge is forbidden, do nothing
         }
 
+        if (edge.end().possessionMap.map(possession) == PossessionState.FORBIDDEN) {
+            // transition would result in an illegal or impossible possession state, do nothing
+            return;
+        }
+
         // Edge is valid and we are not already on it, schedule the corresponding edge command
         edgeCommand.cancel();
         edgeCommand = getEdgeCommand(edge);
