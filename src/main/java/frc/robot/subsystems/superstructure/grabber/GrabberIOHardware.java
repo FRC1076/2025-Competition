@@ -14,7 +14,15 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.filter.LinearFilter;
+
 public class GrabberIOHardware implements GrabberIO {
+
+    
+    private static final double algaeCurrentThreshold = 15.0;
+    
+    private final LinearFilter currentFilter = LinearFilter.movingAverage(5);
+    
     private final SparkMax m_leftMotor;
     private final SparkMax m_rightMotor;
 
@@ -22,6 +30,8 @@ public class GrabberIOHardware implements GrabberIO {
 
     private final SparkMaxConfig m_leftMotorConfig;
     private final SparkMaxConfig m_rightMotorConfig;
+
+    
 
     public GrabberIOHardware() {
         // motor port constant is currently unknown. Change when known.
@@ -71,11 +81,11 @@ public class GrabberIOHardware implements GrabberIO {
         inputs.rightMotorCurrent = m_rightMotor.getOutputCurrent();
 
         inputs.motorPositionRadians = m_encoder.getPosition(); //This is used for bang-bang control
+        inputs.filteredCurrentAmps = currentFilter.calculate(inputs.leftMotorCurrent);
     }
 
     @Override
     public boolean algaePossession() {
-        // TODO Auto-generated method stub, IMPLEMENT WITH DEBOUNCER AND LINEAR FILTER
-        return false;
+        return inputs.filteredCurrentAmps < algaeCurrentThreshold;
     }
 }

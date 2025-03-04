@@ -5,6 +5,7 @@
 package frc.robot.subsystems.superstructure.grabber;
 
 import edu.wpi.first.math.controller.BangBangController;
+import edu.wpi.first.math.filter.LinearFilter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,6 +14,7 @@ import frc.robot.subsystems.superstructure.grabber.GrabberIOInputsAutoLogged;
 import org.littletonrobotics.junction.Logger;
 
 public class Grabber {
+
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
 

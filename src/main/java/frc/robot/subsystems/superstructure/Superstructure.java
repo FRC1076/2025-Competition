@@ -43,8 +43,6 @@ public class Superstructure extends SubsystemBase {
     private static final double emptyTravelRadians = Units.degreesToRadians(90);
 
     private static final double coralTravelHeight = 0.25;
-    private static final double coralTraversalStartSpeed = 1.3;
-    private static final TrapezoidProfile.State coralTraversalStartState = new TrapezoidProfile.State(coralTravelHeight,1.3);
     // State machine static loading
 
     private static record Edge (
@@ -130,10 +128,9 @@ public class Superstructure extends SubsystemBase {
         m_transferBeamBreak = grabberBeamBreak;
 
         premoveCommandSupplierMap.put(PossessionState.EMPTY,() -> applyWristAngle(emptyTravelRadians));
-        premoveCommandSupplierMap.put(PossessionState.CORAL,() -> Commands.either(
-            applyWristAngleImmediate(coralTravelRadians),
-            applyWristAngle(coralTravelRadians),
-            () -> m_elevator.getPositionMeters() < coralTravelHeight
+        premoveCommandSupplierMap.put(PossessionState.CORAL,() -> Commands.sequence(
+            applyElevatorHeight(coralTravelHeight).onlyIf(() -> m_elevator.getPositionMeters() < coralTravelHeight),
+            applyWristAngle(coralTravelRadians)
         ));
         premoveCommandSupplierMap.put(PossessionState.ALGAE, () -> applyWristAngle(algaeTravelRadians));
         premoveCommandFactory = new SelectWithFallbackCommandFactory<>(premoveCommandSupplierMap, Commands::none, () -> possession);

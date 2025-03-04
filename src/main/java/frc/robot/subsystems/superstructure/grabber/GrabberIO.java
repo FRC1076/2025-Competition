@@ -20,6 +20,7 @@ public interface GrabberIO {
         public double rightMotorCurrent = 0;
 
         public double motorPositionRadians = 0;
+        public double filteredCurrentAmps = 0;
     }
 
     /** Update values for logging */

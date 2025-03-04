@@ -5,21 +5,14 @@
 package frc.robot.subsystems.superstructure.wrist;
 
 import frc.robot.Constants.WristConstants;
-import frc.robot.subsystems.superstructure.wrist.WristIOInputsAutoLogged;
 import lib.control.DynamicArmFeedforward;
 
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import static edu.wpi.first.units.Units.Volts;
+import edu.wpi.first.math.filter.LinearFilter;
 
 import org.littletonrobotics.junction.Logger;
 
