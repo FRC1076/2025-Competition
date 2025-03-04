@@ -34,17 +34,17 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
         public int tagsDetected = 0;
         public Integer[] fiducialIDs = new Integer[]{};
         public Pose3d pose = new Pose3d();
-        public Matrix<N3,N1> stddevs = VecBuilder.fill(0,0,0);
+        public Matrix<N3,N1> stddevs = VecBuilder.fill(0, 0, 0);
         public String strategy = "NULL";
 
         public void log(String key) {
-            Logger.recordOutput(key,cameraConnected);
-            Logger.recordOutput(key,estimatePresent);
-            Logger.recordOutput(key,tagsDetected);
-            Logger.recordOutput(key,fiducialIDs.toString());
-            Logger.recordOutput(key,pose);
-            Logger.recordOutput(key,stddevs);
-            Logger.recordOutput(key,strategy);
+            Logger.recordOutput(key, cameraConnected);
+            Logger.recordOutput(key, estimatePresent);
+            Logger.recordOutput(key, tagsDetected);
+            Logger.recordOutput(key, fiducialIDs.toString());
+            Logger.recordOutput(key, pose);
+            Logger.recordOutput(key, stddevs);
+            Logger.recordOutput(key, strategy);
         }
     }
         
