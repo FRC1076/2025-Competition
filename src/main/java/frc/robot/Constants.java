@@ -594,7 +594,7 @@ public final class Constants {
             public static final int kLength = 24;
 
             public static final double kFlashSeconds = 0.75;
-            public static final int kEmptyStateBrightness = 50;
+            public static final int kEmptyStateBrightness = 100;
             public static final int kFlashingStateBrightness = 100;
         }
 
