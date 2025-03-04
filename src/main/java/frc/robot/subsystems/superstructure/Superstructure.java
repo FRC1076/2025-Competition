@@ -104,7 +104,7 @@ public class Superstructure extends SubsystemBase {
 
     private SuperState goalState;
     private SuperState currentState = SuperState.EMPTY_TRAVEL;
-    private SuperState cachedState; // Stores the previous state for tempApplyState commands, or the end state for applyTempEnd commands
+    private SuperState cachedState; // Stores the previous state for tempApplyState commands, or the end state for applyTempEnd commands. Also stores the previous state during overrides
     private PossessionState possession = PossessionState.EMPTY;
     private final BooleanSupplier m_transferBeamBreak;
     private final DoubleSupplier grabberTravelVoltSupplier = () -> possession == PossessionState.ALGAE
@@ -382,62 +382,50 @@ public class Superstructure extends SubsystemBase {
 
     public class SuperstructureCommandFactory {
 
-        private final Map<SuperState,Supplier<Command>> scoringCommandSupplierMap = new HashMap<>();
-        private final Map<SuperState,Supplier<Command>> algaeIntakeCommandSupplierMap = new HashMap<>();
         private final Map<SuperState,Supplier<Command>> grabberActionCommandSupplierMap = new HashMap<>();
+        private final Map<SuperState,Supplier<Command>> overrideGrabberActionCommandSupplierMap = new HashMap<>();
 
-        private final SelectWithFallbackCommandFactory<SuperState> scoreCommandFactory;
-        private final SelectWithFallbackCommandFactory<SuperState> algaeIntakeCommandFactory;
         private final SelectWithFallbackCommandFactory<SuperState> grabberActionCommandFactory;
+        private final SelectWithFallbackCommandFactory<SuperState> overrideGrabberActionCommandFactory;
+
+        //overrideGrabberActionCommandFactory is so we can have a command that applies only the grabber state, without performing the rest of the state transition
+        //This is to replicate the behavior of the grabberActionCommand from the original codebase
+        //When the state is overridden, the superstructure's current state is cached. Grabber action commands during overrides are determined by the cached state
 
         private SuperstructureCommandFactory() {
             // Initialize scoring edge userland commands
             for (Edge edge : scoringEdgeSet) {
                 grabberActionCommandSupplierMap.put(edge.start(),() -> applyState(edge.end()).finallyDo(() -> setGoal(SuperState.EMPTY_TRAVEL)));
+                overrideGrabberActionCommandSupplierMap.put(edge.start(),() -> Commands.startEnd(
+                    () -> applyGrabberVolts(
+                        edge.end().grabberState.leftVolts,
+                        edge.end().grabberState.rightVolts
+                    ),
+                    () -> applyGrabberVolts(grabberTravelVoltSupplier.getAsDouble())
+                ));
             }
 
             // Initialize algae intake edge commands and userland commands
             for (Edge edge : algaeIntakeEdges) {
                 grabberActionCommandSupplierMap.put(edge.start(),() -> applyState(edge.end()).finallyDo(() -> setGoal(SuperState.ALGAE_TRAVEL)));
+                overrideGrabberActionCommandSupplierMap.put(edge.start(),() -> Commands.startEnd(
+                    () -> applyGrabberVolts(
+                        edge.end().grabberState.leftVolts,
+                        edge.end().grabberState.rightVolts
+                    ),
+                    () -> applyGrabberVolts(grabberTravelVoltSupplier.getAsDouble())
+                ));
             }
+            overrideGrabberActionCommandFactory = new SelectWithFallbackCommandFactory<>(overrideGrabberActionCommandSupplierMap, Commands::none, () -> cachedState);
 
-            scoreCommandFactory = new SelectWithFallbackCommandFactory<>(scoringCommandSupplierMap,Commands::none,() -> currentState); //TODO: Should the selector be goalState or currentState?
-            algaeIntakeCommandFactory = new SelectWithFallbackCommandFactory<>(algaeIntakeCommandSupplierMap,Commands::none,() -> currentState);
+            grabberActionCommandSupplierMap.put(SuperState.OVERRIDE,overrideGrabberActionCommandFactory::buildCommand);
+            
             grabberActionCommandFactory = new SelectWithFallbackCommandFactory<>(grabberActionCommandSupplierMap, Commands::none, () -> currentState);
-
         }
         
         public Command applyState(SuperState newGoal){
             return Commands.runOnce(() -> setGoal(newGoal))
                 .andThen(Commands.idle(getSuperstructure()));
-        }
-
-        /**
-         * Transitions between two states, with a third intermediate state
-         * @param tempGoal
-         * @param endGoal
-         * @return
-         */
-        public Command applyTempEndState(SuperState tempGoal, SuperState endGoal) {
-            return Commands.startEnd(
-                () -> {
-                    cacheState(endGoal);
-                    setGoal(tempGoal);
-                },
-                () -> setGoal(cachedState),
-                getSuperstructure()
-            );
-        }
-
-        public Command applyTempState(SuperState tempGoal){
-            return Commands.startEnd(
-                () -> {
-                    cacheCurrentState();
-                    setGoal(tempGoal);
-                },
-                () -> setGoal(cachedState),
-                getSuperstructure()
-            );
         }
 
         public Command autoCoralIntake() {
@@ -462,6 +450,9 @@ public class Superstructure extends SubsystemBase {
             return Commands.startRun(
                 () -> {
                     edgeCommand.cancel();
+                    if (!(currentState == SuperState.OVERRIDE)) {
+                        cacheCurrentState(); // This makes sure we don't cache the override state if two override commands are scheduled consecutively
+                    }
                     updateCurrentState(SuperState.OVERRIDE);
                     updateGoalState(SuperState.OVERRIDE); // TODO: Make goalstate an optional
                 },
