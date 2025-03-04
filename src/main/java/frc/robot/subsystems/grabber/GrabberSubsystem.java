@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems.grabber;
 
+import frc.robot.commands.grabber.ApplyRadians;
+
 import edu.wpi.first.math.controller.BangBangController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.LinearFilter;
@@ -46,6 +48,10 @@ public class GrabberSubsystem extends SubsystemBase{
         return debouncer.calculate(filteredCurrent > kCoralCurrentThreshold);
     }
 
+    public double getPosition(){
+        return inputs.motorPositionRadians;
+    }
+
     @Override
     public void periodic() {
         filteredCurrent = currentFilter.calculate(io.getOutputCurrent());
@@ -84,6 +90,8 @@ public class GrabberSubsystem extends SubsystemBase{
      *  a command that applies a certain number of rotations to the grabber via a simple Bang-Bang controller.
      */
     public Command applyRadiansBangBang(double volts, double radians) {
+        return new ApplyRadians(volts, radians, this);
+        /*
         double setpoint = inputs.motorPositionRadians + radians;
         boolean positiveDirection = (setpoint > inputs.motorPositionRadians);
         return new FunctionalCommand(
@@ -94,7 +102,7 @@ public class GrabberSubsystem extends SubsystemBase{
                 ? () -> inputs.motorPositionRadians >= setpoint
                 : () -> inputs.motorPositionRadians <= setpoint,
             this
-        );
+        );*/
     }
 
     /**

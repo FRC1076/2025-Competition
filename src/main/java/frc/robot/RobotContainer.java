@@ -550,12 +550,11 @@ public class RobotContainer {
     }
 
     private void configureBeamBreakTriggers() {
-
-        /*
         m_transferBeamBreak.onChange(
-            m_superstructure.CommandBuilder.updatePossessionAndKg()
+            Commands.run(
+                () -> m_elastic.updateTransferBeamBreak(m_transferBeamBreak.getAsBoolean())
+            )
         );
-        */
     }
 
   /**

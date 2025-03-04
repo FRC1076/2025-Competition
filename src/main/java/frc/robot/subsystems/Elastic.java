@@ -84,6 +84,10 @@ public class Elastic {
         }
     }
 
+    public void updateTransferBeamBreak(boolean beamBroken) {
+        this.putBoolean("transferBB", beamBroken);
+    }
+
     public void updateSafeToFeedCoral(BooleanSupplier safeToFeedCoral) {
         this.putBoolean("safeToFeedCoral", safeToFeedCoral.getAsBoolean());
     }

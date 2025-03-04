@@ -524,7 +524,7 @@ public final class Constants {
         public static final int kCountsPerRevolution = 8192;
         public static final double kPositionConversionFactor = 2 * Math.PI;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI);// (1/117.1875) * 2 * Math.PI; // rotations to radians
         public static final double kVelocityConversionFactor = 2 * Math.PI / 60;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60;// (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
-        public static final double kZeroOffsetRadians = -0.6595923267948967;
+        public static final double kZeroOffsetRadians = 2.4820003267948962; // -0.6595923267948967;
 
         public static final class Control {
             // PID constants

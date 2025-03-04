@@ -136,7 +136,7 @@ public class Superstructure {
         m_elastic = elastic;
         m_led = led;
         
-        m_elastic.putBoolean("transferBB", transferBeamBreak.getAsBoolean());
+        m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
         CommandUtils.makePeriodic(() -> {
             Logger.processInputs("Superstructure", superState);
@@ -547,13 +547,17 @@ public class Superstructure {
                 )
             );*/
             return Commands.sequence(
-                Commands.parallel(
+                Commands.print("START CORAL TRANSFER"),
+                Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.applyIndexState(IndexState.TRANSFER)
                 ),
+                Commands.print("WAIT FOR TRUE"),
                 Commands.waitUntil(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
+                Commands.print("WAIT FOR FALSE"),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
-                superstructure.m_grabber.applyRotationsBangBang(4, 4), // Adjust rotations
+                Commands.print("RUN BANG BANG!"),
+                superstructure.m_grabber.applyRotationsBangBang(10, 2), // Adjust rotations
                 Commands.parallel(
                     Commands.runOnce(() -> safeToMoveElevator = true),
                     superstructure.applyGrabberState(GrabberState.IDLE),

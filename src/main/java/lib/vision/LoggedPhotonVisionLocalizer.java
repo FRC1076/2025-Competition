@@ -149,7 +149,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
             }
         );
 
-        inputs.log("PhotonVision/" + getName());
+        // inputs.log("PhotonVision/" + getName());
 
         return result;
     }
