@@ -37,21 +37,16 @@ public class ApplyRadians extends Command {
   public void initialize() {
     setpoint = m_grabber.getPosition() + radians;
     positiveDirection = setpoint > m_grabber.getPosition();
-    System.out.println(m_grabber.getPosition());
-    System.out.println(setpoint);
     m_grabber.runVolts(volts);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
-  public void execute() {
-    System.out.println(setpoint);
-  }
+  public void execute() {}
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    System.out.println("STOP!");
     m_grabber.stop();
   }
 
