@@ -54,7 +54,7 @@ public class Elevator {
     public void periodic(){
         //System.out.println("Elevator: " + this.getPositionMeters());
         io.updateInputs(inputs);
-        //Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
+        Logger.recordOutput("Elevator/Goal", m_feedbackController.getGoal().position);
         Logger.processInputs("Elevator",inputs);
         profileGoal.ifPresent(
             (goal) -> {
@@ -78,6 +78,10 @@ public class Elevator {
         profileGoal = Optional.of(new TrapezoidProfile.State(positionMeters,0));
     }
 
+    public void setState(TrapezoidProfile.State state) {
+        m_feedbackController.reset(getPositionMeters(),getVelocityMetersPerSecond());
+        profileGoal = Optional.of(state);
+    }
     
 
     /** 

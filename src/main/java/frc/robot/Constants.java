@@ -496,7 +496,10 @@ public final class Constants {
             public static final double kV = 2.8829; // 12.0 // velocity game
             public static final double kA = 0.0; //Acceleration Gain
 
-            public static final Constraints kProfileConstraints = new Constraints(4, 6);
+            public static final double kMaxAccel = 6;
+            public static final double kMaxVel = 4;
+
+            public static final Constraints kProfileConstraints = new Constraints(kMaxVel, kMaxAccel);
         }
 
         public static class Homing {
@@ -591,7 +594,7 @@ public final class Constants {
 
     public static class WristSimConstants {
         // Values are NOT CORRECT
-        public static final double kWristGearingReductions = 125.0;
+        public static final double kWristGearingReductions = 125;
         public static final double kWristLength = Units.feetToMeters(1); // Excludes a 5 inch fixed piece
         public static final double kWristMass = 2.0;
         public static final double kMinAngleRads = -0.75 * Math.PI;
@@ -607,7 +610,7 @@ public final class Constants {
             public static final double kV = 0.0; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
-            public static final Constraints kProfileConstraints = new Constraints(2, 2);
+            public static final Constraints kProfileConstraints = new Constraints(10 * Math.PI, 6 * Math.PI);
         }
 
 

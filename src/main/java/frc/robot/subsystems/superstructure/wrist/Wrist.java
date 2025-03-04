@@ -24,6 +24,7 @@ import static edu.wpi.first.units.Units.Volts;
 import org.littletonrobotics.junction.Logger;
 
 public class Wrist {
+
     private Optional<TrapezoidProfile.State> autoControlGoal = Optional.empty();
 
     private final WristIO io;
@@ -70,17 +71,18 @@ public class Wrist {
 
     /** Sets the desired rotation of the wrist */
     public void setAngle(Rotation2d position) {
-        io.setVoltage(
-            m_feedbackController.calculate(inputs.angleRadians,MathUtil.clamp(position.getRadians(), WristConstants.kMinWristAngleRadians, WristConstants.kMaxWristAngleRadians))
-            + m_feedforwardController.calculate(inputs.angleRadians, m_feedbackController.getSetpoint().velocity)
-        );
+        m_feedbackController.reset(getAngleRadians(),getVelocityRadsPerSec());
+        autoControlGoal = Optional.of(new TrapezoidProfile.State(position.getRadians(),0));
     }
 
     public void setAngleRadians(double angle) {
-        io.setVoltage(
-            m_feedbackController.calculate(inputs.angleRadians,MathUtil.clamp(angle, WristConstants.kMinWristAngleRadians, WristConstants.kMaxWristAngleRadians))
-            + m_feedforwardController.calculate(inputs.angleRadians, m_feedbackController.getSetpoint().velocity)
-        );
+        m_feedbackController.reset(getAngleRadians(),getVelocityRadsPerSec());
+        autoControlGoal = Optional.of(new TrapezoidProfile.State(angle,0));
+    }
+
+    public void setState(TrapezoidProfile.State state) {
+        m_feedbackController.reset(getAngleRadians(),getVelocityRadsPerSec());
+        autoControlGoal = Optional.of(state);
     }
 
     /** Returns the angle of the wrist in radians */
@@ -90,6 +92,10 @@ public class Wrist {
 
     public Rotation2d getAngle() {
         return Rotation2d.fromRadians(inputs.angleRadians);
+    }
+
+    public double getVelocityRadsPerSec() {
+        return inputs.velocityRadiansPerSecond;
     }
 
     public void stop() {
@@ -104,7 +110,7 @@ public class Wrist {
     public void periodic() {
         //System.out.println("Wrist Angle: " + this.getAngleRadians());
         io.updateInputs(inputs);
-        Logger.recordOutput("Wrist/Setpoint", m_feedbackController.getSetpoint().position);
+        Logger.recordOutput("Wrist/PositionGoal", m_feedbackController.getGoal().position);
         Logger.processInputs("Wrist", inputs);
         autoControlGoal.ifPresent(
             (goal) -> {

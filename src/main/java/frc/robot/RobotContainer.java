@@ -387,9 +387,9 @@ public class RobotContainer {
         );
         */
 
-        m_interruptElevator.onTrue(superstructureManualOverrideCommand);
+        m_interruptElevator.whileTrue(superstructureManualOverrideCommand);
 
-        m_interruptWrist.onTrue(superstructureManualOverrideCommand);
+        m_interruptWrist.whileTrue(superstructureManualOverrideCommand);
         
     }
 

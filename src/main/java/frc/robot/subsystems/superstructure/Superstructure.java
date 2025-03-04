@@ -12,12 +12,14 @@ import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Constants.GrabberConstants.kCoralEffectorVoltage;
 import static frc.robot.Constants.GrabberConstants.kAlgaeHoldingVoltage;
+import static frc.robot.Constants.ElevatorConstants.Control.kMaxVel;
 import static frc.robot.subsystems.superstructure.state.Possession.*;
 
 import frc.robot.subsystems.Elastic;
@@ -37,11 +39,12 @@ import lib.math.Combinatorics;
 public class Superstructure extends SubsystemBase {
     
     private static final double algaeTravelRadians = Units.degreesToRadians(65);
-    private static final double coralTravelRadians = Units.degreesToRadians(-80);
-    private static final double emptyTravelRadians = Units.degreesToRadians(80);
+    private static final double coralTravelRadians = Units.degreesToRadians(-90);
+    private static final double emptyTravelRadians = Units.degreesToRadians(90);
 
     private static final double coralTravelHeight = 0.25;
-
+    private static final double coralTraversalStartSpeed = 1.3;
+    private static final TrapezoidProfile.State coralTraversalStartState = new TrapezoidProfile.State(coralTravelHeight,1.3);
     // State machine static loading
 
     private static record Edge (
@@ -127,9 +130,10 @@ public class Superstructure extends SubsystemBase {
         m_transferBeamBreak = grabberBeamBreak;
 
         premoveCommandSupplierMap.put(PossessionState.EMPTY,() -> applyWristAngle(emptyTravelRadians));
-        premoveCommandSupplierMap.put(PossessionState.CORAL,() -> Commands.parallel(
-            applyElevatorHeight(coralTravelHeight).onlyIf(() -> m_elevator.getPositionMeters() < 0.25),
-            applyWristAngle(coralTravelRadians)
+        premoveCommandSupplierMap.put(PossessionState.CORAL,() -> Commands.either(
+            applyWristAngleImmediate(coralTravelRadians),
+            applyWristAngle(coralTravelRadians),
+            () -> m_elevator.getPositionMeters() < coralTravelHeight
         ));
         premoveCommandSupplierMap.put(PossessionState.ALGAE, () -> applyWristAngle(algaeTravelRadians));
         premoveCommandFactory = new SelectWithFallbackCommandFactory<>(premoveCommandSupplierMap, Commands::none, () -> possession);
@@ -165,13 +169,19 @@ public class Superstructure extends SubsystemBase {
     }
 
     private Command buildEdgeCommand(Edge edge) {
+
+        if (edge.end() == SuperState.OVERRIDE) {
+            edgeCommandMap.put(edge,Commands.none());
+            return Commands.none();
+        }
             
         if (edge.start() == edge.end()) {
+            edgeCommandMap.put(edge,Commands.none());
             return Commands.none();
         }
 
         if (edge.start() == SuperState.OVERRIDE) {
-            return Commands.sequence(
+            var edgeCommand = Commands.sequence(
                 Commands.runOnce(() -> updateGoalState(edge.end())),
                 applyWristevatorStateSafe(
                     edge.end().height.meters,
@@ -186,7 +196,10 @@ public class Superstructure extends SubsystemBase {
                     Commands.runOnce(() -> updateCurrentState(edge.end()))
                 )
             );
+            edgeCommandMap.put(edge, edgeCommand);
+            return edgeCommand;
         }
+
         Command wristevatorCommand;
         // determines wristevator command
         if (edge.start().height != edge.end().height) {
@@ -262,6 +275,16 @@ public class Superstructure extends SubsystemBase {
         return Commands.runOnce(() -> m_elevator.setPosition(positionMeters)).andThen(
             Commands.idle().until(m_elevator::atPositionSetpoint)
         );
+    }
+
+    private Command applyElevatorState(TrapezoidProfile.State state) {
+        return Commands.runOnce(() -> m_elevator.setState(state)).andThen(
+            Commands.idle().until(m_elevator::atPositionSetpoint)
+        );
+    }
+
+    private Command applyElevatorStateImmediate(TrapezoidProfile.State state) {
+        return Commands.runOnce(() -> m_elevator.setState(state));
     }
 
     private Command applyElevatorHeightImmediate(double positionMeters) {
@@ -445,7 +468,8 @@ public class Superstructure extends SubsystemBase {
                 () -> {
                     m_elevator.setVoltage(elevatorVoltSupplier.getAsDouble());
                     m_wrist.setVoltage(wristVoltSupplier.getAsDouble());
-                }
+                },
+                getSuperstructure()
             );
         }
 
