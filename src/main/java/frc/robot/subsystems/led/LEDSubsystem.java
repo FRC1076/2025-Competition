@@ -10,6 +10,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants.LEDStates;
 
@@ -40,16 +41,20 @@ public class LEDSubsystem extends SubsystemBase{
         this.io.setState(state);
     }
 
-    public Command update(BooleanSupplier safeToFeedCoral, BooleanSupplier safeToMoveElevator, BooleanSupplier isAutoAligned) {
-        if (isAutoAligned.getAsBoolean()) {
+    private Command updateBuilder(boolean isAutoAligned, boolean safeToMoveElevator, boolean safeToFeedCoral) {
+        if (isAutoAligned) {
             return setTempStateTimed(LEDStates.AUTO_ALIGNED, 2.0);
-        } else if (safeToFeedCoral.getAsBoolean()) {
+        } else if (safeToFeedCoral) {
             return Commands.runOnce(() -> this.setState(LEDStates.HUMAN_PLAYER_CAN_DROP));
-        } else if (safeToMoveElevator.getAsBoolean()) {
+        } else if (safeToMoveElevator) {
             return Commands.runOnce(() -> this.setState(LEDStates.CORAL_INDEXED));
         } else {
             return Commands.runOnce(() -> this.setState(LEDStates.IDLE));
         }
+    }
+
+    public Command update(BooleanSupplier isAutoAligned, BooleanSupplier safeToMoveElevator, BooleanSupplier safeToFeedCoral) {
+        return new DeferredCommand(() -> updateBuilder(isAutoAligned.getAsBoolean(),safeToMoveElevator.getAsBoolean(),safeToFeedCoral.getAsBoolean()), null);
     }
     
     /** Sets the state of the LEDs through the chosen IO layer,
