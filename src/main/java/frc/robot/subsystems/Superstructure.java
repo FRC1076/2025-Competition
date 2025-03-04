@@ -19,8 +19,10 @@ import frc.robot.subsystems.wrist.WristSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.DaemonCommand;
 import lib.extendedcommands.SelectWithFallbackCommand;
+import lib.extendedcommands.SelectWithFallbackCommandFactory;
 
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -319,12 +321,19 @@ public class Superstructure {
         return m_grabber.applyRadiansBangBang(volts, rotations);
     }
 
+    public Command applyIndexState(IndexState state) {
+        return Commands.sequence(
+            Commands.runOnce(() -> superState.setIndexerState(state)),
+            m_index.applyVolts(state.volts)
+        );
+    }
+
     /**
      * Sets indexer to run at desired state
      * @param state the IndexState
      * @return command to run index as certain state
      */
-    public Command applyIndexState(IndexState state) {
+    public Command holdIndexState(IndexState state) {
         return Commands.sequence(
             Commands.runOnce(() -> superState.setIndexerState(state)),
             m_index.applyVolts(state.volts),
@@ -382,9 +391,8 @@ public class Superstructure {
         private final Superstructure superstructure;
         private final BooleanSupplier m_indexBeamBreak;
         private final BooleanSupplier m_transferBeamBreak;
-        private final BooleanSupplier m_grabberBeamBreak;
-        private final Command grabberActionSelectCommand;
-        private final Map<WristevatorState, Command> grabberActionCommands = new HashMap<>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
+        private final Map<WristevatorState, Supplier<Command>> grabberActionCommands = new HashMap<WristevatorState, Supplier<Command>>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
+        private final SelectWithFallbackCommandFactory<WristevatorState> grabberActionCommandFactory;
         private final Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
 
         private SuperstructureCommandFactory (
@@ -396,28 +404,27 @@ public class Superstructure {
             this.superstructure = superstructure;
             m_indexBeamBreak = indexBeamBreak;
             m_transferBeamBreak = transferBeamBreak;
-            m_grabberBeamBreak = grabberBeamBreak;
-            grabberActionCommands.put(WristevatorState.L1, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
-            grabberActionCommands.put(WristevatorState.L2, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
-            grabberActionCommands.put(WristevatorState.L3, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
-            grabberActionCommands.put(WristevatorState.L4, superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
+            grabberActionCommands.put(WristevatorState.L4, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.GROUND_INTAKE,
-                                        superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
-            grabberActionCommands.put(WristevatorState.PROCESSOR, superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.PROCESSOR, () -> superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
             grabberActionCommands.put(WristevatorState.LOW_INTAKE,
-                                        superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
             grabberActionCommands.put(WristevatorState.HIGH_INTAKE,
-                                        superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
-            grabberActionCommands.put(WristevatorState.NET, superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.NET, () -> superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
 
-            grabberActionSelectCommand = new SelectWithFallbackCommand<WristevatorState>(
-                grabberActionCommands,
-                superstructure.applyGrabberState(GrabberState.DEFAULT_OUTTAKE), // Default command to do if command can't be chosen from grabberActionCommands
-                this.superstructure.getSuperState()::getWristevatorState
-            );
+            grabberActionCommandFactory = new SelectWithFallbackCommandFactory<WristevatorState>(
+                    grabberActionCommands,
+                    () -> superstructure.applyGrabberState(GrabberState.DEFAULT_OUTTAKE),
+                    this.superstructure.getSuperState()::getWristevatorState
+                );
 
             this.updatePossessionAndKg();
         }
@@ -428,7 +435,7 @@ public class Superstructure {
          */
         public Command doGrabberAction() {
             return Commands.parallel(
-                grabberActionSelectCommand,
+                grabberActionCommandFactory.buildCommand(),
                 Commands.runOnce(() -> {safeToMoveElevator = false;}),
                 Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(
                     algaeIntakeWristevatorStates.contains(superstructure.getSuperState().getWristevatorState())
@@ -541,21 +548,20 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.IDLE)
                 ),
                 Commands.sequence(
-                    superstructure.applyIndexState(IndexState.CORAL_TRANSFER),
+                    superstructure.holdIndexState(IndexState.CORAL_TRANSFER),
                     Commands.waitUntil(() -> !m_indexBeamBreak.getAsBoolean()),
-                    superstructure.applyIndexState(IndexState.EMPTY_IDLE)
+                    superstructure.holdIndexState(IndexState.EMPTY_IDLE)
                 )
             );*/
             return Commands.sequence(
                 Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
-                    superstructure.applyIndexState(IndexState.TRANSFER)
+                    superstructure.holdIndexState(IndexState.TRANSFER)
                 )
                 .until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
-                superstructure.m_grabber.applyRotationsBangBang(10, 2), // Adjust rotations
+                superstructure.m_grabber.applyRotationsBangBang(12, 1.7), // Adjust rotations
                 Commands.parallel(
-                    Commands.runOnce(() -> safeToMoveElevator = true),
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
@@ -578,15 +584,17 @@ public class Superstructure {
                 superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
-                    transferCoral()
-                )
+                    transferCoral(),
+                    Commands.runOnce(() -> safeToMoveElevator = true)
+                ),
+                superstructure.applyWristevatorState(WristevatorState.TRAVEL)
             );
         }
 
         public Command stopIntake(){
             return 
                 Commands.parallel(
-                    applyIndexState(IndexState.BACKWARDS),
+                    holdIndexState(IndexState.BACKWARDS),
                     applyGrabberState(GrabberState.IDLE)
                 );
         }
@@ -600,7 +608,9 @@ public class Superstructure {
         }
 
         public Command holdAlgae(){
-            return superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE);
+            return Commands.parallel(
+                Commands.runOnce(() -> superstructure.superState.setGrabberPossession(GrabberPossession.ALGAE)),
+                superstructure.applyGrabberState(GrabberState.ALGAE_HOLD));
         }
 
         /**

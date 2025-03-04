@@ -48,6 +48,8 @@ public class LEDOnRIO implements LEDBase {
         .rainbow(255, 255)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
         .scrollAtRelativeSpeed(Percent.per(Seconds).of(25));
+
+    private final LEDPattern off = LEDPattern.kOff;
     
 
     public LEDOnRIO() {
@@ -57,7 +59,7 @@ public class LEDOnRIO implements LEDBase {
         // Setting the length is intensive, so ONLY update data after this
         m_leds.setLength(m_buffer.getLength());
 
-        solidPurple.applyTo(m_buffer); // Start at solid purple
+        off.applyTo(m_buffer); // Start at solid purple
         m_leds.setData(m_buffer);
         m_leds.start();
     }
@@ -70,11 +72,11 @@ public class LEDOnRIO implements LEDBase {
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.CORAL_INDEXED) {
             // Flashing white
-            flashingWhite.applyTo(m_buffer);
+            flashingGreen.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.HUMAN_PLAYER_CAN_DROP) {
             // Flashing green
-            flashingGreen.applyTo(m_buffer);
+            flashingWhite.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if  (state == LEDStates.AUTO_ALIGNED) {
             // Rainbow
@@ -84,6 +86,9 @@ public class LEDOnRIO implements LEDBase {
             // Flashing dark blue?
             // TODO: See if this color works
             flashingDarkBlue.applyTo(m_buffer);
+            m_leds.setData(m_buffer);
+        } else if (state == LEDStates.OFF) {
+            off.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         }
     }

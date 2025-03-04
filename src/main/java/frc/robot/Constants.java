@@ -188,23 +188,24 @@ public final class Constants {
             public static final InterpolatingDoubleTreeMap elevatorAccelerationTable = new InterpolatingDoubleTreeMap(); // A table that maps elevator heights to slew rate limits
             static {
                 // TODO: add deadzone if needed
-                elevatorAccelerationTable.put(0.0,1000000000.0);
+                elevatorAccelerationTable.put(0.0,100000.0);
                 // elevatorAccelerationTable.put(1.0,1000000000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
                 // elevatorAccelerationTable.put(0.0, 12.66793578);
-                elevatorAccelerationTable.put(0.254, 10.15773958);
-                elevatorAccelerationTable.put(0.508, 8.477828029);
-                elevatorAccelerationTable.put(0.762, 7.274717623);
-                elevatorAccelerationTable.put(1.016, 6.370643237);
-                elevatorAccelerationTable.put(1.27, 5.666439564);
-                elevatorAccelerationTable.put(1.524, 5.102204373);
-                elevatorAccelerationTable.put(1.778, 4.640342002);
-                elevatorAccelerationTable.put(1.8288, 4.557930098);
+                elevatorAccelerationTable.put(0.253, 100000.0);
+                elevatorAccelerationTable.put(0.254, 10.15773958 / 5);
+                elevatorAccelerationTable.put(0.508, 8.477828029 / 5);
+                elevatorAccelerationTable.put(0.762, 7.274717623 / 5);
+                elevatorAccelerationTable.put(1.016, 6.370643237 / 5);
+                elevatorAccelerationTable.put(1.27, 5.666439564 / 6);
+                elevatorAccelerationTable.put(1.524, 5.102204373 / 7);
+                elevatorAccelerationTable.put(1.778, 4.640342002 / 8);
+                elevatorAccelerationTable.put(1.8288, 4.557930098 / 8);
             }
         }
 
         public static class PathPlannerConstants {
             public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
-            public static final Transform2d robotOffset = new Transform2d(0.4572, 0, Rotation2d.kZero);
+            public static final Transform2d robotOffset = new Transform2d(0.508, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
 
             public static class Control {
@@ -267,6 +268,7 @@ public final class Constants {
             IDLE(0, 0),
             
             ALGAE_INTAKE(-12, -12),
+            ALGAE_HOLD(-2, -2),
             CORAL_INTAKE(12, 12),
             REVERSE_CORAL_INTAKE(-12, -12),
 
@@ -307,15 +309,15 @@ public final class Constants {
 
             L1(0.1349839121 + 0.00635, 90, false), // Placeholder
             L2(0.910, -35, false), //0.71628, -35),
-            L3(1.348 + 2 * 0.00889, -35, true), //1.11252, -35),
-            L4(2.109649 + 3 * 0.00635, -30, true),//-40.4130051, true), //1.8161, -45),
+            L3(1.348 + 2 * 0.00889, -35, false), //1.11252, -35),
+            L4(2.109649 + 3 * 0.00635, -38, false),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0.184277, -20, false),
-            LOW_INTAKE(1.13789, -35, false),
-            HIGH_INTAKE(1.7440645, -35, true),
+            LOW_INTAKE(1.0483, -35, false),
+            HIGH_INTAKE(1.58822, -35, false),
 
             PROCESSOR(0.184277 + 0.15, 0, false),
-            NET(2.109649 + 3 * 0.00635, 65, true);
+            NET(2.109649 + 3 * 0.00635, 65, false);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
@@ -538,7 +540,7 @@ public final class Constants {
             public static final double kV = 1.8105; // 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
-            public static final Constraints kProfileConstraints = new Constraints(Math.PI, Math.PI); // new Constraints(10 * Math.PI, 6 * Math.PI);
+            public static final Constraints kProfileConstraints = new Constraints(4 * Math.PI, 2 * Math.PI); // new Constraints(10 * Math.PI, 6 * Math.PI);
         }
     }
 
@@ -603,7 +605,8 @@ public final class Constants {
             CORAL_INDEXED(true, false, false),
             HUMAN_PLAYER_CAN_DROP(false, true, false),
             ALGAE(true, true, false),
-            AUTO_ALIGNED(false, false, true);
+            AUTO_ALIGNED(false, false, true),
+            OFF(true, false, true);
 
             public final boolean onesPlace;
             public final boolean twosPlace;

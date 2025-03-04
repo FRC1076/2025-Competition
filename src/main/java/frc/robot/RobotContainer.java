@@ -34,6 +34,7 @@ import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.LoggedPhotonVisionLocalizer;
 import lib.vision.PhotonVisionLocalizer;
 import lib.vision.VisionLocalizationSystem;
+import lib.vision.Limelight.LEDState;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
@@ -42,6 +43,7 @@ import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
+import frc.robot.Constants.LEDConstants.LEDStates;
 import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
@@ -67,6 +69,7 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -100,6 +103,7 @@ public class RobotContainer {
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
+    private final Trigger m_isDisabled;
     private final Trigger m_safeToFeedCoral;
     private final Trigger m_safeToMoveElevator;
     private final Trigger m_isAutoAligned;
@@ -154,6 +158,8 @@ public class RobotContainer {
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
 
+        m_isDisabled = new Trigger(DriverStation::isDisabled);
+    
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
         
@@ -261,12 +267,12 @@ public class RobotContainer {
         ));
 
         m_index.setDefaultCommand(Commands.sequence(
-            m_superstructure.applyIndexState(IndexState.BACKWARDS),
+            m_superstructure.holdIndexState(IndexState.BACKWARDS),
             Commands.idle(m_index)
         ));
 
         // Configure named commands for auton in PathPlanner
-        //configureNamedCommands();
+        configureNamedCommands();
 
         // Configure miscellaneous bindings
         configureBindings();
@@ -311,33 +317,32 @@ public class RobotContainer {
    */
     private void configureBindings() {
         // m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
+        m_isDisabled
+            .onTrue(
+                Commands.runOnce(() -> m_LEDs.setState(LEDStates.OFF)).ignoringDisable(true))
+            .onFalse(
+                Commands.runOnce(() -> m_LEDs.setState(LEDStates.IDLE))
+            );
 
-        m_safeToFeedCoral.onChange(
-            m_LEDs.update(
-                m_superstructure::getSafeToFeedCoral,
-                m_superstructure::getSafeToMoveElevator,
-                m_drive::isAutoAligned)
-            .alongWith(
-                Commands.runOnce(
-                    () -> m_elastic.updateSafeToFeedCoral(m_superstructure::getSafeToFeedCoral))));
-        
-        m_safeToMoveElevator.onChange(
-            m_LEDs.update(
-                m_superstructure::getSafeToFeedCoral,
-                m_superstructure::getSafeToMoveElevator,
-                m_drive::isAutoAligned)
-            .alongWith(
-                Commands.runOnce(
-                    () -> m_elastic.updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator))));
-        
         m_isAutoAligned.onChange(
             m_LEDs.update(
-                m_superstructure::getSafeToFeedCoral,
-                m_superstructure::getSafeToMoveElevator,
-                m_drive::isAutoAligned)
+                m_drive::isAutoAligned,
+                m_superstructure::getSafeToMoveElevator)
             .alongWith(
                 Commands.runOnce(
                     () -> m_elastic.updateIsAutoAligned(m_drive::isAutoAligned))));
+        
+        m_safeToMoveElevator.onChange(
+            m_LEDs.update(
+                m_drive::isAutoAligned,
+                m_superstructure::getSafeToMoveElevator)
+            .alongWith(
+                Commands.runOnce(
+                    () -> m_elastic.updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator))));
+
+        m_safeToFeedCoral.onChange(
+            Commands.runOnce(
+                () -> m_elastic.updateSafeToFeedCoral(m_superstructure::getSafeToFeedCoral)));
     }
 
     private void configureNamedCommands(){
@@ -351,6 +356,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
         NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
+        NamedCommands.registerCommand("intakeCoral", superstructureCommands.intakeCoral());
         NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
         
@@ -511,16 +517,16 @@ public class RobotContainer {
         // Manual coral intake and transfer
         m_operatorController.povUp()
             .onTrue(
-                m_superstructure.applyIndexState(IndexState.TRANSFER).alongWith(
+                m_superstructure.holdIndexState(IndexState.TRANSFER).alongWith(
                 m_superstructure.applyGrabberState(GrabberState.CORAL_INTAKE)))
             .onFalse(
-                m_superstructure.applyIndexState(IndexState.BACKWARDS).alongWith(
+                m_superstructure.holdIndexState(IndexState.BACKWARDS).alongWith(
                 m_superstructure.applyGrabberState(GrabberState.IDLE)));
 
         // Manual coral intake reverse and transfer
         m_operatorController.povDown()
             .onTrue(
-                m_superstructure.applyIndexState(IndexState.BACKWARDS).alongWith(
+                m_superstructure.holdIndexState(IndexState.BACKWARDS).alongWith(
                 m_superstructure.applyGrabberState(GrabberState.REVERSE_CORAL_INTAKE)))
             .onFalse(
                 m_superstructure.applyGrabberState(GrabberState.IDLE));
@@ -553,7 +559,7 @@ public class RobotContainer {
         m_transferBeamBreak.onChange(
             Commands.run(
                 () -> m_elastic.updateTransferBeamBreak(m_transferBeamBreak.getAsBoolean())
-            )
+            ).ignoringDisable(true)
         );
     }
 

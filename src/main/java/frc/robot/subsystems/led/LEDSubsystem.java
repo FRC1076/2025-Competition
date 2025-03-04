@@ -6,6 +6,7 @@
 // THEY ARE FOR EDUCATIONAL PURPOSES
 package frc.robot.subsystems.led;
 
+import java.util.Set;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
@@ -41,11 +42,9 @@ public class LEDSubsystem extends SubsystemBase{
         this.io.setState(state);
     }
 
-    private Command updateBuilder(boolean isAutoAligned, boolean safeToMoveElevator, boolean safeToFeedCoral) {
+    private Command updateBuilder(boolean isAutoAligned, boolean safeToMoveElevator) {
         if (isAutoAligned) {
             return setTempStateTimed(LEDStates.AUTO_ALIGNED, 2.0);
-        } else if (safeToFeedCoral) {
-            return Commands.runOnce(() -> this.setState(LEDStates.HUMAN_PLAYER_CAN_DROP));
         } else if (safeToMoveElevator) {
             return Commands.runOnce(() -> this.setState(LEDStates.CORAL_INDEXED));
         } else {
@@ -53,8 +52,8 @@ public class LEDSubsystem extends SubsystemBase{
         }
     }
 
-    public Command update(BooleanSupplier isAutoAligned, BooleanSupplier safeToMoveElevator, BooleanSupplier safeToFeedCoral) {
-        return new DeferredCommand(() -> updateBuilder(isAutoAligned.getAsBoolean(),safeToMoveElevator.getAsBoolean(),safeToFeedCoral.getAsBoolean()), null);
+    public Command update(BooleanSupplier isAutoAligned, BooleanSupplier safeToMoveElevator) {
+        return new DeferredCommand(() -> updateBuilder(isAutoAligned.getAsBoolean(), safeToMoveElevator.getAsBoolean()), Set.of(this));
     }
     
     /** Sets the state of the LEDs through the chosen IO layer,
