@@ -591,7 +591,7 @@ public final class Constants {
 
         public static class LEDOnRIOConstants {
             public static final int kPWMPort = 0;
-            public static final int kLength = 100;
+            public static final int kLength = 24;
 
             public static final double kFlashSeconds = 0.75;
             public static final int kEmptyStateBrightness = 50;

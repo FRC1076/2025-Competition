@@ -23,6 +23,7 @@ import frc.robot.subsystems.index.IndexIOSim;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.led.LEDIODigitalPins;
 import frc.robot.subsystems.led.LEDIOSim;
+import frc.robot.subsystems.led.LEDOnRIO;
 import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristIOHardware;
 import frc.robot.subsystems.wrist.WristIOSim;
@@ -164,7 +165,7 @@ public class RobotContainer {
             m_wrist = new WristSubsystem(new WristIOHardware());
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
             m_index = new IndexSubsystem(new IndexIOHardware());
-            m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
+            m_LEDs = new LEDSubsystem(new LEDOnRIO());
             for (PhotonConfig config : PhotonConfig.values()){
                 
                 var cam = new PhotonCamera(config.name);
