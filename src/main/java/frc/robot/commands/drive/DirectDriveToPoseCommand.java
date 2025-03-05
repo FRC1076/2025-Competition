@@ -10,6 +10,7 @@ import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import lib.utils.GeometryUtils;
 
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -63,8 +64,8 @@ public class DirectDriveToPoseCommand extends Command {
         followPathCommand.schedule();
     }
 
-    public boolean atGoal() {
-        return targetPose.getTranslation().getDistance(m_drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;
+    public BooleanSupplier atGoal() {
+        return () -> targetPose.getTranslation().getDistance(m_drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;
     }
 
     @Override
