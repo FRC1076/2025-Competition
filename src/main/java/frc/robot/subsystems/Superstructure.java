@@ -51,23 +51,27 @@ public class Superstructure {
     public static class MutableSuperState {
 
         protected GrabberState grabberState;
-        protected WristevatorState WristevatorState;
+        protected WristevatorState wristevatorState;
         protected IndexState indexState;
         protected GrabberPossession grabberPossession;
 
-        public MutableSuperState(GrabberState grabberState, WristevatorState WristevatorState){
+        public MutableSuperState(GrabberState grabberState, WristevatorState wristevatorState){
             this.grabberState = grabberState;
-            this.WristevatorState = WristevatorState;
+            this.wristevatorState = wristevatorState;
             grabberPossession = GrabberPossession.EMPTY;
         }
 
-        public MutableSuperState() {}
+        public MutableSuperState() {
+            this.grabberState = GrabberState.IDLE;
+            this.wristevatorState = WristevatorState.TRAVEL;
+            grabberPossession = GrabberPossession.EMPTY;
+        }
         
         /** Set state of the wristevator <p>
          * States include elevator heights and wrist angles corresponding to specific actions
          */
         public void setWristevatorState(WristevatorState position) {
-            this.WristevatorState = position;
+            this.wristevatorState = position;
         }
 
         /** Set state of the grabber. <p>
@@ -90,7 +94,7 @@ public class Superstructure {
         }
 
         public WristevatorState getWristevatorState() {
-            return WristevatorState;
+            return wristevatorState;
         }
 
         public IndexState getIndexerState() {

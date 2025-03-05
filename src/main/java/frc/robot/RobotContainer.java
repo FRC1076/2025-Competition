@@ -330,7 +330,7 @@ public class RobotContainer {
             );
 
         m_isAutoAligned
-            .onTrue(
+            .whileTrue(
                 m_LEDs.setStateTimed(LEDStates.AUTO_ALIGNED))
             .onChange(
                 Commands.runOnce(
