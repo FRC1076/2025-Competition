@@ -84,6 +84,7 @@ public class DynamicPIDController implements Sendable, AutoCloseable {
 
     /**
      * Allocates a PIDController with the given constants for kp, ki, and kd.
+     * This PIDController is dynamic because it accounts for varying loop times
      *
      * @param kp The proportional coefficient.
      * @param ki The integral coefficient.

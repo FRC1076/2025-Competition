@@ -47,7 +47,8 @@ public class DynamicProfiledPIDController implements Sendable {
     }
 
     /**
-     * Allocates a ProfiledPIDController with the given constants for Kp, Ki, and Kd.
+     * Allocates a ProfiledPIDController with the given constants for Kp, Ki, and Kd. 
+     * This ProfiledPIDController is dynamic because it accounts for variations in loop time
      *
      * @param Kp The proportional coefficient.
      * @param Ki The integral coefficient.
