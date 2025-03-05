@@ -67,6 +67,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -356,7 +357,8 @@ public class RobotContainer {
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
         NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
-        NamedCommands.registerCommand("intakeCoral", superstructureCommands.intakeCoral());
+        NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
+        NamedCommands.registerCommand("autonIntakeCoral", superstructureCommands.autonIntakeCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
         // NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
@@ -573,5 +575,11 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
         //return AutoBuilder.buildAuto("J4_K4_L4_A4");
         return m_autoChooser.getSelected();
+    }
+
+    public void zeroVoltages() {
+        m_drive.driveCO(new ChassisSpeeds());
+        m_elevator.setVoltage(0);
+        m_wrist.setVoltage(0);
     }
 }

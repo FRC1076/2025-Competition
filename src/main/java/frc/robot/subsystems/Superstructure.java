@@ -216,8 +216,8 @@ public class Superstructure {
             () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
         );
         
-        return Commands.either(
-            applyWristevatorStateDirect(position),
+        return //Commands.either(
+            //applyWristevatorStateDirect(position),
             Commands.sequence(
                 new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
                     .alongWith(Commands.runOnce(() -> {
@@ -236,8 +236,8 @@ public class Superstructure {
                 new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
                 new ProxyCommand(new DaemonCommand(
                     () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
-                    () -> false))),
-            () -> superState.getWristevatorState() == position);
+                    () -> false)));
+            //() -> superState.getWristevatorState() == position);
 
         /* Old code, we're not sure why it doesn't work
         Command wristPreMoveCommand = Commands.either(
@@ -572,7 +572,7 @@ public class Superstructure {
                     superstructure.holdIndexState(IndexState.TRANSFER)
                 )
                 .until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
-                Commands.waitSeconds(1),
+                Commands.waitSeconds(0.3),
                 Commands.waitUntil(m_transferBeamBreak),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.7), // Adjust rotations
@@ -620,6 +620,18 @@ public class Superstructure {
 
         public Command interruptWrist() {
             return superstructure.interruptWrist();
+        }
+
+        public Command preIntakeCoral() {
+            return superstructure.applyWristevatorState(WristevatorState.TRAVEL);
+        }
+
+        public Command autonIntakeCoral() {
+            return Commands.sequence(
+                superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
+                transferCoral(),
+                Commands.runOnce(() -> safeToMoveElevator = true)
+            );
         }
 
         public Command holdAlgae() {

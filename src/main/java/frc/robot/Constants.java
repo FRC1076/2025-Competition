@@ -287,7 +287,7 @@ public final class Constants {
 
         // Index State
         public enum IndexState {
-            TRANSFER(2),
+            TRANSFER(3),
             IDLE(0), // Never implemented, just an option
             BACKWARDS(-1);
             
@@ -307,7 +307,7 @@ public final class Constants {
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2, false), // Same as CORAL_DIRECT_INTAKE
 
-            L1(0.1349839121 + 0.00635, 90, false), // Placeholder
+            L1(0.42019, 23.9365, false), // Placeholder
             L2(0.910, -35, false), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35, false), //1.11252, -35),
             L4(2.109649 + 3 * 0.00635, -38, false),//-40.4130051, true), //1.8161, -45),
@@ -426,7 +426,7 @@ public final class Constants {
         public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0);
         public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(82.75);//81.15);
         // TODO: change max operator control voltages based on Andrew's opinion
-        public static final double defaultMaxOperatorControlVolts = 2;
+        public static final double defaultMaxOperatorControlVolts = 1.5;
         public static final double fasterMaxOperatorControlVolts = 4;
 
         public static final boolean leadMotorInverted = false;
@@ -540,7 +540,7 @@ public final class Constants {
             public static final double kV = 1.8105; // 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
-            public static final Constraints kProfileConstraints = new Constraints(4 * Math.PI, 2 * Math.PI); // new Constraints(10 * Math.PI, 6 * Math.PI);
+            public static final Constraints kProfileConstraints = new Constraints(4 * Math.PI, 3.5 * Math.PI); // new Constraints(10 * Math.PI, 6 * Math.PI);
         }
     }
 

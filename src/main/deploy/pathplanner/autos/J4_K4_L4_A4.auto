@@ -5,33 +5,22 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "stopAndRetract"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "1-J4"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autonShoot"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "J4_LOUT"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LOUT-K4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "1-J4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preL4"
+                }
+              }
+            ]
           }
         },
         {
@@ -41,15 +30,47 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "K4-LOUT"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "J4_LOUT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preIntakeCoral"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "LOUT-L4"
+            "name": "autonIntakeCoral"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LOUT-K4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preL4"
+                }
+              }
+            ]
           }
         },
         {
@@ -59,21 +80,72 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "L4-LOUT"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "K4-LOUT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preIntakeCoral"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "LOUT-A4"
+            "name": "autonIntakeCoral"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LOUT-L4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preL4"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
             "name": "autonShoot"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "L4-LOUT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preIntakeCoral"
+                }
+              }
+            ]
           }
         }
       ]
