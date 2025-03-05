@@ -257,10 +257,13 @@ public class DriveSubsystem extends SubsystemBase {
 
             return Commands.parallel(
                     directDriveToPoseCommand,
-                    Commands.runOnce(() -> {isAutoAligned = false;}),
+
                     Commands.sequence(
+                        Commands.runOnce(() -> {isAutoAligned = false;}),
+                        //Commands.print("HAS NOT AUTOALIGNED"),
                         Commands.waitUntil(directDriveToPoseCommand::atGoal),
-                        Commands.runOnce(() -> {isAutoAligned = true;})
+                        Commands.print("HAS AUTOALIGNED"),
+                        //Commands.runOnce(() -> {isAutoAligned = true;})
                     )
             );
         }

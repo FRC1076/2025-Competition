@@ -64,7 +64,7 @@ public class DirectDriveToPoseCommand extends Command {
     }
 
     public boolean atGoal() {
-        return targetPose.getTranslation().getDistance(m_drive.getPose().getTranslation()) > PathPlannerConstants.LEDpathToleranceMeters;
+        return targetPose.getTranslation().getDistance(m_drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;
     }
 
     @Override
