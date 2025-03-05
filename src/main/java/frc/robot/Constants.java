@@ -606,7 +606,8 @@ public final class Constants {
             HUMAN_PLAYER_CAN_DROP(false, true, false),
             ALGAE(true, true, false),
             AUTO_ALIGNED(false, false, true),
-            OFF(true, false, true);
+            OFF(true, false, true),
+            ELEVATOR_ZEROED(false, true, true);
 
             public final boolean onesPlace;
             public final boolean twosPlace;

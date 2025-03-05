@@ -24,6 +24,10 @@ public class LEDOnRIO implements LEDBase {
         .solid(Color.kGreen)
         .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
 
+    private final LEDPattern solidOrange = LEDPattern
+        .solid(Color.kOrange)
+        .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
+
     private final LEDPattern flashingPurple = LEDPattern
         .solid(Color.kPurple)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
@@ -72,20 +76,14 @@ public class LEDOnRIO implements LEDBase {
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.CORAL_INDEXED) {
             // Flashing white
-            flashingGreen.applyTo(m_buffer);
+            solidGreen.applyTo(m_buffer);
             m_leds.setData(m_buffer);
-        } else if (state == LEDStates.HUMAN_PLAYER_CAN_DROP) {
-            // Flashing green
-            flashingWhite.applyTo(m_buffer);
-            m_leds.setData(m_buffer);
-        } else if  (state == LEDStates.AUTO_ALIGNED) {
+        } else if (state == LEDStates.AUTO_ALIGNED) {
             // Rainbow
             rainbow.applyTo(m_buffer);
             m_leds.setData(m_buffer);
-        } else if (state == LEDStates.ALGAE) {
-            // Flashing dark blue?
-            // TODO: See if this color works
-            flashingDarkBlue.applyTo(m_buffer);
+        } else if (state == LEDStates.ELEVATOR_ZEROED) {
+            solidOrange.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.OFF) {
             off.applyTo(m_buffer);

@@ -121,6 +121,11 @@ public class ElevatorSubsystem extends SubsystemBase {
         return inputs.elevatorHeightMeters;
     }
 
+    /** This method isn't used for any command logic. It's only used for LEDs */
+    public boolean isZeroed() {
+        return homed;
+    }
+
     
     /* ######################################################################## */
     /* # Public Command Factories                                             # */

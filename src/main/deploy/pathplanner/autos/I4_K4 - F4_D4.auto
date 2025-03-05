@@ -1,0 +1,94 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "1-I4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preL4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autonShoot"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "I4-LOUT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preIntakeCoral"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autonIntakeCoral"
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "LOUT-K4"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preL4"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autonShoot"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "K4-LOUT-SLOW"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

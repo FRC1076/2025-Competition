@@ -108,7 +108,6 @@ public class Superstructure {
     private final WristSubsystem m_wrist;
     private final Elastic m_elastic;
     private final Trigger elevatorClutchTrigger;
-    private final LEDSubsystem m_led;
 
     public final SuperstructureCommandFactory CommandBuilder;
 
@@ -126,7 +125,6 @@ public class Superstructure {
         IndexSubsystem index,
         WristSubsystem wrist,
         Elastic elastic,
-        LEDSubsystem led,
         BooleanSupplier indexBeamBreak, // REMOVE
         BooleanSupplier transferBeamBreak, //returns true when beam broken
         BooleanSupplier grabberBeamBreak // REMOVE
@@ -136,7 +134,6 @@ public class Superstructure {
         m_index = index;
         m_wrist = wrist;
         m_elastic = elastic;
-        m_led = led;
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
@@ -178,6 +175,11 @@ public class Superstructure {
     /** This method isn't used for any command logic. It's only used to display on LEDs and Elastic */
     public boolean getSafeToMoveElevator(){
         return safeToMoveElevator;
+    }
+
+    /** This method isn't used for any command logic. It's only used to display on LEDs and Elastic */
+    public boolean getElevatorZeroed() {
+        return m_elevator.isZeroed();
     }
 
     public SuperstructureCommandFactory getCommandBuilder(){
@@ -601,8 +603,10 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     transferCoral()
                 ),
-                superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                Commands.runOnce(() -> safeToMoveElevator = true)
+                Commands.parallel(
+                    superstructure.applyWristevatorState(WristevatorState.TRAVEL),
+                    Commands.runOnce(() -> safeToMoveElevator = true)
+                )
             );
         }
 

@@ -42,19 +42,23 @@ public class LEDSubsystem extends SubsystemBase{
         this.io.setState(state);
     }
 
-    private Command updateBuilder(boolean isAutoAligned, boolean safeToMoveElevator) {
+    /*
+    private Command updateBuilder(boolean isAutoAligned, boolean safeToMoveElevator, boolean elevatorZeroed) {
         if (isAutoAligned) {
-            return setTempStateTimed(LEDStates.AUTO_ALIGNED, 2.0);
+            return setStateTimed(LEDStates.AUTO_ALIGNED, 2.0);
         } else if (safeToMoveElevator) {
-            return Commands.runOnce(() -> this.setState(LEDStates.CORAL_INDEXED));
+            return setStateTimed(LEDStates.CORAL_INDEXED, 2.0);
+        } else if (elevatorZeroed) {
+            return setStateTimed(LEDStates.ELEVATOR_ZEROED, 2.0);
         } else {
-            return Commands.runOnce(() -> this.setState(LEDStates.IDLE));
+            return Commands.runOnce(() -> {});
         }
     }
 
-    public Command update(BooleanSupplier isAutoAligned, BooleanSupplier safeToMoveElevator) {
-        return new DeferredCommand(() -> updateBuilder(isAutoAligned.getAsBoolean(), safeToMoveElevator.getAsBoolean()), Set.of(this));
+    public Command update(BooleanSupplier isAutoAligned, BooleanSupplier safeToMoveElevator, BooleanSupplier elevatorZeroed) {
+        return new DeferredCommand(() -> updateBuilder(isAutoAligned.getAsBoolean(), safeToMoveElevator.getAsBoolean(), elevatorZeroed.getAsBoolean()), Set.of(this));
     }
+    */
     
     /** Sets the state of the LEDs through the chosen IO layer,
      * and then reverts the LEDs to the IDLE state.
@@ -70,6 +74,15 @@ public class LEDSubsystem extends SubsystemBase{
         ).withTimeout(seconds);
     }
 
+    /** Sets the state of the LEDs through the chosen IO layer for a default of 2 seconds,
+     * and then reverts the LEDs to the IDLE state.
+     * 
+     * @param state The state to apply to the LEDs
+     */
+    public Command setStateTimed(LEDStates state) {
+        return setStateTimed(state, 2);
+    }
+
     /**
      * Sets the state of the LEDs through the chosen IO layer,
      * and then reverts the LEDs to the previous state.
@@ -79,9 +92,7 @@ public class LEDSubsystem extends SubsystemBase{
      */
     public Command setTempStateTimed(LEDStates state, double seconds) {
         return Commands.startEnd(
-            () -> {
-                setState(state);
-            },
+            () -> setState(state),
             () -> setState(this.previousState),
             this
         ).withTimeout(seconds);

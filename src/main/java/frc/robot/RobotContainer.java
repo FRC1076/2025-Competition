@@ -51,6 +51,7 @@ import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultMultiTagS
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.elevatorAccelerationTable;
+import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.VisionConstants.fieldLayout;
 
 import java.util.HashMap;
@@ -108,6 +109,7 @@ public class RobotContainer {
     private final Trigger m_safeToFeedCoral;
     private final Trigger m_safeToMoveElevator;
     private final Trigger m_isAutoAligned;
+    private final Trigger m_elevatorZeroed;
     private final Superstructure m_superstructure;
     private final SuperstructureVisualizer superVis;
     private final Elastic m_elastic;
@@ -221,7 +223,6 @@ public class RobotContainer {
             m_index, 
             m_wrist, 
             m_elastic,
-            m_LEDs,
             () -> false,
             m_transferBeamBreak, 
             () -> false
@@ -241,6 +242,7 @@ public class RobotContainer {
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
         m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
         m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+        m_elevatorZeroed = new Trigger(() -> m_elevator.isZeroed());
 
         superVis = new SuperstructureVisualizer(m_superstructure);
 
@@ -325,21 +327,23 @@ public class RobotContainer {
                 Commands.runOnce(() -> m_LEDs.setState(LEDStates.IDLE))
             );
 
-        m_isAutoAligned.onChange(
-            m_LEDs.update(
-                m_drive::isAutoAligned,
-                m_superstructure::getSafeToMoveElevator)
-            .alongWith(
+        m_isAutoAligned
+            .onTrue(
+                m_LEDs.setStateTimed(LEDStates.AUTO_ALIGNED))
+            .onChange(
                 Commands.runOnce(
-                    () -> m_elastic.updateIsAutoAligned(m_drive::isAutoAligned))));
+                    () -> m_elastic.updateIsAutoAligned(m_drive::isAutoAligned)));
         
-        m_safeToMoveElevator.onChange(
-            m_LEDs.update(
-                m_drive::isAutoAligned,
-                m_superstructure::getSafeToMoveElevator)
-            .alongWith(
+        m_safeToMoveElevator
+            .onTrue(
+                m_LEDs.setStateTimed(LEDStates.CORAL_INDEXED))
+            .onChange(
                 Commands.runOnce(
-                    () -> m_elastic.updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator))));
+                    () -> m_elastic.updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator)));
+
+        m_elevatorZeroed
+            .onTrue(
+                m_LEDs.setStateTimed(LEDStates.ELEVATOR_ZEROED));
 
         m_safeToFeedCoral.onChange(
             Commands.runOnce(
@@ -556,7 +560,12 @@ public class RobotContainer {
         ));
         */
 
-        m_operatorController.start().whileTrue(m_elevator.autoHome());
+        m_operatorController.start().whileTrue(
+            Commands.parallel(
+                m_elevator.autoHome(),
+                m_wrist.applyAngle(algaeTravelAngle)
+            )
+        );
     }
 
     private void configureBeamBreakTriggers() {
@@ -577,6 +586,10 @@ public class RobotContainer {
         return m_autoChooser.getSelected();
     }
 
+    /**
+     * Used to prevent the robot from moving quickly when teleop first starts, 
+     * before voltages are updated by the normal comands
+     */
     public void zeroVoltages() {
         m_drive.driveCO(new ChassisSpeeds());
         m_elevator.setVoltage(0);
