@@ -207,6 +207,7 @@ public final class Constants {
             public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.508, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
+            public static final double LEDpathToleranceMeters = 0.02;
 
             public static class Control {
                 public static final PIDConstants transPID = new PIDConstants(5, 0, 0);

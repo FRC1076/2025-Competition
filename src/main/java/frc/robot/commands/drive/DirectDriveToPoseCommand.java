@@ -63,6 +63,10 @@ public class DirectDriveToPoseCommand extends Command {
         followPathCommand.schedule();
     }
 
+    public boolean atGoal() {
+        return targetPose.getTranslation().getDistance(m_drive.getPose().getTranslation()) > PathPlannerConstants.LEDpathToleranceMeters;
+    }
+
     @Override
     public void execute(){
         followPathCommand.execute();

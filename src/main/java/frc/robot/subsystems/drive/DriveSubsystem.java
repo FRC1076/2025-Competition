@@ -253,12 +253,16 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public Command directDriveToPose(Pose2d targetPose) {
+            DirectDriveToPoseCommand directDriveToPoseCommand = new DirectDriveToPoseCommand(drive, targetPose);
+
             return Commands.parallel(
-                    new DirectDriveToPoseCommand(drive, targetPose),
-                    Commands.runOnce(() -> {isAutoAligned = false;}))
-                .andThen(
-                    Commands.runOnce(() -> {isAutoAligned = true;})
-                );
+                    directDriveToPoseCommand,
+                    Commands.runOnce(() -> {isAutoAligned = false;}),
+                    Commands.sequence(
+                        Commands.waitUntil(directDriveToPoseCommand::atGoal),
+                        Commands.runOnce(() -> {isAutoAligned = true;})
+                    )
+            );
         }
 
         public Command directDriveToNearestLeftBranch() {
