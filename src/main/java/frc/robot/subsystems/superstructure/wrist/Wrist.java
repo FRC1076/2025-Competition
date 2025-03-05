@@ -103,7 +103,7 @@ public class Wrist {
     public void periodic() {
         //System.out.println("Wrist Angle: " + this.getAngleRadians());
         io.updateInputs(inputs);
-        Logger.recordOutput("Wrist/PositionGoal", m_feedbackController.getGoal().position);
+        //Logger.recordOutput("Wrist/PositionGoal", m_feedbackController.getGoal().position);
         Logger.processInputs("Wrist", inputs);
         autoControlGoal.ifPresent(
             (goal) -> {
