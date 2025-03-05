@@ -6,12 +6,12 @@ package frc.robot.subsystems.elevator;
 
 import frc.robot.Constants.ElevatorConstants;
 import lib.control.DynamicElevatorFeedforward;
+import lib.control.DynamicProfiledPIDController;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -30,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-    private final ProfiledPIDController m_profiledPIDController;
+    private final DynamicProfiledPIDController m_profiledPIDController;
     private final DynamicElevatorFeedforward m_feedforwardController;
     
     private boolean homed = false;
@@ -38,13 +38,16 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private final SysIdRoutine m_elevatorSysIdRoutine;
 
-    public ElevatorSubsystem(ElevatorIO io){
+    public ElevatorSubsystem(ElevatorIO io, DoubleSupplier periodSupplier){
         this.io = io;
         var controlConstants = io.getControlConstants();
-        m_profiledPIDController = new ProfiledPIDController(
+        m_profiledPIDController = new DynamicProfiledPIDController(
             controlConstants.kP(),
             controlConstants.kI(),
             controlConstants.kD(), 
+            periodSupplier,
+            0.02,
+            0.05,
             controlConstants.kProfileConstraints()
         );
 

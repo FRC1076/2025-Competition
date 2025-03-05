@@ -12,8 +12,11 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+import edu.wpi.first.wpilibj.Timer;
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -22,6 +25,9 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
  */
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
+
+    private double m_lastLoopTimeSeconds = 0.0;
+    private double m_lastTimeSeconds = Timer.getFPGATimestamp();
 
     private RobotContainer m_robotContainer;
 
@@ -91,6 +97,10 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     //CommandScheduler.getInstance().printWatchdogEpochs(); // WARNING: Uses a lot of resources
 
+    m_lastLoopTimeSeconds = Timer.getFPGATimestamp() - m_lastTimeSeconds;
+    m_lastTimeSeconds = Timer.getFPGATimestamp();
+
+    m_robotContainer.updateLoopTime(m_lastLoopTimeSeconds);
     //m_robotContainer.updateInterface();
   }
 
