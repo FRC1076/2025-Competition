@@ -605,7 +605,7 @@ public class Superstructure {
                 ),
                 Commands.parallel(
                     superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                    Commands.runOnce(() -> safeToMoveElevator = true)
+                    Commands.run(() -> safeToMoveElevator = true)
                 )
             );
         }

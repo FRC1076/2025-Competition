@@ -9,6 +9,7 @@ import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
@@ -18,6 +19,7 @@ import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 
 public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
+    private Field2d field;
     private SendableChooser<AutonSides> autonSideChooser;
     private HashMap<Alliance, String> AllianceNames; 
     private Alliance currentAllianceName;
@@ -26,6 +28,9 @@ public class Elastic {
         /* This is a dropdown menu on the SmartDashboard that allows the user to select whether 
         the auton is on the left (default) or the right side of the field.
         */
+        field = new Field2d();
+        SmartDashboard.putData(field);
+
         autonSideChooser = new SendableChooser<>();
         autonSideChooser.setDefaultOption(GameConstants.autonSide.name(), GameConstants.autonSide);
         autonSideChooser.addOption(AutonSides.Left.name(), AutonSides.Left);
