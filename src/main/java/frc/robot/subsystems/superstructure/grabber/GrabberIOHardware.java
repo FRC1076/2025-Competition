@@ -19,7 +19,7 @@ import edu.wpi.first.math.filter.LinearFilter;
 public class GrabberIOHardware implements GrabberIO {
 
     
-    private static final double algaeCurrentThreshold = 15.0;
+    private static final double algaeCurrentThreshold = 15.0; // TODO: TUNE THIS
     
     private final LinearFilter currentFilter = LinearFilter.movingAverage(5);
     

@@ -497,6 +497,10 @@ public class Superstructure extends SubsystemBase {
             return applyState(SuperState.PRE_NET); // TODO: WRITE LOGIC FOR NET SCORING
         }
 
+        public Command scoreCoralAuton() {
+            return applyGrabberRotationsBangBang(12,3);
+        }
+
     }
 
 }
