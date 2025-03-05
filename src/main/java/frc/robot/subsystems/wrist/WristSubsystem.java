@@ -38,7 +38,7 @@ public class WristSubsystem extends SubsystemBase {
             controlConstants.kD(),
             periodSupplier,
             0.02,
-            0.05, 
+            0.1, 
             controlConstants.kProfileConstraints()
         );
 
