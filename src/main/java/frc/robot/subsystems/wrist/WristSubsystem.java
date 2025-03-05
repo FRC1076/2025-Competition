@@ -6,12 +6,12 @@ package frc.robot.subsystems.wrist;
 
 import frc.robot.Constants.WristConstants;
 import lib.control.DynamicArmFeedforward;
+import lib.control.DynamicProfiledPIDController;
 
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,20 +22,23 @@ import org.littletonrobotics.junction.Logger;
 
 public class WristSubsystem extends SubsystemBase {
     private final WristIO io;
-    private final ProfiledPIDController m_profiledPIDController;
+    private final DynamicProfiledPIDController m_profiledPIDController;
     private final DynamicArmFeedforward m_feedforwardController;
     private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
     private final SysIdRoutine sysid;
     
 
-    public WristSubsystem(WristIO io) {
+    public WristSubsystem(WristIO io, DoubleSupplier periodSupplier) {
         this.io = io;
 
         var controlConstants = io.getControlConstants();
-        m_profiledPIDController = new ProfiledPIDController(
+        m_profiledPIDController = new DynamicProfiledPIDController(
             controlConstants.kP(),
             controlConstants.kI(),
-            controlConstants.kD(), 
+            controlConstants.kD(),
+            periodSupplier,
+            0.02,
+            0.05, 
             controlConstants.kProfileConstraints()
         );
 

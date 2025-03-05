@@ -145,6 +145,8 @@ public class RobotContainer {
 
     private final TeleopDriveCommand teleopDriveCommand;
 
+    private double lastLoopTime = 0;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
@@ -170,8 +172,8 @@ public class RobotContainer {
             m_visionSim = null;
             m_elastic = new Elastic();
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
-            m_elevator = new ElevatorSubsystem(new ElevatorIOHardware());
-            m_wrist = new WristSubsystem(new WristIOHardware());
+            m_elevator = new ElevatorSubsystem(new ElevatorIOHardware(), this::getLoopTime);
+            m_wrist = new WristSubsystem(new WristIOHardware(), this::getLoopTime);
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
             m_index = new IndexSubsystem(new IndexIOHardware());
             m_LEDs = new LEDSubsystem(new LEDOnRIO());
@@ -192,8 +194,8 @@ public class RobotContainer {
         } else if (SystemConstants.currentMode == 1) {
             m_elastic = new Elastic();
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
-            m_elevator = new ElevatorSubsystem(new ElevatorIOSim());
-            m_wrist = new WristSubsystem(new WristIOSim());
+            m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
+            m_wrist = new WristSubsystem(new WristIOSim(), this::getLoopTime);
             m_grabber = new GrabberSubsystem(new GrabberIOSim());
             m_index = new IndexSubsystem(new IndexIOSim());
             m_LEDs = new LEDSubsystem(new LEDIOSim());
@@ -594,5 +596,13 @@ public class RobotContainer {
         m_drive.driveCO(new ChassisSpeeds());
         m_elevator.setVoltage(0);
         m_wrist.setVoltage(0);
+    }
+
+    public void updateLoopTime(double loopTime) {
+        lastLoopTime = loopTime;
+    }
+
+    public double getLoopTime() {
+        return lastLoopTime;
     }
 }
