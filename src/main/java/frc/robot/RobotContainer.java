@@ -581,6 +581,10 @@ public class RobotContainer {
             m_operatorController::getLeftX
         ));
         */
+        
+        m_operatorController.rightBumper()
+            .onTrue(superstructureCommands.removeAlgae())
+            .whileFalse(superstructureCommands.stopGrabber());
 
         m_operatorController.start().whileTrue(
             Commands.parallel(

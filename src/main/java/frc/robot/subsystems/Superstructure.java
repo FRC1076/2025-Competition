@@ -496,6 +496,10 @@ public class Superstructure {
             );
         }
 
+        public Command removeAlgae(){
+            return superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE);
+        }
+
         /**
          * Set elevator and wrist to L1 preset
          */
