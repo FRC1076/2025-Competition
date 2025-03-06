@@ -361,12 +361,16 @@ public class Superstructure {
     }
 
     private Command interruptWrist(){
-        return Commands.runOnce(() -> m_wrist.getCurrentCommand().cancel(), m_wrist);
+        return Commands.runOnce(() -> {
+            if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
+        });
         
     }
 
     private Command interruptElevator(){
-        return Commands.runOnce(() -> m_elevator.getCurrentCommand().cancel(), m_elevator);
+        return Commands.runOnce(() -> {
+            if(m_elevator.getCurrentCommand() != null) m_elevator.getCurrentCommand().cancel();
+        });
     }
 
     /**
@@ -621,7 +625,15 @@ public class Superstructure {
                     applyGrabberState(GrabberState.IDLE)
                 );
         }
+        
+        public Command interruptWristevator() {
+            return Commands.parallel(
+                superstructure.interruptElevator(),
+                superstructure.interruptWrist()
+            );
+        }
 
+        /*
         public Command interruptElevator() {
             return superstructure.interruptElevator();
         }
@@ -629,6 +641,7 @@ public class Superstructure {
         public Command interruptWrist() {
             return superstructure.interruptWrist();
         }
+        */
 
         public Command preIntakeCoral() {
             return superstructure.applyWristevatorState(WristevatorState.TRAVEL);

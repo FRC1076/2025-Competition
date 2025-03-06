@@ -253,18 +253,19 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public Command directDriveToPose(Pose2d targetPose) {
+            return new DirectDriveToPoseCommand(drive, targetPose);
+            /*
             DirectDriveToPoseCommand directDriveToPoseCommand = new DirectDriveToPoseCommand(drive, targetPose);
 
             return Commands.parallel(
                     directDriveToPoseCommand,
                     Commands.sequence(
                         Commands.runOnce(() -> {isAutoAligned = false;}),
-                        Commands.print("HAS NOT AUTOALIGNED"),
-                        Commands.waitUntil(directDriveToPoseCommand.atGoal()),
-                        Commands.print("HAS AUTOALIGNED"),
+                        Commands.waitUntil(() -> {return targetPose.getTranslation().getDistance(drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;}),
                         Commands.run(() -> {isAutoAligned = true;})
                     )
-            );
+
+            );*/
         }
 
         public Command directDriveToNearestLeftBranch() {

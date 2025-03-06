@@ -51,7 +51,7 @@ public class LEDOnRIO implements LEDBase {
     private final LEDPattern rainbow = LEDPattern
         .rainbow(255, 255)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
-        .scrollAtRelativeSpeed(Percent.per(Seconds).of(25));
+        .scrollAtRelativeSpeed(Percent.per(Seconds).of(100));
 
     private final LEDPattern off = LEDPattern.kOff;
     

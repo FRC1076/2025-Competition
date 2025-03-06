@@ -67,9 +67,8 @@ public class LEDSubsystem extends SubsystemBase{
      * @param seconds The number of seconds to wait before reverting to the IDLE state
       */
     public Command setStateTimed(LEDStates state, double seconds) {
-        return Commands.runEnd(
+        return Commands.run(
             () -> setState(state),
-            () -> setState(LEDStates.IDLE),
             this
         ).withTimeout(seconds);
     }

@@ -103,8 +103,7 @@ public class RobotContainer {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final Trigger m_transferBeamBreak;
-    private final Trigger m_interruptElevator;
-    private final Trigger m_interruptWrist;
+    private final Trigger m_interruptDrive;
     private final Trigger m_isDisabled;
     private final Trigger m_safeToFeedCoral;
     private final Trigger m_safeToMoveElevator;
@@ -160,8 +159,7 @@ public class RobotContainer {
     
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
-        m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
-        m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
+        m_interruptDrive = m_driverController.leftTrigger();
 
         m_isDisabled = new Trigger(DriverStation::isDisabled);
     
@@ -275,6 +273,8 @@ public class RobotContainer {
             m_superstructure.holdIndexState(IndexState.BACKWARDS),
             Commands.idle(m_index)
         ));
+
+        m_LEDs.setDefaultCommand(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
 
         // Configure named commands for auton in PathPlanner
         configureNamedCommands();
@@ -392,6 +392,8 @@ public class RobotContainer {
         m_driverController.b().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
         );
+
+        m_interruptDrive.onTrue(m_drive.getDefaultCommand());
         
         // Point to reef
         m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
@@ -417,7 +419,7 @@ public class RobotContainer {
             );
 
         m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
-            .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL));
+            .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL, 5));
 
         m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
 
@@ -562,10 +564,7 @@ public class RobotContainer {
         );
 
         // Interrupts any elevator command when the the left joystick is moved
-        m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
-
-        // Interrupts any wrist command when the right joystick is moved
-        m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
+        // m_operatorController.leftStick().onTrue(superstructureCommands.interruptWristevator());
 
         /*
         m_operatorController.start().whileTrue(m_elevator.zeroEncoderJoystickControl(
