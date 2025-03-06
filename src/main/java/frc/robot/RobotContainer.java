@@ -406,7 +406,18 @@ public class RobotContainer {
 
         // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
-            .whileTrue(teleopDriveCommand.applyFPVDrive());
+            .whileTrue(
+                Commands.parallel(
+                    teleopDriveCommand.applyDoubleClutch(),
+                    Commands.startEnd(
+                        () -> slewRateLimiterEnabled = false,
+                        () -> slewRateLimiterEnabled = true
+                    )
+                )
+            );
+
+        m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
+            .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL));
 
         m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
 
