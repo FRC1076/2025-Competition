@@ -360,14 +360,14 @@ public class Superstructure {
         );
     }
 
-    private Command interruptWrist(){
+    public Command interruptWrist(){
         return Commands.runOnce(() -> {
             if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
         });
         
     }
 
-    private Command interruptElevator(){
+    public Command interruptElevator(){
         return Commands.runOnce(() -> {
             if(m_elevator.getCurrentCommand() != null) m_elevator.getCurrentCommand().cancel();
         });
@@ -626,14 +626,15 @@ public class Superstructure {
                 );
         }
         
+        /*
         public Command interruptWristevator() {
             return Commands.parallel(
                 superstructure.interruptElevator(),
                 superstructure.interruptWrist()
             );
-        }
+        }*/
 
-        /*
+        
         public Command interruptElevator() {
             return superstructure.interruptElevator();
         }
@@ -641,7 +642,7 @@ public class Superstructure {
         public Command interruptWrist() {
             return superstructure.interruptWrist();
         }
-        */
+        
 
         public Command preIntakeCoral() {
             return superstructure.applyWristevatorState(WristevatorState.TRAVEL);

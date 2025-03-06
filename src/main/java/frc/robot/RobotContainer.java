@@ -104,6 +104,8 @@ public class RobotContainer {
     private final IndexSubsystem m_index;
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptDrive;
+    private final Trigger m_interruptElevator;
+    private final Trigger m_interruptWrist;
     private final Trigger m_isDisabled;
     private final Trigger m_safeToFeedCoral;
     private final Trigger m_safeToMoveElevator;
@@ -160,6 +162,8 @@ public class RobotContainer {
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
         m_interruptDrive = m_driverController.leftTrigger();
+        m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
+        m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
 
         m_isDisabled = new Trigger(DriverStation::isDisabled);
     
@@ -562,6 +566,12 @@ public class RobotContainer {
         ).onFalse(
             superstructureCommands.stopGrabber()
         );
+
+        // Interrupts any elevator command when the the left joystick is moved
+        m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
+
+        // Interrupts any wrist command when the right joystick is moved
+        m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
 
         // Interrupts any elevator command when the the left joystick is moved
         // m_operatorController.leftStick().onTrue(superstructureCommands.interruptWristevator());
