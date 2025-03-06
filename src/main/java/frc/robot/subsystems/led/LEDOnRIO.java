@@ -75,15 +75,16 @@ public class LEDOnRIO implements LEDBase {
             solidPurple.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.CORAL_INDEXED) {
-            // Flashing white
-            solidGreen.applyTo(m_buffer);
+            flashingPurple.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.AUTO_ALIGNED) {
-            // Rainbow
-            rainbow.applyTo(m_buffer);
+            solidGreen.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.ELEVATOR_ZEROED) {
             solidOrange.applyTo(m_buffer);
+            m_leds.setData(m_buffer);
+        } else if (state == LEDStates.HUMAN_PLAYER_SIGNAL) {
+            rainbow.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.OFF) {
             off.applyTo(m_buffer);
