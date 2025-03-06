@@ -27,6 +27,7 @@ import frc.robot.subsystems.superstructure.grabber.Grabber;
 import frc.robot.subsystems.superstructure.wrist.Wrist;
 import frc.robot.subsystems.superstructure.wrist.WristIOHardware;
 import frc.robot.subsystems.superstructure.wrist.WristIOSim;
+import lib.control.DynamicSlewRateLimiter;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.PhotonVisionSource;
@@ -44,6 +45,7 @@ import frc.robot.subsystems.superstructure.Superstructure.SuperstructureCommandF
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
+import static frc.robot.Constants.DriveConstants.DriverControlConstants.elevatorAccelerationTable;
 import static frc.robot.Constants.VisionConstants.fieldLayout;
 
 import java.util.HashMap;
@@ -119,6 +121,11 @@ public class RobotContainer {
 
     private final TeleopDriveCommand teleopDriveCommand;
 
+    
+    private final DynamicSlewRateLimiter xLimiter;
+    private final DynamicSlewRateLimiter yLimiter;
+    private boolean slewRateLimiterEnabled = true;
+
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
 
@@ -169,9 +176,24 @@ public class RobotContainer {
 
         superVis = new SuperstructureVisualizer(m_superstructure);
 
+        
+        xLimiter = new DynamicSlewRateLimiter(
+            () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
+            m_elevator.getPositionMeters()
+        );
+
+        yLimiter = new DynamicSlewRateLimiter(
+            () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
+            m_elevator.getPositionMeters()
+        );
+
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> -m_driverController.getLeftY(), 
-            () -> -m_driverController.getLeftX(),
+            () -> slewRateLimiterEnabled
+                ? yLimiter.calculate(-m_driverController.getLeftY())
+                : -m_driverController.getLeftY(),
+            () -> slewRateLimiterEnabled
+                ? xLimiter.calculate(-m_driverController.getLeftX())
+                : -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()
         );
 
@@ -274,6 +296,10 @@ public class RobotContainer {
         ).onTrue(new InstantCommand(
             () -> m_drive.resetHeading()
         )); 
+
+        m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
+
+        m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
     }
 
     private void configureOperatorBindings() {
@@ -345,7 +371,7 @@ public class RobotContainer {
             .onTrue(superstructureCommands.preL4());
         
         //TODO: IMPLEMENT ALGAE IN SUPERSTRUCTURE
-        /* 
+        
         // Processor
         m_operatorController.x()
             .and(m_operatorController.leftBumper())
@@ -354,12 +380,12 @@ public class RobotContainer {
         // Low Algae Intake
         m_operatorController.a()
             .and(m_operatorController.leftBumper())
-            .onTrue(superstructureCommands.lowAlgaeIntake());
+            .onTrue(superstructureCommands.preLowIntake());
 
         // High Algae Intake
         m_operatorController.b()
             .and(m_operatorController.leftBumper())
-            .onTrue(superstructureCommands.highAlgaeIntake());
+            .whileTrue(superstructureCommands.preHighIntake());
 
         // Net
         m_operatorController.y()
@@ -367,14 +393,15 @@ public class RobotContainer {
             .onTrue(superstructureCommands.preNet());
 
         // Ground Algae Intake
-        m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
-        */
+        m_operatorController.leftTrigger()
+            .and(m_operatorController.leftBumper())
+            .onTrue(superstructureCommands.preGroundIntake());
 
         m_operatorController.leftTrigger()
             .and(m_operatorController.leftBumper().negate())
             .whileTrue(superstructureCommands.autoCoralIntake());
 
-        // Does Grabber action, ie. outtake coral/algae depending 
+        // Does Grabber action, ie. outtake coral/algae depending on superstate
         m_operatorController.rightTrigger().whileTrue(superstructureCommands.doGrabberAction());
 
         // Retract mechanisms and stop grabber

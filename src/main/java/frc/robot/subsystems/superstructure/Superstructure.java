@@ -129,9 +129,9 @@ public class Superstructure extends SubsystemBase {
 
         premoveCommandSupplierMap.put(PossessionState.EMPTY,() -> applyWristAngle(emptyTravelRadians));
         premoveCommandSupplierMap.put(PossessionState.CORAL,() -> Commands.sequence(
-            applyElevatorHeight(coralTravelHeight).onlyIf(() -> m_elevator.getPositionMeters() < coralTravelHeight),
+            applyElevatorHeight(coralTravelHeight).onlyIf(() -> m_elevator.getPositionMeters() < (coralTravelHeight-0.01)),
             applyWristAngle(coralTravelRadians)
-        ));
+        )); // A small buffer is added to coralTravelHeight for safety
         premoveCommandSupplierMap.put(PossessionState.ALGAE, () -> applyWristAngle(algaeTravelRadians));
         premoveCommandFactory = new SelectWithFallbackCommandFactory<>(premoveCommandSupplierMap, Commands::none, () -> possession);
 
@@ -430,7 +430,7 @@ public class Superstructure extends SubsystemBase {
                 applyState(SuperState.CORAL_INTAKE).until(getSuperstructure()::atGoal),
                 Commands.waitUntil(m_transferBeamBreak), 
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),//Makes sure the coral has fully passed the transfer beambreak before activating the Bang-Bang controller
-                applyGrabberRotationsBangBang(kCoralEffectorVoltage,0.5), // TODO: Tune these constants
+                applyGrabberRotationsBangBang(kCoralEffectorVoltage,2), // TODO: Tune these constants
                 applyState(SuperState.CORAL_TRAVEL) // Moves wristivator into the travel position
             );
         }

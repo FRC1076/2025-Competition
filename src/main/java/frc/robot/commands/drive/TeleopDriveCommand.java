@@ -33,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
@@ -131,8 +132,10 @@ public class TeleopDriveCommand extends Command {
             };
         } else {
             requestGenerator = (vx,vy,omega) -> {
-                return new ApplyFieldSpeeds()
-                    .withSpeeds(new ChassisSpeeds(vx,vy,omega))
+                return new FieldCentric()
+                    .withVelocityX(vx)
+                    .withVelocityY(vy)
+                    .withRotationalRate(omega)
                     .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
             };
         }
