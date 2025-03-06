@@ -249,12 +249,12 @@ public class RobotContainer {
         superVis = new SuperstructureVisualizer(m_superstructure);
 
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            slewRateLimiterEnabled
-                ? () -> yLimiter.calculate(-m_driverController.getLeftY())
-                : () -> -m_driverController.getLeftY(),
-            slewRateLimiterEnabled
-                ? () -> xLimiter.calculate(-m_driverController.getLeftX())
-                : () -> -m_driverController.getLeftX(),
+            () -> slewRateLimiterEnabled
+                ? yLimiter.calculate(-m_driverController.getLeftY())
+                : -m_driverController.getLeftY(),
+            () -> slewRateLimiterEnabled
+                ? xLimiter.calculate(-m_driverController.getLeftX())
+                : -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()
         );
 
