@@ -43,6 +43,7 @@ import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
+import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.LEDConstants.LEDStates;
 import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
@@ -116,6 +117,7 @@ public class RobotContainer {
     private final Elastic m_elastic;
     private final LEDSubsystem m_LEDs;
 
+    private boolean m_autonState = false;
 
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController m_driverController =
@@ -172,12 +174,18 @@ public class RobotContainer {
         
         if (SystemConstants.currentMode == 0) {
             m_visionSim = null;
-            m_elastic = new Elastic();
+            m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
+
             // BLUE
-            m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180)));
+            if(GameConstants.teamColor == Alliance.Blue){
+                m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180)));
+            }
             // RED
-            //m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0)));
+            else{ 
+                m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0)));
+            }
+            
             m_elevator = new ElevatorSubsystem(new ElevatorIOHardware(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOHardware(), this::getLoopTime);
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
@@ -198,7 +206,7 @@ public class RobotContainer {
                 );
             }
         } else if (SystemConstants.currentMode == 1) {
-            m_elastic = new Elastic();
+            m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOSim(), this::getLoopTime);
@@ -632,5 +640,13 @@ public class RobotContainer {
 
     public double getLoopTime() {
         return lastLoopTime;
+    }
+
+    public void setAutonState(boolean inAuton) {
+        m_autonState = inAuton;
+    }
+
+    public boolean getAutonState() {
+        return m_autonState;
     }
 }

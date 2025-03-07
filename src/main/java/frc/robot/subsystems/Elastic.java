@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
+import frc.robot.RobotContainer;
 
 public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
@@ -23,8 +24,10 @@ public class Elastic {
     private SendableChooser<AutonSides> autonSideChooser;
     private HashMap<Alliance, String> AllianceNames; 
     private Alliance currentAllianceName;
+    private final RobotContainer m_robotContainer;
 
-    public Elastic() {
+    public Elastic(RobotContainer robotContainer) {
+        m_robotContainer = robotContainer;
         /* This is a dropdown menu on the SmartDashboard that allows the user to select whether 
         the auton is on the left (default) or the right side of the field.
         */
@@ -68,7 +71,7 @@ public class Elastic {
 
     /** Gets the selected team color from the driver station */
     public Alliance getSelectedTeamColor() {
-        return DriverStation.getAlliance().orElse(Alliance.Blue);
+        return GameConstants.teamColor;
     }
 
     public void putSelectedTeamColor() {
@@ -108,6 +111,6 @@ public class Elastic {
     /** Returns true to mirror the auton from the left side to the right side
      * when in autonomous mode and the auton is selected as mirrored to the right side */
     public boolean getPathPlannerMirrored() {
-        return DriverStation.isAutonomous() && autonSideChooser.getSelected().isRightSide;
+        return m_robotContainer.getAutonState() && (GameConstants.autonSide == AutonSides.Right);//autonSideChooser.getSelected().isRightSide;
     }
 }

@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
@@ -126,7 +127,7 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static TeamColors kTeamColor = TeamColors.kTeamColorBlue;
+        public static Alliance teamColor = Alliance.Blue;
         public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
@@ -465,7 +466,7 @@ public final class Constants {
             public static final double kV = 3.1265;  //2.8829; // 12.0 // velocity game
             public static final double kA = 0.0; //Acceleration Gain
 
-            public static final Constraints kProfileConstraints = new Constraints(4, 6);
+            public static final Constraints kProfileConstraints = new Constraints(4, 5.25);
         }
     }
 
