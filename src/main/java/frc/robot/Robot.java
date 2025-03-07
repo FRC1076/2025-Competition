@@ -56,7 +56,9 @@ public class Robot extends LoggedRobot {
     if (Constants.SystemConstants.currentMode == 0){
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
-        Logger.addDataReceiver(new NT4Publisher());
+        if (Constants.SystemConstants.streamToNT) {
+            Logger.addDataReceiver(new NT4Publisher());
+        }
     } else if (Constants.SystemConstants.currentMode == 1) {
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());

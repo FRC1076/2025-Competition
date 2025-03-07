@@ -202,6 +202,7 @@ public final class Constants {
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
+        public static final boolean streamToNT = true;
     }
     
     public static class DriveConstants {
