@@ -667,17 +667,19 @@ public final class Constants {
             public static final int kFlashingStateBrightness = 100;
         }
 
-        public static enum LEDStates {
+        public static enum LEDState {
             IDLE(false, false, false),
-            CORAL(true, false, false),
-            HUMAN_PLAYER_CAN_DROP(false, true, false),
+            CORAL_INDEXED(true, false, false),
+            HUMAN_PLAYER_SIGNAL(false, true, false),
             ALGAE(true, true, false),
-            AUTO_ALIGNED(false, false, true);
+            AUTO_ALIGNING(false, false, true),
+            OFF(true, false, true),
+            ZEROING_ELEVATOR(false, true, true);
 
             public final boolean onesPlace;
             public final boolean twosPlace;
             public final boolean foursPlace;
-            private LEDStates(boolean onesPlace, boolean twosPlace, boolean foursPlace) {
+            private LEDState(boolean onesPlace, boolean twosPlace, boolean foursPlace) {
                 this.onesPlace = onesPlace;
                 this.twosPlace = twosPlace;
                 this.foursPlace = foursPlace;

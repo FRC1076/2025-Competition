@@ -8,7 +8,7 @@ package frc.robot.subsystems.led;
 
 import frc.robot.Constants.LEDConstants;
 import frc.robot.Constants.LEDConstants.LEDDIOConstants;
-import frc.robot.Constants.LEDConstants.LEDStates;
+import frc.robot.Constants.LEDConstants.LEDState;
 
 import edu.wpi.first.wpilibj.DigitalOutput;
 
@@ -31,7 +31,7 @@ public class LEDIODigitalPins implements LEDBase {
      * This implementation is specifically if you are using digital pins.
      */
     @Override
-    public void setState(LEDStates state) {
+    public void setState(LEDState state) {
         // LEDStates is an enum, and state is an instance of that enum,
         // and .onesPlace is a boolean element of that enum.
         m_pin1.set(state.onesPlace);

@@ -14,6 +14,7 @@ import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.TunerConstants;
 import frc.robot.subsystems.led.LEDIODigitalPins;
 import frc.robot.subsystems.led.LEDIOSim;
+import frc.robot.subsystems.led.LEDOnRIO;
 import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.superstructure.elevator.Elevator;
 import frc.robot.subsystems.superstructure.elevator.ElevatorIOHardware;
@@ -151,7 +152,7 @@ public class RobotContainer {
             m_wrist = new Wrist(new WristIOHardware());
             m_grabber = new Grabber(new GrabberIOHardware());
             m_funnel = new Funnel(new FunnelIOHardware());
-            m_LEDs = new LEDSubsystem(new LEDIODigitalPins());
+            m_LEDs = new LEDSubsystem(new LEDOnRIO());
             m_vision = new VisionSubsystem(m_drive::getPose)
                 .withMeasurementConsumer(m_drive::addVisionMeasurement);
         } else if (SystemConstants.currentMode == 1) {
@@ -171,7 +172,7 @@ public class RobotContainer {
             m_wrist, 
             m_grabber, 
             m_funnel, 
-            m_transferBeamBreak
+            () -> m_transferBeamBreak.getAsBoolean()
         );
 
         superVis = new SuperstructureVisualizer(m_superstructure);
@@ -219,11 +220,11 @@ public class RobotContainer {
         m_autoChooser = AutoBuilder.buildAutoChooser();
         m_autoChooser.addOption(
             "DoNothingBlue180", 
-            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))))
+            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.k180deg)))
         );
         m_autoChooser.addOption(
             "DoNothingRed0", 
-            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0))))
+            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.kZero)))
         );
         SmartDashboard.putData(m_autoChooser);
     }
@@ -257,11 +258,11 @@ public class RobotContainer {
     private void configureDriverBindings() {
         
         m_driverController.leftTrigger().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            m_drive.CommandBuilder.directDriveToNearestLeftBranch().deadlineFor(m_LEDs.applyAutoAlignFlag())
         );
 
         m_driverController.rightTrigger().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            m_drive.CommandBuilder.directDriveToNearestRightBranch().deadlineFor(m_LEDs.applyAutoAlignFlag())
         );
 
         // Point to reef

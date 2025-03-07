@@ -4,11 +4,11 @@
 
 package frc.robot.subsystems.led;
 
-import frc.robot.Constants.LEDConstants.LEDStates;
+import frc.robot.Constants.LEDConstants.LEDState;
 
 public class LEDIOSim implements LEDBase {
     @Override
-    public void setState(LEDStates state) {
+    public void setState(LEDState state) {
         // do nothing because there are no simulated LEDs
     }
 }
