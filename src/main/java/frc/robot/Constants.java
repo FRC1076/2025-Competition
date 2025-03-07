@@ -425,7 +425,7 @@ public final class Constants {
         
         public static final double elevatorPositionToleranceMeters = Units.inchesToMeters(0.5);
         public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0);
-        public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(82.75);//81.15);
+        public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(83.25);//81.15);
         // TODO: change max operator control voltages based on Andrew's opinion
         public static final double defaultMaxOperatorControlVolts = 1.5;
         public static final double fasterMaxOperatorControlVolts = 4;

@@ -174,6 +174,10 @@ public class RobotContainer {
             m_visionSim = null;
             m_elastic = new Elastic();
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
+            // BLUE
+            m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180)));
+            // RED
+            //m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0)));
             m_elevator = new ElevatorSubsystem(new ElevatorIOHardware(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOHardware(), this::getLoopTime);
             m_grabber = new GrabberSubsystem(new GrabberIOHardware());
