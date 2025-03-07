@@ -68,6 +68,8 @@ public class DirectDriveToPoseCommand extends Command {
     
     @Override
     public void end(boolean interrupted) {
-        followPathCommand.end(interrupted);
+        if (interrupted) {
+            followPathCommand.cancel(); // Only cancels the followPathCommand when the directDriveToPoseCommand is interrupted
+        }
     }
 }
