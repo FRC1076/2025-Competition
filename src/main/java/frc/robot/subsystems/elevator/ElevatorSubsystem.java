@@ -47,7 +47,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             controlConstants.kD(), 
             periodSupplier,
             0.02,
-            0.3,
+            0.2,
             controlConstants.kProfileConstraints()
         );
 

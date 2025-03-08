@@ -6,6 +6,7 @@ package frc.robot.subsystems.drive;
 
 import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.commands.drive.DirectDriveToPoseCommand;
 import frc.robot.commands.drive.TeleopDriveCommand;
@@ -96,7 +97,7 @@ public class DriveSubsystem extends SubsystemBase {
                     PathPlannerConstants.Control.rotPID
                 ),
                 RobotConfig.fromGUISettings(),
-                () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                () -> GameConstants.teamColor == Alliance.Red,//DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
                 this
             );
         } catch (Exception ex) {
@@ -117,20 +118,26 @@ public class DriveSubsystem extends SubsystemBase {
         // io.updateModuleInputs(frontRightInputs, 1);
         // io.updateModuleInputs(rearLeftInputs, 2);
         // io.updateModuleInputs(rearRightInputs, 3);
-        Logger.processInputs("Drive", driveInputs);
+        //Logger.processInputs("Drive", driveInputs);
         // Logger.processInputs("Drive/FrontLeft", frontLeftInputs);
         // Logger.processInputs("Drive/FrontRight", frontRightInputs);
         // Logger.processInputs("Drive/RearLeft", rearLeftInputs);
         // Logger.processInputs("Drive/RearRight", rearRightInputs);
 
-        if (DriverStation.getAlliance().isPresent() && !hasSetAlliance) {
-            hasSetAlliance = true;
-            if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
-                io.setAllianceRotation(Rotation2d.fromDegrees(180));
-            } else {
-                io.setAllianceRotation(Rotation2d.fromDegrees(0));
-            }
-        }
+        if (GameConstants.teamColor == Alliance.Red) {
+            io.setAllianceRotation(Rotation2d.fromDegrees(180));
+        } else {
+            io.setAllianceRotation(Rotation2d.fromDegrees(0));
+        } /*
+            if(DriverStation.getAlliance().isPresent()){
+                hasSetAlliance = true;
+                if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
+                    io.setAllianceRotation(Rotation2d.fromDegrees(180));
+                } else {
+                    io.setAllianceRotation(Rotation2d.fromDegrees(0));
+                }
+            } 
+        }*/
     }
 
     /** This method is not used in any command logic. It is only used for LEDs and Elastic */

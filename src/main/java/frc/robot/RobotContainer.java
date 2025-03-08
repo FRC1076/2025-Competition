@@ -166,8 +166,6 @@ public class RobotContainer {
         m_interruptDrive = m_driverController.leftTrigger();
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
-
-        m_isDisabled = new Trigger(DriverStation::isDisabled);
     
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
@@ -194,7 +192,7 @@ public class RobotContainer {
             for (PhotonConfig config : PhotonConfig.values()){
                 
                 var cam = new PhotonCamera(config.name);
-                m_vision.addCamera(new LoggedPhotonVisionLocalizer(
+                m_vision.addCamera(new PhotonVisionLocalizer(
                     cam, 
                     config.offset,
                     config.multiTagPoseStrategy,
@@ -338,12 +336,12 @@ public class RobotContainer {
    */
     private void configureBindings() {
         // m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
-        m_isDisabled
+        /*m_isDisabled
             .onTrue(
                 Commands.runOnce(() -> m_LEDs.setState(LEDStates.OFF)).ignoringDisable(true))
             .onFalse(
                 Commands.runOnce(() -> m_LEDs.setState(LEDStates.IDLE))
-            );
+            );*/
 
         m_isAutoAligned
             .onTrue(
@@ -412,7 +410,7 @@ public class RobotContainer {
         m_interruptDrive.onTrue(m_drive.getDefaultCommand());
         
         // Point to reef
-        m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
+        // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
         // Apply single clutch
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())

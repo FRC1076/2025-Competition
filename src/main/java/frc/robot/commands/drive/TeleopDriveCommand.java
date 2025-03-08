@@ -101,7 +101,7 @@ public class TeleopDriveCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return !DriverStation.isTeleopEnabled();
+        return false;
     }
 
     
@@ -232,7 +232,8 @@ public class TeleopDriveCommand extends Command {
         return applyClutchFactor(doubleClutchTranslationFactor, doubleClutchRotationFactor);
     }
 
-    /** Returns a command that applies a reef-oriented heading lock */
+    /*
+    /** Returns a command that applies a reef-oriented heading lock *
     public Command applyReefHeadingLock() {
         return Commands.either(
             applyHeadingLock(
@@ -253,7 +254,7 @@ public class TeleopDriveCommand extends Command {
         );
     }
 
-    /** Returns a command that applies a Processor side coral station-oriented heading lock*/
+    /** Returns a command that applies a Processor side coral station-oriented heading lock*
     public Command applyRightStationHeadingLock() {
         return Commands.either(
             applyHeadingLock(PoseOfInterest.RED_RIGHT_STATION.pose.getRotation()),
@@ -262,14 +263,14 @@ public class TeleopDriveCommand extends Command {
         );
     }
 
-    /** Returns a command that applies an Opposite side coral station-oriented heading lock */
+    /** Returns a command that applies an Opposite side coral station-oriented heading lock *
     public Command applyLeftStationHeadingLock() {
         return Commands.either(
             applyHeadingLock(PoseOfInterest.RED_LEFT_STATION.pose.getRotation()),
             applyHeadingLock(PoseOfInterest.BLU_LEFT_STATION.pose.getRotation()),
             () -> DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red
         );
-    }
+    }*/
 
     /** Returns a command that applies a forward-oriented heading lock */
     public Command applyForwardHeadingLock() {
