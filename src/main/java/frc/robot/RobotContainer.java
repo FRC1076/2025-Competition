@@ -383,7 +383,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
         // NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
-        
+        NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
     }
 
     private void configureSharedBindings() {

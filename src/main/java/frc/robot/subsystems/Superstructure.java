@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.DeferredCommand;
@@ -494,6 +495,10 @@ public class Superstructure {
                 stopGrabber(),
                 retractMechanisms()
             );
+        }
+
+        public Command wristFlickUp() {
+            return m_wrist.applyAngle(coralTravelAngle);
         }
 
         public Command removeAlgae(){

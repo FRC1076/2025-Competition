@@ -127,7 +127,7 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Blue;
+        public static Alliance teamColor = Alliance.Red;
         public static AutonSides autonSide = AutonSides.Right;
         
         public enum TeamColors {
@@ -162,7 +162,7 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 1; // 0 is real, 1 is sim
+        public static final int currentMode = 0; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
@@ -216,7 +216,7 @@ public final class Constants {
             }
         }
 
-        public static final double kOdometryUpdateFrequency = 250.0;
+        public static final double kOdometryUpdateFrequency = 50.0;
     }
 
     public static class SuperstructureConstants {
