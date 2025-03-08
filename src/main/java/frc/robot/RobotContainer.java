@@ -280,7 +280,7 @@ public class RobotContainer {
 
         m_elevator.setDefaultCommand(m_elevator.applyManualControl(
             () -> -m_operatorController.getLeftY(),
-            () -> m_operatorController.povLeft().getAsBoolean()
+            () -> false
         ));
 
         m_index.setDefaultCommand(Commands.sequence(
@@ -391,11 +391,13 @@ public class RobotContainer {
 
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
-                .onTrue(superstructureCommands.doGrabberAction());
-
+                .onTrue(superstructureCommands.doGrabberAction())
+                    .whileFalse(superstructureCommands.stopAndRetract());
+        
+        /*
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
-                .whileFalse(superstructureCommands.stopAndRetract());
+                .whileFalse(superstructureCommands.stopAndRetract());*/
     }
 
     private void configureDriverBindings() {
@@ -605,11 +607,12 @@ public class RobotContainer {
     }
 
     private void configureBeamBreakTriggers() {
+        /*
         m_transferBeamBreak.onChange(
             Commands.run(
                 () -> m_elastic.updateTransferBeamBreak(m_transferBeamBreak.getAsBoolean())
             ).ignoringDisable(true)
-        );
+        );*/
     }
 
   /**
@@ -618,8 +621,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        //return AutoBuilder.buildAuto("J4_K4_L4_A4");
-        return m_autoChooser.getSelected();
+        return AutoBuilder.buildAuto("J4_K4 - E4_D4");
+        // return m_autoChooser.getSelected();
     }
 
     /**

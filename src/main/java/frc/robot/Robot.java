@@ -78,6 +78,10 @@ public class Robot extends LoggedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
+    m_robotContainer.setAutonState(true);
+
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+
     //PathfindingCommand.warmupCommand().schedule();
   }
 
@@ -114,9 +118,6 @@ public class Robot extends LoggedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_robotContainer.setAutonState(true);
-
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     /*
      * String autoSelected = SmartDashboard.getString("Auto Selector",

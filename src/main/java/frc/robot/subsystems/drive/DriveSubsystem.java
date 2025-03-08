@@ -69,6 +69,12 @@ public class DriveSubsystem extends SubsystemBase {
         this.vision = vision;
         this.elastic = elastic;
         vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
+
+        if (GameConstants.teamColor == Alliance.Red) {
+            io.setAllianceRotation(Rotation2d.fromDegrees(180));
+        } else {
+            io.setAllianceRotation(Rotation2d.fromDegrees(0));
+        }
         
         try {
             AutoBuilder.configure(
@@ -124,11 +130,7 @@ public class DriveSubsystem extends SubsystemBase {
         // Logger.processInputs("Drive/RearLeft", rearLeftInputs);
         // Logger.processInputs("Drive/RearRight", rearRightInputs);
 
-        if (GameConstants.teamColor == Alliance.Red) {
-            io.setAllianceRotation(Rotation2d.fromDegrees(180));
-        } else {
-            io.setAllianceRotation(Rotation2d.fromDegrees(0));
-        } /*
+         /*
             if(DriverStation.getAlliance().isPresent()){
                 hasSetAlliance = true;
                 if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
