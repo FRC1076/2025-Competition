@@ -107,7 +107,7 @@ public class RobotContainer {
     private final Trigger m_interruptDrive;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
-    private final Trigger m_isDisabled;
+    // private final Trigger m_isDisabled;
     private final Trigger m_safeToFeedCoral;
     private final Trigger m_safeToMoveElevator;
     private final Trigger m_isAutoAligned;
