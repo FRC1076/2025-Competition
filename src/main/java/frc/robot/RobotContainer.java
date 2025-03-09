@@ -243,7 +243,7 @@ public class RobotContainer {
 
         slewRateLimiter = new DynamicSlewRateLimiter2d(
             () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
-            m_elevator.getPositionMeters()
+            0
         );
 
         // Drive team status triggers
