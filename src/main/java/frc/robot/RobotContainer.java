@@ -28,7 +28,7 @@ import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristIOHardware;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
-import lib.control.DynamicSlewRateLimiter;
+import lib.control.DynamicSlewRateLimiter2d;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.LoggedPhotonVisionLocalizer;
@@ -140,8 +140,7 @@ public class RobotContainer {
 
     private final VisionSystemSim m_visionSim;
 
-    private final DynamicSlewRateLimiter xLimiter;
-    private final DynamicSlewRateLimiter yLimiter;
+    private final DynamicSlewRateLimiter2d slewRateLimiter;
     private boolean slewRateLimiterEnabled = true;
 
    // private final PhotonCamera m_driveCamera;
@@ -242,12 +241,7 @@ public class RobotContainer {
             () -> false
         );
 
-        xLimiter = new DynamicSlewRateLimiter(
-            () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
-            m_elevator.getPositionMeters()
-        );
-
-        yLimiter = new DynamicSlewRateLimiter(
+        slewRateLimiter = new DynamicSlewRateLimiter2d(
             () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
             m_elevator.getPositionMeters()
         );
@@ -260,6 +254,18 @@ public class RobotContainer {
 
         superVis = new SuperstructureVisualizer(m_superstructure);
 
+        // TODO: maybe x and y are flipped
+        teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
+            () -> slewRateLimiterEnabled
+                ? slewRateLimiter.calculateY(-m_driverController.getLeftX(), -m_driverController.getLeftY())
+                : -m_driverController.getLeftY(),
+            () -> slewRateLimiterEnabled
+                ? slewRateLimiter.calculateX(-m_driverController.getLeftX(), -m_driverController.getLeftY())
+                : -m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()
+        );
+
+        /*
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
             () -> slewRateLimiterEnabled
                 ? yLimiter.calculate(-m_driverController.getLeftY())
@@ -268,7 +274,7 @@ public class RobotContainer {
                 ? xLimiter.calculate(-m_driverController.getLeftX())
                 : -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()
-        );
+        );*/
 
         m_drive.setDefaultCommand(
             teleopDriveCommand
