@@ -203,6 +203,7 @@ public final class Constants {
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
         public static final boolean streamToNT = true;
+        public static final boolean enableHootLogging = false; // Must be set to true for drivetrain SysID
     }
     
     public static class DriveConstants {
