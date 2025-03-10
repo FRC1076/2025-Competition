@@ -39,7 +39,6 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void robotInit() {
-        //PathfindingCommand.warmupCommand().schedule();
         // Configure AdvantageKit. This must be done BEFORE any other instatiation
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -77,6 +76,7 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+
     SignalLogger.enableAutoLogging(SystemConstants.logCTRE);
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
@@ -87,7 +87,6 @@ public class Robot extends LoggedRobot {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     FollowPathCommand.warmupCommand().schedule();
-    //PathfindingCommand.warmupCommand().schedule();
   }
 
   /**

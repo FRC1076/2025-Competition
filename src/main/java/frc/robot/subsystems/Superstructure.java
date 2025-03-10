@@ -475,7 +475,11 @@ public class Superstructure {
          * Returns a command that stops grabber wheels from spinning
          */
         public Command stopGrabber(){
-            return superstructure.applyGrabberState(GrabberState.IDLE);
+            return Commands.either(
+                superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
+                superstructure.applyGrabberState(GrabberState.IDLE),
+                () -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
+            ); // superstructure.applyGrabberState(GrabberState.IDLE);
         }
 
         /**

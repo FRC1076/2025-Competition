@@ -29,7 +29,7 @@ deploy {
 
                 frcJava(getArtifactTypeClass('FRCJavaArtifact')) {
 
-                    
+                    /*
                     // Enable VisualVM connection
                     jvmArgs.add("-Dcom.sun.management.jmxremote=true")
                     jvmArgs.add("-Dcom.sun.management.jmxremote.port=1198")
@@ -37,6 +37,7 @@ deploy {
                     jvmArgs.add("-Dcom.sun.management.jmxremote.ssl=false")
                     jvmArgs.add("-Dcom.sun.management.jmxremote.authenticate=false")
                     jvmArgs.add("-Djava.rmi.server.hostname=10.10.76.2")
+                    */
 
                 }
 
