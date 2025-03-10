@@ -38,6 +38,7 @@ import lib.vision.Limelight.LEDState;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
@@ -280,6 +281,14 @@ public class RobotContainer {
             teleopDriveCommand
         );
 
+        m_grabber.setDefaultCommand(
+            Commands.either(
+                m_superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
+                m_superstructure.applyGrabberState(GrabberState.IDLE),
+                () -> m_superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
+            )
+        );
+
         m_wrist.setDefaultCommand(m_wrist.applyManualControl(
             () -> -m_operatorController.getRightY()
         ));
@@ -397,7 +406,7 @@ public class RobotContainer {
 
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
-                .onTrue(superstructureCommands.doGrabberAction())
+                .whileTrue(superstructureCommands.doGrabberAction())
                     .whileFalse(superstructureCommands.stopAndRetract());
         
         /*
@@ -602,7 +611,7 @@ public class RobotContainer {
         
         m_operatorController.rightBumper()
             .onTrue(superstructureCommands.removeAlgae())
-            .whileFalse(superstructureCommands.stopGrabber());
+            .onFalse(superstructureCommands.stopGrabber());
 
         m_operatorController.start().whileTrue(
             Commands.parallel(

@@ -472,7 +472,7 @@ public class Superstructure {
          * Returns a command that stops grabber wheels from spinning
          */
         public Command stopGrabber(){
-            return superstructure.applyGrabberState(GrabberState.IDLE);
+            return m_grabber.getDefaultCommand(); // superstructure.applyGrabberState(GrabberState.IDLE);
         }
 
         /**
