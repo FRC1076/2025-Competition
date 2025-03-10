@@ -48,7 +48,6 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.None;
 public class Superstructure {
 
     /** A mutable (you can change the state after instantiation) class representing the Superstructure's desired state */
-    @AutoLog
     public static class MutableSuperState {
 
         protected GrabberState grabberState;
