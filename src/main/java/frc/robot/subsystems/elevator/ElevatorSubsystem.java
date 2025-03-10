@@ -151,9 +151,6 @@ public class ElevatorSubsystem extends SubsystemBase {
             () -> m_profiledPIDController.reset(getPositionMeters()),
             () -> setPosition(positionMeters),
             (interrupted) -> {},
-            // () -> {io.resetController();},
-            // () -> {setPosition(positionMeters);},
-            // (interrupted) -> {setVoltage(io.getFFkG());},
             () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters,
             this
         );
