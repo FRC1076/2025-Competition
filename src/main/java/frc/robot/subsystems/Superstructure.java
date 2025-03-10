@@ -142,9 +142,11 @@ public class Superstructure {
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
+        /*
         CommandUtils.makePeriodic(() -> {
             Logger.processInputs("Superstructure", superState);
         });
+        */
         CommandBuilder = new SuperstructureCommandFactory(this, indexBeamBreak, transferBeamBreak, grabberBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
 

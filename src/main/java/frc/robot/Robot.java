@@ -17,7 +17,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
+import frc.robot.Constants.SystemConstants;
 import edu.wpi.first.wpilibj.Timer;
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -76,7 +76,8 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
-    SignalLogger.enableAutoLogging(true);
+
+    SignalLogger.enableAutoLogging(SystemConstants.logCTRE);
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
@@ -86,8 +87,6 @@ public class Robot extends LoggedRobot {
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     FollowPathCommand.warmupCommand().schedule();
-
-    //PathfindingCommand.warmupCommand().schedule();
   }
 
   /**
