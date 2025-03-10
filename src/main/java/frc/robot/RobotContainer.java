@@ -281,13 +281,7 @@ public class RobotContainer {
             teleopDriveCommand
         );
 
-        m_grabber.setDefaultCommand(
-            Commands.either(
-                m_superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
-                m_superstructure.applyGrabberState(GrabberState.IDLE),
-                () -> m_superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
-            )
-        );
+        m_grabber.setDefaultCommand(m_superstructure.getCommandBuilder().stopGrabber());
 
         m_wrist.setDefaultCommand(m_wrist.applyManualControl(
             () -> -m_operatorController.getRightY()

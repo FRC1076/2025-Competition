@@ -48,6 +48,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators.None;
 public class Superstructure {
 
     /** A mutable (you can change the state after instantiation) class representing the Superstructure's desired state */
+    @AutoLog
     public static class MutableSuperState {
 
         protected GrabberState grabberState;
@@ -472,7 +473,11 @@ public class Superstructure {
          * Returns a command that stops grabber wheels from spinning
          */
         public Command stopGrabber(){
-            return m_grabber.getDefaultCommand(); // superstructure.applyGrabberState(GrabberState.IDLE);
+            return Commands.either(
+                superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
+                superstructure.applyGrabberState(GrabberState.IDLE),
+                () -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
+            ); // superstructure.applyGrabberState(GrabberState.IDLE);
         }
 
         /**

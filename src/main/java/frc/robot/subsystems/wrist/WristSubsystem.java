@@ -12,6 +12,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -22,7 +23,7 @@ import org.littletonrobotics.junction.Logger;
 
 public class WristSubsystem extends SubsystemBase {
     private final WristIO io;
-    private final DynamicProfiledPIDController m_profiledPIDController;
+    private final ProfiledPIDController m_profiledPIDController;
     private final DynamicArmFeedforward m_feedforwardController;
     private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
     private final SysIdRoutine sysid;
@@ -32,6 +33,14 @@ public class WristSubsystem extends SubsystemBase {
         this.io = io;
 
         var controlConstants = io.getControlConstants();
+
+        m_profiledPIDController = new ProfiledPIDController(
+            controlConstants.kP(),
+            controlConstants.kI(),
+            controlConstants.kD(),
+            controlConstants.kProfileConstraints()
+        );
+        /*
         m_profiledPIDController = new DynamicProfiledPIDController(
             controlConstants.kP(),
             controlConstants.kI(),
@@ -40,7 +49,7 @@ public class WristSubsystem extends SubsystemBase {
             0.02,
             0.2, 
             controlConstants.kProfileConstraints()
-        );
+        );*/
 
         m_feedforwardController = new DynamicArmFeedforward(
             controlConstants.kS(),
