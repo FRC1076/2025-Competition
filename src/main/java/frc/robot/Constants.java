@@ -216,7 +216,7 @@ public final class Constants {
             }
         }
 
-        public static final double kOdometryUpdateFrequency = 50.0;
+        public static final double kOdometryUpdateFrequency = 250.0;
     }
 
     public static class SuperstructureConstants {

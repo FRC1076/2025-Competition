@@ -124,7 +124,7 @@ public class DriveSubsystem extends SubsystemBase {
         // io.updateModuleInputs(frontRightInputs, 1);
         // io.updateModuleInputs(rearLeftInputs, 2);
         // io.updateModuleInputs(rearRightInputs, 3);
-        //Logger.processInputs("Drive", driveInputs);
+        Logger.processInputs("Drive", driveInputs);
         // Logger.processInputs("Drive/FrontLeft", frontLeftInputs);
         // Logger.processInputs("Drive/FrontRight", frontRightInputs);
         // Logger.processInputs("Drive/RearLeft", rearLeftInputs);

@@ -281,7 +281,7 @@ public class RobotContainer {
             teleopDriveCommand
         );
 
-        m_grabber.setDefaultCommand(m_superstructure.getCommandBuilder().stopGrabber());
+        //m_grabber.setDefaultCommand(m_superstructure.getCommandBuilder().stopGrabber());
 
         m_wrist.setDefaultCommand(m_wrist.applyManualControl(
             () -> -m_operatorController.getRightY()
