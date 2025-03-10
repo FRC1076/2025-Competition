@@ -190,7 +190,6 @@ public class RobotContainer {
             m_index = new IndexSubsystem(new IndexIOHardware());
             m_LEDs = new LEDSubsystem(new LEDOnRIO());
             for (PhotonConfig config : PhotonConfig.values()){
-                
                 var cam = new PhotonCamera(config.name);
                 m_vision.addCamera(new PhotonVisionLocalizer(
                     cam, 
