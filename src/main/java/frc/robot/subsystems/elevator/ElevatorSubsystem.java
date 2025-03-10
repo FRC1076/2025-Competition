@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 import java.util.Optional;
 
 import org.littletonrobotics.junction.Logger;
@@ -28,6 +30,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     public static final double homingVolts = -0.1;
     public static final double homingDebounceTime = 0.25;
     public static final double homingVelocityThreshold = 0.1;
+
+    
+    private Optional<TrapezoidProfile.State> profileGoal = Optional.empty();
 
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
@@ -85,10 +90,17 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
-        //System.out.println("Elevator: " + this.getPositionMeters());
         io.updateInputs(inputs);
-        Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
-        Logger.processInputs("Elevator", inputs);
+        Logger.recordOutput("Elevator/Goal", m_profiledPIDController.getGoal().position);
+        Logger.processInputs("Elevator",inputs);
+        profileGoal.ifPresent(
+            (goal) -> {
+                io.setVoltage(
+                    m_profiledPIDController.calculate(inputs.elevatorHeightMeters,goal)
+                    + m_feedforwardController.calculate(m_profiledPIDController.getSetpoint().velocity)
+                );
+            }
+        );
     }
 
     @Override

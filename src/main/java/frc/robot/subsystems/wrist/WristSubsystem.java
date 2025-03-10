@@ -8,9 +8,11 @@ import frc.robot.Constants.WristConstants;
 import lib.control.DynamicArmFeedforward;
 import lib.control.DynamicProfiledPIDController;
 
+import java.util.Optional;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -25,6 +27,7 @@ public class WristSubsystem extends SubsystemBase {
     private final WristIO io;
     private final ProfiledPIDController m_profiledPIDController;
     private final DynamicArmFeedforward m_feedforwardController;
+    private Optional<TrapezoidProfile.State> profileGoal = Optional.empty();
     private final WristIOInputsAutoLogged inputs = new WristIOInputsAutoLogged();
     private final SysIdRoutine sysid;
     
