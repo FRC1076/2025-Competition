@@ -80,6 +80,6 @@ public class DirectDriveToPoseCommand extends Command {
     
     @Override
     public void end(boolean interrupted) {
-        followPathCommand.end(interrupted);
+        followPathCommand.cancel();
     }
 }

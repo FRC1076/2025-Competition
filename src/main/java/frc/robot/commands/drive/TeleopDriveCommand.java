@@ -17,19 +17,30 @@ import static frc.robot.Constants.DriveConstants.DriverControlConstants.maxTrans
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.singleClutchRotationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.singleClutchTranslationFactor;
 
+import lib.control.LQRHolonomicController;
+import lib.control.LQRHolonomicController.LQRHolonomicDriveControllerTolerances;
 import lib.functional.TriFunction;
 
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.Trajectory;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
@@ -38,10 +49,15 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 public class TeleopDriveCommand extends Command {
+    private static final LQRHolonomicDriveControllerTolerances tolerances = new LQRHolonomicDriveControllerTolerances(0.1, 0.5, 0.1, 0.5);
+
     // The raw speed suppliers, unaffected by the clutches. A reference to these is maintained in order to make applying and unapplying clutches easier
     private final DoubleSupplier rawXSupplier;
     private final DoubleSupplier rawYSupplier;
     private final DoubleSupplier rawOmegaSupplier;
+
+    private final LQRHolonomicController holonomicController = new LQRHolonomicController(tolerances, singleClutchTranslationFactor);
+    private Pose2d targetPose = null;
 
     // The required drive subsystem
     private final DriveSubsystem m_drive;
@@ -205,6 +221,15 @@ public class TeleopDriveCommand extends Command {
                 vy *= FPVClutchTranslationFactor;
                 omega *= FPVClutchRotationFactor;
                 return new ApplyRobotSpeeds().withSpeeds(new ChassisSpeeds(vx, vy, omega));
+            }
+        );
+    }
+
+    public Command applyDriveToPose(Pose2d targetPose) {
+        this.targetPose = targetPose;
+        return applyRequestGenerator(
+            (vx, vy, omega) -> {
+                return new ApplyRobotSpeeds().withSpeeds(holonomicController.calculateChassisOriented(m_drive.getPose(), targetPose));
             }
         );
     }
