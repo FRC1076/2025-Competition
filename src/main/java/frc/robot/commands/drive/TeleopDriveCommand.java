@@ -58,9 +58,6 @@ public class TeleopDriveCommand extends Command {
     private final DoubleSupplier rawYSupplier;
     private final DoubleSupplier rawOmegaSupplier;
 
-    private final LQRHolonomicController holonomicController = new LQRHolonomicController(tolerances, singleClutchTranslationFactor);
-    private Pose2d targetPose = null;
-
     // The required drive subsystem
     private final DriveSubsystem m_drive;
 
@@ -243,7 +240,8 @@ public class TeleopDriveCommand extends Command {
                         goalPose,
                         0,
                         goalPose.getRotation()
-                    ));
+                    )
+                );
             }
         );
     }
@@ -278,15 +276,6 @@ public class TeleopDriveCommand extends Command {
                 vy *= FPVClutchTranslationFactor;
                 omega *= FPVClutchRotationFactor;
                 return new ApplyRobotSpeeds().withSpeeds(new ChassisSpeeds(vx, vy, omega));
-            }
-        );
-    }
-
-    public Command applyDriveToPose(Pose2d targetPose) {
-        this.targetPose = targetPose;
-        return applyRequestGenerator(
-            (vx, vy, omega) -> {
-                return new ApplyRobotSpeeds().withSpeeds(holonomicController.calculateChassisOriented(m_drive.getPose(), targetPose));
             }
         );
     }
