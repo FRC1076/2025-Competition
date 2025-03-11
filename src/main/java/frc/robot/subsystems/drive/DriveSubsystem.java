@@ -168,6 +168,10 @@ public class DriveSubsystem extends SubsystemBase {
         return velMPS;
     }
 
+    public double getAngularVelocityRadPerSec() {
+        return driveInputs.Speeds.omegaRadiansPerSecond;
+    }
+
     /** Swerve drive request with field-oriented chassisSpeeds */
     public void driveFO(ChassisSpeeds speeds) {
         io.acceptRequest(new ApplyFieldSpeeds().withSpeeds(speeds).withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));

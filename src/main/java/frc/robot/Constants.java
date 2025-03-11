@@ -207,7 +207,8 @@ public final class Constants {
         }
 
         public static class DirectDriveConstants {
-            public static final TrapezoidProfile.C
+            public static final Constraints translationConstraints = new Constraints(2, 2);
+            public static final Constraints headingConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(360));
         }
 
         public static class PathPlannerConstants {
