@@ -8,7 +8,7 @@ import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
-import frc.robot.commands.drive.DirectDriveToPoseCommand;
+import frc.robot.commands.drive.PPDriveToPose;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
 import frc.robot.utils.Localization;
@@ -262,7 +262,7 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public Command directDriveToPose(Pose2d targetPose) {
-            return new DirectDriveToPoseCommand(drive, targetPose);
+            return new PPDriveToPose(drive, targetPose);
             /*
             DirectDriveToPoseCommand directDriveToPoseCommand = new DirectDriveToPoseCommand(drive, targetPose);
 
