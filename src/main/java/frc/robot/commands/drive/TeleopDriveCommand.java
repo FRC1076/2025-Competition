@@ -5,6 +5,7 @@
 package frc.robot.commands.drive;
 
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.utils.Localization;
 import frc.robot.Constants.FieldConstants.PointOfInterest;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 
@@ -16,10 +17,12 @@ import static frc.robot.Constants.DriveConstants.DriverControlConstants.maxRotat
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.maxTranslationSpeedMPS;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.singleClutchRotationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.singleClutchTranslationFactor;
+import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
 
 import lib.control.LQRHolonomicController;
 import lib.control.LQRHolonomicController.LQRHolonomicDriveControllerTolerances;
 import lib.functional.TriFunction;
+import lib.utils.GeometryUtils;
 
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
@@ -32,9 +35,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.Trajectory.State;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
@@ -70,6 +72,21 @@ public class TeleopDriveCommand extends Command {
     private DoubleSupplier xSupplier;
     private DoubleSupplier ySupplier;
     private DoubleSupplier omegaSupplier;
+
+    private final PIDController xPIDController = new PIDController(0.5, 0, 0); // PathPlanner uses 5, 0, 0
+    private final PIDController yPIDController = new PIDController(0.5, 0, 0); // 5, 0, 0
+
+    private final Constraints headingContraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(360));
+    private final ProfiledPIDController headingPIDController = new ProfiledPIDController(0.5, 0, 0, headingContraints); // 5, 0, 0
+
+    private final HolonomicDriveController m_DriveController = 
+        new HolonomicDriveController(
+            xPIDController,
+            yPIDController,
+            headingPIDController
+        );
+
+    private Pose2d goalPose = new Pose2d();
 
     // Request Generator declarations
 
@@ -212,6 +229,46 @@ public class TeleopDriveCommand extends Command {
             () -> clearRequestGeneratorOverride()
         );
     }
+
+    public Command applyLeftBranchAlign() {
+        return applyRequestGenerator(
+            (vx, vy, omega) -> {
+                goalPose = GeometryUtils.rotatePose(
+                    Localization.getClosestReefFace(m_drive.getPose()).leftBranch.transformBy(robotOffset),
+                    Rotation2d.k180deg);
+
+                return new ApplyRobotSpeeds().withSpeeds(
+                    m_DriveController.calculate(
+                        m_drive.getPose(),
+                        goalPose,
+                        0,
+                        goalPose.getRotation()
+                    ));
+            }
+        );
+    }
+
+    public Command applyRightBranchAlign() {
+        return applyRequestGenerator(
+            (vx, vy, omega) -> {
+                goalPose = GeometryUtils.rotatePose(
+                    Localization.getClosestReefFace(m_drive.getPose()).rightBranch.transformBy(robotOffset),
+                    Rotation2d.k180deg);
+
+                return new ApplyRobotSpeeds().withSpeeds(
+                    m_DriveController.calculate(
+                        m_drive.getPose(),
+                        goalPose,
+                        0,
+                        goalPose.getRotation()
+                    ));
+            }
+        );
+    }
+
+    public boolean isAutoAligned() {
+        return m_DriveController.atReference();
+    }   
 
     /** Returns a command that makes the drive train drive in chassis-oriented mode, with a clutch applied, for FPV branch alignment */
     public Command applyFPVDrive(){

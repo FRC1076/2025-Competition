@@ -241,18 +241,12 @@ public class RobotContainer {
             () -> false
         );
 
+        superVis = new SuperstructureVisualizer(m_superstructure);
+
         slewRateLimiter = new DynamicSlewRateLimiter2d(
             () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
             0
         );
-
-        // Drive team status triggers
-        m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
-        m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
-        m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
-        m_elevatorZeroed = new Trigger(() -> m_elevator.isZeroed());
-
-        superVis = new SuperstructureVisualizer(m_superstructure);
 
         // TODO: maybe x and y are flipped
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
@@ -275,6 +269,13 @@ public class RobotContainer {
                 : -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()
         );*/
+
+        // Drive team status triggers
+        m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
+        m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
+        // m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+        m_isAutoAligned = new Trigger(() -> teleopDriveCommand.isAutoAligned());
+        m_elevatorZeroed = new Trigger(() -> m_elevator.isZeroed());
 
         m_drive.setDefaultCommand(
             teleopDriveCommand
@@ -410,11 +411,13 @@ public class RobotContainer {
 
     private void configureDriverBindings() {
         m_driverController.a().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            // m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            teleopDriveCommand.applyLeftBranchAlign()
         );
 
         m_driverController.b().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            // m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            teleopDriveCommand.applyRightBranchAlign()
         );
 
         m_interruptDrive.onTrue(m_drive.getDefaultCommand());
