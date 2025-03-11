@@ -39,6 +39,14 @@ deploy {
                     jvmArgs.add("-Djava.rmi.server.hostname=10.10.76.2")
                     */
 
+                    // These JVM settings are meant to reduce the impact of garbage collection on loop times, and are based on 6328's AdvantageKit example code
+                    jvmArgs.add("-XX:+UnlockExperimentalVMOptions")
+                    jvmArgs.add("-XX:GCTimeRatio=5")
+                    jvmArgs.add("-XX:+UseSerialGC")
+                    jvmArgs.add("-XX:MaxGCPauseMillis=50")
+
+
+
                 }
 
                 // Static files artifact

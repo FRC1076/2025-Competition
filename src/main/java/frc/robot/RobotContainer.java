@@ -74,6 +74,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -660,5 +661,12 @@ public class RobotContainer {
 
     public boolean getAutonState() {
         return m_autonState;
+    }
+
+    public static Command threadCommand() {
+        return Commands.sequence(
+            Commands.waitSeconds(20),
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, SystemConstants.threadPriority))
+        );
     }
 }
