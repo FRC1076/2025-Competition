@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -203,6 +204,10 @@ public final class Constants {
                 elevatorAccelerationTable.put(1.778, 4.640342002 / 8);
                 elevatorAccelerationTable.put(1.8288, 4.557930098 / 8);
             }
+        }
+
+        public static class DirectDriveConstants {
+            public static final TrapezoidProfile.C
         }
 
         public static class PathPlannerConstants {
