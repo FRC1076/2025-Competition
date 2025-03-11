@@ -376,42 +376,6 @@ public class Superstructure {
         });
     }
 
-    /**
-     * Updates game piece possession based on beambreaks and updates kG accordingly
-     * (gamepieces have weight that affects elevator and wrist)
-     * @param indexBB whether the beambreak sensor in the indexer detects something
-     * @param transferBB whether the beambreak sensor between the indexer and grabber detects something
-     * @param greabberBB whether the beambreak sensor in the grabber detects something
-     */
-    public void updatePossessionAndKg(
-        boolean indexBB,
-        boolean transferBB,
-        boolean grabberBB
-    ) {
-        GrabberPossession grabberPossession;
-        
-        if (transferBB && grabberBB) {
-            grabberPossession = GrabberPossession.CORAL;
-        } else if (transferBB) {
-            grabberPossession = GrabberPossession.TRANSFERRING;
-        } else if (grabberBB) {
-            grabberPossession = GrabberPossession.ALGAE;
-        } else {
-            grabberPossession = GrabberPossession.EMPTY;
-        }
-
-        m_elevator.setKg(grabberPossession.elevator_kG);
-        m_wrist.setKg(grabberPossession.wrist_kG);
-        superState.setGrabberPossession(grabberPossession);
-        
-        m_elastic.putGrabberPossession(grabberPossession);
-        m_elastic.putBoolean("transferBB", transferBB);
-
-        // For debugging the beambreaks
-        //System.out.println("updatePossessionAndKg() Called");
-        //System.out.println("transferBB: " + transferBB);
-    }
-
     /** Contains all the command factories for the superstructure */
     public class SuperstructureCommandFactory { 
         private final Superstructure superstructure;
@@ -451,8 +415,6 @@ public class Superstructure {
                     () -> superstructure.applyGrabberState(GrabberState.DEFAULT_OUTTAKE),
                     this.superstructure.getSuperState()::getWristevatorState
                 );
-
-            this.updatePossessionAndKg();
         }
 
         /**
@@ -685,19 +647,6 @@ public class Superstructure {
             return Commands.sequence(
                 m_grabber.applyRotationsBangBang(-12, 3),
                 holdAlgae()
-            );
-        }
-
-        /**
-         * Used to calculate what the robot is possessing based on breambreaks
-         */
-        public Command updatePossessionAndKg() {
-            return Commands.runOnce(
-                () -> superstructure.updatePossessionAndKg(
-                    m_indexBeamBreak.getAsBoolean(),
-                    m_transferBeamBreak.getAsBoolean(),
-                    false
-                )
             );
         }
 
