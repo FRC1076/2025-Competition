@@ -373,7 +373,7 @@ public class Superstructure {
                 superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
                 superstructure.applyGrabberState(GrabberState.IDLE),
                 () -> (superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE)
-            ); // superstructure.applyGrabberState(GrabberState.IDLE);
+            );
         }
 
         /**
@@ -472,19 +472,6 @@ public class Superstructure {
          * Transfers a coral from the indexer to the grabber, without checking for position 
          */
         private Command transferCoral() {
-            /*return Commands.parallel(
-                Commands.sequence(
-                    superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
-                    Commands.waitUntil(m_indexBeamBreak),
-                    superstructure.grabberRadiansBangBang(4, kIndexVoltage),
-                    superstructure.applyGrabberState(GrabberState.IDLE)
-                ),
-                Commands.sequence(
-                    superstructure.holdIndexState(IndexState.CORAL_TRANSFER),
-                    Commands.waitUntil(() -> !m_indexBeamBreak.getAsBoolean()),
-                    superstructure.holdIndexState(IndexState.EMPTY_IDLE)
-                )
-            );*/
             return Commands.sequence(
                 Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
@@ -499,8 +486,6 @@ public class Superstructure {
                     superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
             );
-            
-            //.onlyIf(() -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.EMPTY);
         }
 
         /**
@@ -551,15 +536,6 @@ public class Superstructure {
                 );
         }
         
-        /*
-        public Command interruptWristevator() {
-            return Commands.parallel(
-                superstructure.interruptElevator(),
-                superstructure.interruptWrist()
-            );
-        }*/
-
-        
         public Command interruptElevator() {
             return superstructure.interruptElevator();
         }
@@ -575,7 +551,7 @@ public class Superstructure {
 
         public Command autonIntakeCoral() {
             return Commands.sequence(
-                //superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
+                // superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
                 transferCoral(),
                 Commands.runOnce(() -> safeToMoveElevator = true)
             );

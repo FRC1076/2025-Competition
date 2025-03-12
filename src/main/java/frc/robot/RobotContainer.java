@@ -255,17 +255,6 @@ public class RobotContainer {
             () -> -m_driverController.getRightX()
         );
 
-        /*
-        teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> slewRateLimiterEnabled
-                ? yLimiter.calculate(-m_driverController.getLeftY())
-                : -m_driverController.getLeftY(),
-            () -> slewRateLimiterEnabled
-                ? xLimiter.calculate(-m_driverController.getLeftX())
-                : -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()
-        );*/
-
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
         m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
@@ -340,14 +329,6 @@ public class RobotContainer {
    * joysticks}.
    */
     private void configureBindings() {
-        // m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
-        /*m_isDisabled
-            .onTrue(
-                Commands.runOnce(() -> m_LEDs.setState(LEDStates.OFF)).ignoringDisable(true))
-            .onFalse(
-                Commands.runOnce(() -> m_LEDs.setState(LEDStates.IDLE))
-            );*/
-
         m_isAutoAligned
             .onTrue(
                 m_LEDs.setStateTimed(LEDStates.AUTO_ALIGNED))
@@ -388,7 +369,6 @@ public class RobotContainer {
         NamedCommands.registerCommand("grabberIntakeCoral", superstructureCommands.grabberIntakeCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
-        // NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
         NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
     }
@@ -400,22 +380,15 @@ public class RobotContainer {
             .or(m_operatorController.rightTrigger())
                 .onTrue(superstructureCommands.doGrabberAction())
                     .whileFalse(superstructureCommands.stopAndRetract());
-        
-        /*
-        m_driverController.rightTrigger()
-            .or(m_operatorController.rightTrigger())
-                .whileFalse(superstructureCommands.stopAndRetract());*/
     }
 
     private void configureDriverBindings() {
         m_driverController.a().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
-            //teleopDriveCommand.applyLeftBranchAlign()
         );
 
         m_driverController.b().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
-            // teleopDriveCommand.applyRightBranchAlign()
         );
         
         // Point to reef
@@ -447,18 +420,6 @@ public class RobotContainer {
         m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
 
         m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
-
-        /*
-        m_driverController.x().and(
-            m_driverController.leftBumper().and(
-                m_driverController.rightBumper()
-            ).negate()
-        ).whileTrue(teleopDriveCommand.applyLeftStationHeadingLock());
-
-        m_driverController.b().whileTrue(teleopDriveCommand.applyRightStationHeadingLock());
-        */
-
-        // m_driverController.y().whileTrue(teleopDriveCommand.applyForwardHeadingLock()); Oliver didn't want this
 
         m_driverController.leftBumper().and(
             m_driverController.rightBumper().and(
@@ -591,15 +552,6 @@ public class RobotContainer {
 
         // Interrupts any wrist command when the right joystick is moved
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
-
-        // Interrupts any elevator command when the the left joystick is moved
-        // m_operatorController.leftStick().onTrue(superstructureCommands.interruptWristevator());
-
-        /*
-        m_operatorController.start().whileTrue(m_elevator.zeroEncoderJoystickControl(
-            m_operatorController::getLeftX
-        ));
-        */
         
         m_operatorController.rightBumper()
             .onTrue(superstructureCommands.removeAlgae())
@@ -622,7 +574,7 @@ public class RobotContainer {
         );*/
     }
 
-  /**
+   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous

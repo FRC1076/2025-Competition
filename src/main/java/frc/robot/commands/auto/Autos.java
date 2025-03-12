@@ -15,13 +15,4 @@ public class Autos {
         m_drive = drive;
         m_superstructure = superstructure;
     }
-
-    /*
-    public Command get2L4(){
-        Commands.sequence(
-            Commands.parallel(
-
-            )
-        )
-    }*/
 }

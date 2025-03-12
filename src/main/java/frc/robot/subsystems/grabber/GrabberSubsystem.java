@@ -90,18 +90,6 @@ public class GrabberSubsystem extends SubsystemBase{
      */
     public Command applyRadiansBangBang(double volts, double radians) {
         return new ApplyRadians(volts, radians, this);
-        /*
-        double setpoint = inputs.motorPositionRadians + radians;
-        boolean positiveDirection = (setpoint > inputs.motorPositionRadians);
-        return new FunctionalCommand(
-            () -> runVolts(volts),
-            () -> {},
-            (interrupted) -> stop(),
-            positiveDirection 
-                ? () -> inputs.motorPositionRadians >= setpoint
-                : () -> inputs.motorPositionRadians <= setpoint,
-            this
-        );*/
     }
 
     /**
