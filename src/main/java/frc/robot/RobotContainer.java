@@ -106,7 +106,6 @@ public class RobotContainer {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final Trigger m_transferBeamBreak;
-    private final Trigger m_interruptDrive;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
     // private final Trigger m_isDisabled;
@@ -164,7 +163,6 @@ public class RobotContainer {
     
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
-        m_interruptDrive = m_driverController.leftTrigger();
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
     
@@ -418,8 +416,6 @@ public class RobotContainer {
             m_drive.CommandBuilder.directDriveToNearestRightBranch()
             // teleopDriveCommand.applyRightBranchAlign()
         );
-
-        m_interruptDrive.onTrue(m_drive.getDefaultCommand());
         
         // Point to reef
         // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
@@ -433,7 +429,7 @@ public class RobotContainer {
             .whileTrue(teleopDriveCommand.applyDoubleClutch());
 
         // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
-        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
+        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
             .whileTrue(
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
