@@ -13,12 +13,9 @@ import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
-import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
 
 import lib.extendedcommands.CommandUtils;
-import lib.extendedcommands.LegacyDaemonCommand;
-import lib.extendedcommands.SelectWithFallbackCommand;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 
 import java.util.function.BooleanSupplier;
@@ -27,17 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.DeferredCommand;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.AutoLog;
-import org.littletonrobotics.junction.Logger;
-
-import com.fasterxml.jackson.annotation.ObjectIdGenerators.None;
 
 /**
  * Superstructure class that contains all subsystems and commands for the robot's superstructure <p>
@@ -119,6 +110,8 @@ public class Superstructure {
     //Super State
     private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
 
+    private final BooleanSupplier possessAlgae = () -> superState.getGrabberPossession() == GrabberPossession.ALGAE;
+
     private Boolean safeToFeedCoral;
     private Boolean safeToMoveElevator;
 
@@ -143,9 +136,7 @@ public class Superstructure {
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
         /*
-        CommandUtils.makePeriodic(() -> {
-            Logger.processInputs("Superstructure", superState);
-        });
+        CommandUtils.makePeriodic(() -> Logger.processInputs("Superstructure", superState));
         */
         CommandBuilder = new SuperstructureCommandFactory(this, indexBeamBreak, transferBeamBreak, grabberBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
@@ -221,79 +212,30 @@ public class Superstructure {
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
             m_wrist.applyAngle(coralTravelAngle),
-            () -> (superState.getGrabberPossession() == GrabberPossession.ALGAE)
+            possessAlgae
         );
 
         Command wristHoldCommand = Commands.either(
             m_wrist.holdAngle(algaeTravelAngle), 
             m_wrist.holdAngle(coralTravelAngle),
-            () -> (superState.getGrabberPossession() == GrabberPossession.ALGAE)
+            possessAlgae
         );
+
+        // Due to command composition semantics, the command composition itself cannot require the subsystems directly
         
         return Commands.sequence(
-                Commands.runOnce(() -> superState.setWristevatorState(position)).alongWith(Commands.runOnce(ledSignal)),
-                wristPreMoveCommand.asProxy(),
-                Commands.deadline(
-                    m_elevator.applyPosition(position.elevatorHeightMeters),
-                    wristHoldCommand
-                ).asProxy(),
-                CommandUtils.runAsDaemon(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
-                CommandUtils.runAsDaemon(() -> m_wrist.setAngle(position.wristAngle), m_wrist).asProxy()
+            wristPreMoveCommand.asProxy(),
+            Commands.deadline(
+                m_elevator.applyPosition(position.elevatorHeightMeters),
+                wristHoldCommand
+            ).asProxy(),
+            CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
+            m_wrist.applyAngle(position.wristAngle).asProxy(),
+            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
+        ).alongWith(
+            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            Commands.runOnce(ledSignal)
         );
-            //() -> superState.getWristevatorState() == position);
-
-        /* Old code, we're not sure why it doesn't work
-        Command wristPreMoveCommand = Commands.either(
-            m_wrist.applyAngle(algaeTravelAngle),
-            m_wrist.applyAngle(coralTravelAngle),
-            () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
-        );
-
-        
-        // We use parallel commands here to reduce the number of loops that instant commands use
-        return Commands.sequence(
-            // Sets the wristevatorState instantly for purpose of logging
-            new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))) 
-            // Folds the wrist in to avoid hitting obstacles, at an angle depending on grabber possession
-            .alongWith(new ProxyCommand(wristPreMoveCommand)),
-            // Raises the elevator until the elevator at the correct height and holds the wrist in place in the background
-            new ProxyCommand(m_elevator.applyPosition(position.elevatorHeightMeters))
-            .alongWith(new ProxyCommand(new DaemonCommand(
-                () -> Commands.run(() -> m_wrist.setAngle(
-                    superState.getGrabberPossession() == GrabberPossession.ALGAE
-                        ? algaeTravelAngle
-                        : coralTravelAngle)), 
-                () -> false))),
-            // Moves to the next command instantly, but holds the elevator in place in the background
-            new ProxyCommand(new DaemonCommand(
-                () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                () -> false
-            ))
-            // Moves the wrist to the final position
-            .alongWith(new ProxyCommand(m_wrist.applyAngle(position.wristAngle))),
-            // Moves to the next command instantly, but holds the wrist in place in the background
-            new ProxyCommand(new DaemonCommand(
-                () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
-                () -> false
-            ))
-            // apply clutch trigger state found in WristevatorState
-            .alongWith(Commands.runOnce(() -> elevatorClutch = position.elevatorClutch)
-        ));
-        */
-
-        // Even older code
-        /*
-        return Commands.sequence(
-            //m_elevator.applyPosition(position.elevatorHeightMeters),
-            
-            new DaemonCommand(
-                () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                () -> false
-            )
-            m_wrist.applyAngle(Rotation2d.fromDegrees(80)),
-            m_wrist.applyAngle(Rotation2d.fromDegrees(-30))
-        );*/
     }
 
     /**
@@ -303,30 +245,24 @@ public class Superstructure {
      * @return
      */
     private Command applyWristevatorStateDirect(WristevatorState position) {
+
+        Runnable ledSignal = () -> {
+            safeToFeedCoral = false;
+            safeToMoveElevator = false;
+        };
         
-        return //Commands.either(
-            //applyWristevatorStateDirect(position),
-            Commands.parallel(
-                new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
-                    .alongWith(Commands.runOnce(() -> {
-                        safeToFeedCoral = false;
-                        safeToMoveElevator = false;
-                    }))),
-                Commands.sequence(
-                    new ProxyCommand(
-                        m_elevator.applyPosition(position.elevatorHeightMeters)
-                    ),
-                    new ProxyCommand(new LegacyDaemonCommand(
-                        () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                        () -> false
-                    ))
-                ),
-                Commands.sequence(
-                    new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
-                    new ProxyCommand(new LegacyDaemonCommand(
-                        () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
-                        () -> false)))
-                );
+        return Commands.parallel(
+            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            Commands.runOnce(ledSignal),
+            Commands.sequence(
+                m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
+                CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters))
+            ),
+            Commands.sequence(
+                m_wrist.applyAngle(position.wristAngle).asProxy(),
+                CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
+            )
+        );
     }
 
     /**

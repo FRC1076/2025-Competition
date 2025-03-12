@@ -155,6 +155,10 @@ public class ElevatorSubsystem extends SubsystemBase {
             this
         );
     }
+
+    public Command holdPosition(double positionMeters) {
+        return run(() -> setPosition(positionMeters));
+    }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.
      * @param controlSupplier Supplier that returns the desired voltage of the elevator
