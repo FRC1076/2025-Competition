@@ -458,7 +458,7 @@ public class Superstructure {
             return Commands.either(
                 superstructure.applyWristevatorState(WristevatorState.ALGAE_TRAVEL),
                 superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                () -> superstructure.superState.getGrabberPossession() == GrabberPossession.ALGAE
+                () -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
             );
         }
 
@@ -640,9 +640,13 @@ public class Superstructure {
             );
         }
 
+        public Command preL4Direct() {
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L4);
+        }
+
         public Command holdAlgae() {
             return Commands.parallel(
-                Commands.runOnce(() -> superstructure.superState.setGrabberPossession(GrabberPossession.ALGAE)),
+                Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(GrabberPossession.ALGAE)),
                 superstructure.applyGrabberState(GrabberState.ALGAE_HOLD));
         }
 

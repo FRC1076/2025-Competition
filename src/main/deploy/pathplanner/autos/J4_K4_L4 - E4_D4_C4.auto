@@ -17,10 +17,16 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "preL4"
+                  "name": "preL4Direct"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.2
           }
         },
         {
@@ -40,18 +46,25 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "preIntakeCoral"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "preIntakeCoral"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "autonIntakeCoral"
+                      }
+                    }
+                  ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autonIntakeCoral"
           }
         },
         {
@@ -67,7 +80,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "preL4"
+                  "name": "preL4Direct"
                 }
               }
             ]
@@ -90,18 +103,25 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "preIntakeCoral"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "preIntakeCoral"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "autonIntakeCoral"
+                      }
+                    }
+                  ]
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "autonIntakeCoral"
           }
         },
         {
@@ -117,7 +137,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "preL4"
+                  "name": "preL4Direct"
                 }
               }
             ]
@@ -130,22 +150,9 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "named",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "L4-LOUT"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "preIntakeCoral"
-                }
-              }
-            ]
+            "name": "preL4"
           }
         }
       ]
