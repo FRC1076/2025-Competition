@@ -216,13 +216,13 @@ public class Superstructure {
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
             m_wrist.applyAngle(coralTravelAngle),
-            () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
+            () -> (superState.getGrabberPossession() == GrabberPossession.ALGAE)
         );
 
         Command wristHoldCommand = Commands.either(
             m_wrist.holdAngle(algaeTravelAngle), 
             m_wrist.holdAngle(coralTravelAngle),
-            () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
+            () -> (superState.getGrabberPossession() == GrabberPossession.ALGAE)
         );
         
         return //Commands.either(
@@ -447,7 +447,7 @@ public class Superstructure {
             return Commands.either(
                 superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
                 superstructure.applyGrabberState(GrabberState.IDLE),
-                () -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
+                () -> (superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE)
             ); // superstructure.applyGrabberState(GrabberState.IDLE);
         }
 
@@ -458,7 +458,7 @@ public class Superstructure {
             return Commands.either(
                 superstructure.applyWristevatorState(WristevatorState.ALGAE_TRAVEL),
                 superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                () -> superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE
+                () -> (superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE)
             );
         }
 
