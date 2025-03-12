@@ -269,7 +269,7 @@ public class Superstructure {
      * @return command to run grabber as certain state
      */
     public Command applyGrabberState(GrabberState state) {
-        return Commands.sequence(
+        return Commands.parallel(
             Commands.runOnce(() -> superState.setGrabberState(state)),
             m_grabber.applyDifferentialVolts(state.leftVoltage, state.rightVoltage) //Can do a runOnce because runVolts is sticky
         );
@@ -280,7 +280,7 @@ public class Superstructure {
     }
 
     public Command applyIndexState(IndexState state) {
-        return Commands.sequence(
+        return Commands.parallel(
             Commands.runOnce(() -> superState.setIndexerState(state)),
             m_index.applyVolts(state.volts)
         );
