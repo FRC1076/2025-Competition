@@ -385,6 +385,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
         NamedCommands.registerCommand("autonIntakeCoral", superstructureCommands.autonIntakeCoral());
+        NamedCommands.registerCommand("grabberIntakeCoral", superstructureCommands.grabberIntakeCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
         // NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());

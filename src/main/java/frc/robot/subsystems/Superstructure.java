@@ -526,6 +526,24 @@ public class Superstructure {
             );
         }
 
+        public Command grabberIntakeCoral() {
+            return Commands.sequence(
+                superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE),
+                Commands.parallel(
+                    Commands.runOnce(() -> safeToFeedCoral = true),
+                    Commands.sequence(
+                        applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE)
+                        .until(m_grabber::hasCoral),
+                        m_grabber.applyRotationsBangBang(1, 0)
+                    )
+                ),
+                Commands.parallel(
+                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL),
+                    Commands.run(() -> safeToMoveElevator = true)
+                )
+            );
+        }
+
         public Command stopIntake() {
             return Commands.parallel(
                     holdIndexState(IndexState.BACKWARDS),

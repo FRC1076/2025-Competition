@@ -280,6 +280,7 @@ public final class Constants {
             ALGAE_HOLD(-2, -2),
             CORAL_INTAKE(12, 12),
             REVERSE_CORAL_INTAKE(-12, -12),
+            GRABBER_CORAL_INTAKE(-12, -12),
 
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
@@ -315,6 +316,8 @@ public final class Constants {
             ALGAE_TRAVEL(0.134983912 + 0.00635, 65),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
+            GRABBER_CORAL_INTAKE(0.910, 35),
+            HIGH_TRAVEL(0.910, 90),
 
             L1(0.42019, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
@@ -510,7 +513,7 @@ public final class Constants {
         public static final int kRightMotorPort = 42;
         
         public static final double kCurrentLimit = 20; 
-        public static final double kGearRatio = 45;
+        public static final double kGearRatio = 9;
         public static final double kPositionConversionFactor = Math.PI * 2 * (1/kGearRatio);
 
         public static final boolean kLeftMotorInverted = true;
