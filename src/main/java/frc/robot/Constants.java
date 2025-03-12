@@ -191,7 +191,6 @@ public final class Constants {
 
             public static final InterpolatingDoubleTreeMap elevatorAccelerationTable = new InterpolatingDoubleTreeMap(); // A table that maps elevator heights to slew rate limits
             static {
-                // TODO: add deadzone if needed
                 elevatorAccelerationTable.put(0.0,100000.0);
                 // elevatorAccelerationTable.put(1.0,1000000000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
                 // elevatorAccelerationTable.put(0.0, 12.66793578);
