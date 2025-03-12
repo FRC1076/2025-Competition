@@ -16,6 +16,10 @@ public class DaemonCommand extends Command {
         this.command = command.until(endCondition);
     }
 
+    public DaemonCommand(Command command) {
+        this.command = command;
+    }
+
     @Override
     public void initialize() {
         command.schedule();
@@ -23,12 +27,12 @@ public class DaemonCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return command.isFinished();
+        return true;
     }
 
     @Override
-    public void end(boolean interrupted) {
-        command.end(interrupted);
+    public boolean runsWhenDisabled() {
+        return true;
     }
     
 }

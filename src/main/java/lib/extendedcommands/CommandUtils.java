@@ -18,8 +18,14 @@ public class CommandUtils {
         throw new NotImplementedException("This is a utility class!");
     }
 
-    public static Command makeDaemon(Supplier<Command> commandSupplier, BooleanSupplier endCondition) {
-        return new LegacyDaemonCommand(commandSupplier, endCondition);
+    /** Tells the robot to run a command in the background with an arbitrary end condition */
+    public static Command makeDaemon(Command command, BooleanSupplier endCondition) {
+        return new DaemonCommand(command, endCondition);
+    }
+
+    /** Tells the robot to run a command in the background */
+    public static Command makeDaemon(Command command) {
+        return new DaemonCommand(command);
     }
 
     /** tells the robot to periodically run a runnable that is not associated with any particular subsystem */
