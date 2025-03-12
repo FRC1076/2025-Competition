@@ -74,6 +74,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -400,7 +401,7 @@ public class RobotContainer {
 
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
-                .whileTrue(superstructureCommands.doGrabberAction())
+                .onTrue(superstructureCommands.doGrabberAction())
                     .whileFalse(superstructureCommands.stopAndRetract());
         
         /*
@@ -411,13 +412,13 @@ public class RobotContainer {
 
     private void configureDriverBindings() {
         m_driverController.a().whileTrue(
-            // m_drive.CommandBuilder.directDriveToNearestLeftBranch()
-            teleopDriveCommand.applyLeftBranchAlign()
+            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            //teleopDriveCommand.applyLeftBranchAlign()
         );
 
         m_driverController.b().whileTrue(
-            // m_drive.CommandBuilder.directDriveToNearestRightBranch()
-            teleopDriveCommand.applyRightBranchAlign()
+            m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            // teleopDriveCommand.applyRightBranchAlign()
         );
 
         m_interruptDrive.onTrue(m_drive.getDefaultCommand());
@@ -660,5 +661,12 @@ public class RobotContainer {
 
     public boolean getAutonState() {
         return m_autonState;
+    }
+
+    public static Command threadCommand() {
+        return Commands.sequence(
+            Commands.waitSeconds(20),
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10))
+        ).ignoringDisable(true);
     }
 }

@@ -73,6 +73,8 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
     }
 
+  
+
     // Start AdvantageKit logger
     Logger.start();
 
@@ -83,6 +85,8 @@ public class Robot extends LoggedRobot {
     m_robotContainer = new RobotContainer();
 
     m_robotContainer.setAutonState(true);
+
+    m_robotContainer.threadCommand().schedule();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 

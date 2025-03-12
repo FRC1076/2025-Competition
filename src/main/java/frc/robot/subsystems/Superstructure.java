@@ -308,23 +308,30 @@ public class Superstructure {
      * @return
      */
     private Command applyWristevatorStateDirect(WristevatorState position) {
-        safeToFeedCoral = false;
-        safeToMoveElevator = false;
         
-        return Commands.sequence(
+        return //Commands.either(
+            //applyWristevatorStateDirect(position),
             Commands.parallel(
-                Commands.runOnce(() -> superState.setWristevatorState(position)),
-                m_elevator.applyPosition(position.elevatorHeightMeters),
-                m_wrist.applyAngle(position.wristAngle)),
-            Commands.parallel(
-                new DaemonCommand(
-                    () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                    () -> false),
-                new DaemonCommand(
-                    () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
-                    () -> false)
-            )
-        );
+                new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
+                    .alongWith(Commands.runOnce(() -> {
+                        safeToFeedCoral = false;
+                        safeToMoveElevator = false;
+                    }))),
+                Commands.sequence(
+                    new ProxyCommand(
+                    m_elevator.applyPosition(position.elevatorHeightMeters)
+                    ),
+                    new ProxyCommand(new DaemonCommand(
+                        () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
+                        () -> false
+                    ))
+                ),
+                Commands.sequence(
+                    new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
+                    new ProxyCommand(new DaemonCommand(
+                        () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
+                        () -> false)))
+                );
     }
 
     /**
@@ -622,12 +629,12 @@ public class Superstructure {
         
 
         public Command preIntakeCoral() {
-            return superstructure.applyWristevatorState(WristevatorState.TRAVEL);
+            return superstructure.applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER);
         }
 
         public Command autonIntakeCoral() {
             return Commands.sequence(
-                superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
+                //superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
                 transferCoral(),
                 Commands.runOnce(() -> safeToMoveElevator = true)
             );
