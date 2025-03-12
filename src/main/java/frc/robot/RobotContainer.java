@@ -237,9 +237,7 @@ public class RobotContainer {
             m_index, 
             m_wrist, 
             m_elastic,
-            () -> false,
-            m_transferBeamBreak, 
-            () -> false
+            m_transferBeamBreak
         );
 
         superVis = new SuperstructureVisualizer(m_superstructure);

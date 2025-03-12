@@ -123,9 +123,7 @@ public class Superstructure {
         IndexSubsystem index,
         WristSubsystem wrist,
         Elastic elastic,
-        BooleanSupplier indexBeamBreak, // REMOVE
-        BooleanSupplier transferBeamBreak, //returns true when beam broken
-        BooleanSupplier grabberBeamBreak // REMOVE
+        BooleanSupplier transferBeamBreak //returns true when beam broken
     ) {
         m_elevator = elevator;
         m_grabber = grabber;
@@ -138,7 +136,7 @@ public class Superstructure {
         /*
         CommandUtils.makePeriodic(() -> Logger.processInputs("Superstructure", superState));
         */
-        CommandBuilder = new SuperstructureCommandFactory(this, indexBeamBreak, transferBeamBreak, grabberBeamBreak);
+        CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
 
         this.safeToFeedCoral = false;
@@ -317,7 +315,6 @@ public class Superstructure {
     /** Contains all the command factories for the superstructure */
     public class SuperstructureCommandFactory { 
         private final Superstructure superstructure;
-        private final BooleanSupplier m_indexBeamBreak;
         private final BooleanSupplier m_transferBeamBreak;
         private final Map<WristevatorState, Supplier<Command>> grabberActionCommands = new HashMap<WristevatorState, Supplier<Command>>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
         private final SelectWithFallbackCommandFactory<WristevatorState> grabberActionCommandFactory;
@@ -325,12 +322,9 @@ public class Superstructure {
 
         private SuperstructureCommandFactory (
             Superstructure superstructure,
-            BooleanSupplier indexBeamBreak,
-            BooleanSupplier transferBeamBreak,
-            BooleanSupplier grabberBeamBreak
+            BooleanSupplier transferBeamBreak
         ) {
             this.superstructure = superstructure;
-            m_indexBeamBreak = indexBeamBreak;
             m_transferBeamBreak = transferBeamBreak;
             grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
@@ -533,8 +527,7 @@ public class Superstructure {
         }
 
         public Command stopIntake() {
-            return 
-                Commands.parallel(
+            return Commands.parallel(
                     holdIndexState(IndexState.BACKWARDS),
                     applyGrabberState(GrabberState.IDLE)
                 );
