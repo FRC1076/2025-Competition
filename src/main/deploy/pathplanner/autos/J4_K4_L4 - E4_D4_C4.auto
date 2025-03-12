@@ -50,6 +50,12 @@
                 "data": {
                   "commands": [
                     {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
                       "type": "named",
                       "data": {
                         "name": "preIntakeCoral"
@@ -106,6 +112,12 @@
                 "type": "sequential",
                 "data": {
                   "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
                     {
                       "type": "named",
                       "data": {
