@@ -10,8 +10,10 @@ import java.util.function.BooleanSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-/* A wrapper that executes a command in the background without blocking execution of a CommandSequence 
-NOTE: If possible, use parallel and sequential command groups instead of this class. */
+/** A wrapper that executes a command in the background without blocking execution of a CommandSequence 
+NOTE: If possible, use parallel and sequential command groups instead of this class. 
+@deprecated use {@linkplain DaemonCommand} instead*/
+@Deprecated
 public class LegacyDaemonCommand extends Command {
     Supplier<Command> commandSupplier;
     BooleanSupplier endCondition;
