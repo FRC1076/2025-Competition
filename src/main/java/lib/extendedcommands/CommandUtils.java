@@ -11,6 +11,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 public class CommandUtils {
@@ -28,13 +29,21 @@ public class CommandUtils {
         return new DaemonCommand(command);
     }
 
-    /** tells the robot to periodically run a runnable that is not associated with any particular subsystem */
-    public static void makePeriodic(Runnable runnable, boolean runWhenDisabled) {
-        CommandScheduler.getInstance().schedule(Commands.run(runnable).ignoringDisable(runWhenDisabled));
+    public static Command runAsDaemon(Runnable action, BooleanSupplier endCondition, Subsystem... requirements) {
+        return new DaemonCommand(Commands.run(action,requirements),endCondition);
+    }
+
+    public static Command runAsDaemon(Runnable action, Subsystem... requirements) {
+        return new DaemonCommand(Commands.run(action,requirements));
     }
 
     /** tells the robot to periodically run a runnable that is not associated with any particular subsystem */
-    public static void makePeriodic(Runnable runnable) {
-        CommandScheduler.getInstance().schedule(Commands.run(runnable).ignoringDisable(false));
+    public static void makePeriodic(Runnable action, boolean runWhenDisabled) {
+        CommandScheduler.getInstance().schedule(Commands.run(action).ignoringDisable(runWhenDisabled));
+    }
+
+    /** tells the robot to periodically run a runnable that is not associated with any particular subsystem */
+    public static void makePeriodic(Runnable action) {
+        CommandScheduler.getInstance().schedule(Commands.run(action).ignoringDisable(false));
     }
 }

@@ -213,6 +213,11 @@ public class Superstructure {
      */
     private Command applyWristevatorState(WristevatorState position) {
 
+        Runnable ledSignal = () -> {
+            safeToFeedCoral = false;
+            safeToMoveElevator = false;
+        };
+
         Command wristPreMoveCommand = Commands.either(
             m_wrist.applyAngle(algaeTravelAngle),
             m_wrist.applyAngle(coralTravelAngle),
@@ -225,27 +230,17 @@ public class Superstructure {
             () -> superState.getGrabberPossession() == GrabberPossession.ALGAE
         );
         
-        return //Commands.either(
-            //applyWristevatorStateDirect(position),
-            Commands.sequence(
-                new ProxyCommand(Commands.runOnce(() -> superState.setWristevatorState(position))
-                    .alongWith(Commands.runOnce(() -> {
-                        safeToFeedCoral = false;
-                        safeToMoveElevator = false;
-                    }))),
-                new ProxyCommand(wristPreMoveCommand),
-                new ProxyCommand(Commands.deadline(
+        return Commands.sequence(
+                Commands.runOnce(() -> superState.setWristevatorState(position)).alongWith(Commands.runOnce(ledSignal)),
+                wristPreMoveCommand.asProxy(),
+                Commands.deadline(
                     m_elevator.applyPosition(position.elevatorHeightMeters),
                     wristHoldCommand
-                )),
-                new ProxyCommand(new LegacyDaemonCommand(
-                    () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
-                    () -> false
-                )),
+                ).asProxy(),
+                CommandUtils.runAsDaemon(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
                 new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
-                new ProxyCommand(new LegacyDaemonCommand(
-                    () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
-                    () -> false)));
+                CommandUtils.runAsDaemon(() -> m_wrist.setAngle(position.wristAngle), m_wrist).asProxy()
+        );
             //() -> superState.getWristevatorState() == position);
 
         /* Old code, we're not sure why it doesn't work

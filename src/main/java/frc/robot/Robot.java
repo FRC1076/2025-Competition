@@ -28,9 +28,6 @@ import edu.wpi.first.wpilibj.Timer;
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
 
-    private double m_lastLoopTimeSeconds = 0.0;
-    private double m_lastTimeSeconds = Timer.getFPGATimestamp();
-
     private RobotContainer m_robotContainer;
 
     /**
@@ -86,7 +83,7 @@ public class Robot extends LoggedRobot {
 
     m_robotContainer.setAutonState(true);
 
-    m_robotContainer.threadCommand().schedule();
+    RobotContainer.threadCommand().schedule();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
@@ -109,10 +106,10 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     //CommandScheduler.getInstance().printWatchdogEpochs(); // WARNING: Uses a lot of resources
 
-    m_lastLoopTimeSeconds = Timer.getFPGATimestamp() - m_lastTimeSeconds;
-    m_lastTimeSeconds = Timer.getFPGATimestamp();
+    //m_lastLoopTimeSeconds = Timer.getFPGATimestamp() - m_lastTimeSeconds;
+    //m_lastTimeSeconds = Timer.getFPGATimestamp();
 
-    m_robotContainer.updateLoopTime(m_lastLoopTimeSeconds);
+    //m_robotContainer.updateLoopTime(m_lastLoopTimeSeconds);
     //m_robotContainer.updateInterface();
   }
 
