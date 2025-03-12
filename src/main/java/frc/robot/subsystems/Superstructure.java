@@ -17,7 +17,7 @@ import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
 
 import lib.extendedcommands.CommandUtils;
-import lib.extendedcommands.DaemonCommand;
+import lib.extendedcommands.LegacyDaemonCommand;
 import lib.extendedcommands.SelectWithFallbackCommand;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 
@@ -238,12 +238,12 @@ public class Superstructure {
                     m_elevator.applyPosition(position.elevatorHeightMeters),
                     wristHoldCommand
                 )),
-                new ProxyCommand(new DaemonCommand(
+                new ProxyCommand(new LegacyDaemonCommand(
                     () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
                     () -> false
                 )),
                 new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
-                new ProxyCommand(new DaemonCommand(
+                new ProxyCommand(new LegacyDaemonCommand(
                     () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
                     () -> false)));
             //() -> superState.getWristevatorState() == position);
@@ -319,16 +319,16 @@ public class Superstructure {
                     }))),
                 Commands.sequence(
                     new ProxyCommand(
-                    m_elevator.applyPosition(position.elevatorHeightMeters)
+                        m_elevator.applyPosition(position.elevatorHeightMeters)
                     ),
-                    new ProxyCommand(new DaemonCommand(
+                    new ProxyCommand(new LegacyDaemonCommand(
                         () -> Commands.run(() -> m_elevator.setPosition(position.elevatorHeightMeters), m_elevator),
                         () -> false
                     ))
                 ),
                 Commands.sequence(
                     new ProxyCommand(m_wrist.applyAngle(position.wristAngle)),
-                    new ProxyCommand(new DaemonCommand(
+                    new ProxyCommand(new LegacyDaemonCommand(
                         () -> Commands.run(() -> m_wrist.setAngle(position.wristAngle), m_wrist),
                         () -> false)))
                 );
@@ -564,8 +564,7 @@ public class Superstructure {
                 Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
-                )
-                .until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
+                ).until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
                 Commands.waitSeconds(0.3),
                 Commands.waitUntil(m_transferBeamBreak),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel

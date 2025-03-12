@@ -19,7 +19,7 @@ public class CommandUtils {
     }
 
     public static Command makeDaemon(Supplier<Command> commandSupplier, BooleanSupplier endCondition) {
-        return new DaemonCommand(commandSupplier, endCondition);
+        return new LegacyDaemonCommand(commandSupplier, endCondition);
     }
 
     /** tells the robot to periodically run a runnable that is not associated with any particular subsystem */
