@@ -85,7 +85,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
-        //System.out.println("Elevator: " + this.getPositionMeters());
         io.updateInputs(inputs);
         Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
         Logger.processInputs("Elevator", inputs);

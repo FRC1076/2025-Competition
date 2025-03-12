@@ -69,26 +69,7 @@ public final class Constants {
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     12.389, -11.683, 11.513639, // 15 - 7.163, -(15 - 2.892), 19.162, 
                     0, 0, 20 // -11.385, 17.961, 40
-                ); //,
-                /*
-                REAR_LEFT_CAM(
-                    "REAR_LEFT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
-                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    0, 0, 0,
-                    0, 0, 0
-                ),
-                REAR_RIGHT_CAM("REAR_RIGHT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
-                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    0, 0, 0,
-                    0, 0, 0
                 );
-                */
 
                 public final String name;
                 public final Transform3d offset;
@@ -449,10 +430,6 @@ public final class Constants {
         public static final double kVelocityConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635 / 60.0; //Gear ratio & chain pitch & rpm -> m/s
         public static final double kPositionConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635; //Gear ratio & chain pitch
 
-        /*
-        public static final double kMaxVelocityMeters = 1.0;
-        public static final double kMaxAccelerationMetersSquared = 0.5;
-        */
         public static class Electrical {
             public static final double kVoltageCompensation = 10.5;
             public static final double kCurrentLimit = 60;
@@ -466,10 +443,10 @@ public final class Constants {
             public static final double kD = 0.0;
 
             // Feedforward constant
-            public static final double kS = 0.082814;  //0.059004; //Static gain (voltage)
-            public static final double kG = 0.74003;  //0.77763;//1.2;//0.97369; // 0.6 //Gravity gain (voltage)
-            public static final double kV = 3.1265;  //2.8829; // 12.0 // velocity game
-            public static final double kA = 0.0; //Acceleration Gain
+            public static final double kS = 0.082814;  // 0.059004; //Static gain (voltage)
+            public static final double kG = 0.74003;  // 0.77763; //Gravity gain (voltage)
+            public static final double kV = 3.1265;  // 2.8829; // velocity game
+            public static final double kA = 0.0; // Acceleration Gain
 
             public static final Constraints kProfileConstraints = new Constraints(4, 5.25);
         }
@@ -531,8 +508,8 @@ public final class Constants {
 
         // Source: https://docs.revrobotics.com/brushless/spark-max/encoders/alternate-encoder
         public static final int kCountsPerRevolution = 8192;
-        public static final double kPositionConversionFactor = 2 * Math.PI;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI);// (1/117.1875) * 2 * Math.PI; // rotations to radians
-        public static final double kVelocityConversionFactor = 2 * Math.PI / 60;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60;// (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
+        public static final double kPositionConversionFactor = 2 * Math.PI; // (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) // rotations to radians
+        public static final double kVelocityConversionFactor = 2 * Math.PI / 60; // (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60; // rpm to radians/second
         public static final double kZeroOffsetRadians = 2.4820003267948962; // -0.6595923267948967;
 
         public static final class Control {
@@ -543,7 +520,7 @@ public final class Constants {
 
             // Feedforward constants
             public static final double kS = 0.16629; //0.26649; // static gain in volts
-            public static final double kG = 0.13459; // 0.13459; // 0.13593; // gravity gain in volts
+            public static final double kG = 0.13459; // 0.13459; // gravity gain in volts
             public static final double kV = 1.8105; // 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
@@ -577,10 +554,8 @@ public final class Constants {
 
     public static class IndexConstants {
         public static final int kLeadMotorPort = 51;
-        // public static final int kFollowMotorPort = 52;
 
         public static final double kCurrentLimit = 20.0;
-        // public static final double kIndexVoltage = 12.0;
 
         public static final boolean kLeadMotorInverted = false;
         public static final boolean kFollowMotorInverted = true;
