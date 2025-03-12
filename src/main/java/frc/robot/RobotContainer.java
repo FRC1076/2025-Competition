@@ -249,7 +249,6 @@ public class RobotContainer {
             0
         );
 
-        // TODO: maybe x and y are flipped
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
             () -> slewRateLimiterEnabled
                 ? slewRateLimiter.calculateY(-m_driverController.getLeftX(), -m_driverController.getLeftY())
