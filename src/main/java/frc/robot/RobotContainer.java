@@ -521,6 +521,8 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.intakeCoral())
             .whileFalse(superstructureCommands.stopIntake());
 
+        m_operatorController.povLeft().whileTrue(superstructureCommands.grabberIntakeCoral());
+
         // Manual coral intake and transfer
         m_operatorController.povUp()
             .onTrue(
