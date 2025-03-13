@@ -297,8 +297,8 @@ public final class Constants {
             ALGAE_TRAVEL(0.134983912 + 0.00635, 65),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
-            GRABBER_CORAL_INTAKE(0.910, 35),
-            HIGH_TRAVEL(0.910, 90),
+            GRABBER_CORAL_INTAKE(0.716, 50.306),
+            HIGH_TRAVEL(0.716, 90),
 
             L1(0.42019, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
@@ -513,7 +513,7 @@ public final class Constants {
         public static final int kCountsPerRevolution = 8192;
         public static final double kPositionConversionFactor = 2 * Math.PI; // (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) // rotations to radians
         public static final double kVelocityConversionFactor = 2 * Math.PI / 60; // (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60; // rpm to radians/second
-        public static final double kZeroOffsetRadians = 2.4820003267948962; // -0.6595923267948967;
+        public static final double kZeroOffsetRadians = -1.7236260000051038; // -0.6595923267948967;
 
         public static final class Control {
             // PID constants
