@@ -297,8 +297,8 @@ public final class Constants {
             ALGAE_TRAVEL(0.134983912 + 0.00635, 65),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
-            GRABBER_CORAL_INTAKE(0.716, 50.306),
-            HIGH_TRAVEL(0.716, 90),
+            GRABBER_CORAL_INTAKE(0.703, 55.21410),
+            HIGH_TRAVEL(0.703, 90),
 
             L1(0.42019, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
