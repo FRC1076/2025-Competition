@@ -9,6 +9,8 @@ import frc.robot.utils.Localization;
 import frc.robot.Constants.FieldConstants.PointOfInterest;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 
+import static frc.robot.Constants.DriveConstants.DirectDriveConstants.headingConstraints;
+import static frc.robot.Constants.DriveConstants.DirectDriveConstants.translationConstraints;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.FPVClutchRotationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.FPVClutchTranslationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.doubleClutchRotationFactor;
@@ -21,6 +23,7 @@ import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffse
 
 import lib.control.LQRHolonomicController;
 import lib.control.LQRHolonomicController.LQRHolonomicDriveControllerTolerances;
+import lib.control.ProfiledPIDHolonomicController;
 import lib.functional.TriFunction;
 import lib.utils.GeometryUtils;
 
@@ -70,17 +73,13 @@ public class TeleopDriveCommand extends Command {
     private DoubleSupplier ySupplier;
     private DoubleSupplier omegaSupplier;
 
-    private final PIDController xPIDController = new PIDController(0.5, 0, 0); // PathPlanner uses 5, 0, 0
-    private final PIDController yPIDController = new PIDController(0.5, 0, 0); // 5, 0, 0
+    private final ProfiledPIDController translationPIDController = new ProfiledPIDController(0.5, 0, 0, translationConstraints); // PathPlanner uses 5, 0, 0
+    private final ProfiledPIDController rotationPIDController = new ProfiledPIDController(0.5, 0, 0, headingConstraints); // 5, 0, 0
 
-    private final Constraints headingContraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(360));
-    private final ProfiledPIDController headingPIDController = new ProfiledPIDController(0.5, 0, 0, headingContraints); // 5, 0, 0
-
-    private final HolonomicDriveController m_DriveController = 
-        new HolonomicDriveController(
-            xPIDController,
-            yPIDController,
-            headingPIDController
+    private final ProfiledPIDHolonomicController m_DriveController = 
+        new ProfiledPIDHolonomicController(
+            translationPIDController,
+            rotationPIDController
         );
 
     private Pose2d goalPose = new Pose2d();
@@ -234,12 +233,18 @@ public class TeleopDriveCommand extends Command {
                     Localization.getClosestReefFace(m_drive.getPose()).leftBranch.transformBy(robotOffset),
                     Rotation2d.k180deg);
 
+                translationPIDController.reset(
+                    m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
+                    m_drive.getVelocityMPS());
+
+                rotationPIDController.reset(
+                    m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
+                    m_drive.getAngularVelocityRadPerSec());
+
                 return new ApplyRobotSpeeds().withSpeeds(
                     m_DriveController.calculate(
                         m_drive.getPose(),
-                        goalPose,
-                        0,
-                        goalPose.getRotation()
+                        goalPose
                     )
                 );
             }
@@ -253,12 +258,18 @@ public class TeleopDriveCommand extends Command {
                     Localization.getClosestReefFace(m_drive.getPose()).rightBranch.transformBy(robotOffset),
                     Rotation2d.k180deg);
 
+                translationPIDController.reset(
+                    m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
+                    m_drive.getVelocityMPS());
+
+                rotationPIDController.reset(
+                    m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
+                    m_drive.getAngularVelocityRadPerSec());
+
                 return new ApplyRobotSpeeds().withSpeeds(
                     m_DriveController.calculate(
                         m_drive.getPose(),
-                        goalPose,
-                        0,
-                        goalPose.getRotation()
+                        goalPose
                     ));
             }
         );

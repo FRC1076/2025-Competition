@@ -106,7 +106,6 @@ public class RobotContainer {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final Trigger m_transferBeamBreak;
-    private final Trigger m_interruptDrive;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
     // private final Trigger m_isDisabled;
@@ -164,7 +163,6 @@ public class RobotContainer {
     
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
-        m_interruptDrive = m_driverController.leftTrigger();
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
     
@@ -237,9 +235,7 @@ public class RobotContainer {
             m_index, 
             m_wrist, 
             m_elastic,
-            () -> false,
-            m_transferBeamBreak, 
-            () -> false
+            m_transferBeamBreak
         );
 
         superVis = new SuperstructureVisualizer(m_superstructure);
@@ -249,7 +245,6 @@ public class RobotContainer {
             0
         );
 
-        // TODO: maybe x and y are flipped
         teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
             () -> slewRateLimiterEnabled
                 ? slewRateLimiter.calculateY(-m_driverController.getLeftX(), -m_driverController.getLeftY())
@@ -259,17 +254,6 @@ public class RobotContainer {
                 : -m_driverController.getLeftX(),
             () -> -m_driverController.getRightX()
         );
-
-        /*
-        teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> slewRateLimiterEnabled
-                ? yLimiter.calculate(-m_driverController.getLeftY())
-                : -m_driverController.getLeftY(),
-            () -> slewRateLimiterEnabled
-                ? xLimiter.calculate(-m_driverController.getLeftX())
-                : -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()
-        );*/
 
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
@@ -345,14 +329,6 @@ public class RobotContainer {
    * joysticks}.
    */
     private void configureBindings() {
-        // m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
-        /*m_isDisabled
-            .onTrue(
-                Commands.runOnce(() -> m_LEDs.setState(LEDStates.OFF)).ignoringDisable(true))
-            .onFalse(
-                Commands.runOnce(() -> m_LEDs.setState(LEDStates.IDLE))
-            );*/
-
         m_isAutoAligned
             .onTrue(
                 m_LEDs.setStateTimed(LEDStates.AUTO_ALIGNED))
@@ -383,15 +359,16 @@ public class RobotContainer {
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
         NamedCommands.registerCommand("preL3", superstructureCommands.preL3());
         NamedCommands.registerCommand("preL4", superstructureCommands.preL4());
+        NamedCommands.registerCommand("preL4Direct", superstructureCommands.preL4Direct());
         NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
         NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
         NamedCommands.registerCommand("autonIntakeCoral", superstructureCommands.autonIntakeCoral());
+        NamedCommands.registerCommand("grabberIntakeCoral", superstructureCommands.grabberIntakeCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
-        // NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
         NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
     }
@@ -401,27 +378,18 @@ public class RobotContainer {
 
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
-                .whileTrue(superstructureCommands.doGrabberAction())
+                .onTrue(superstructureCommands.doGrabberAction())
                     .whileFalse(superstructureCommands.stopAndRetract());
-        
-        /*
-        m_driverController.rightTrigger()
-            .or(m_operatorController.rightTrigger())
-                .whileFalse(superstructureCommands.stopAndRetract());*/
     }
 
     private void configureDriverBindings() {
         m_driverController.a().whileTrue(
-            // m_drive.CommandBuilder.directDriveToNearestLeftBranch()
-            teleopDriveCommand.applyLeftBranchAlign()
+            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );
 
         m_driverController.b().whileTrue(
-            // m_drive.CommandBuilder.directDriveToNearestRightBranch()
-            teleopDriveCommand.applyRightBranchAlign()
+            m_drive.CommandBuilder.directDriveToNearestRightBranch()
         );
-
-        m_interruptDrive.onTrue(m_drive.getDefaultCommand());
         
         // Point to reef
         // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
@@ -435,7 +403,7 @@ public class RobotContainer {
             .whileTrue(teleopDriveCommand.applyDoubleClutch());
 
         // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
-        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
+        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
             .whileTrue(
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
@@ -452,18 +420,6 @@ public class RobotContainer {
         m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
 
         m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
-
-        /*
-        m_driverController.x().and(
-            m_driverController.leftBumper().and(
-                m_driverController.rightBumper()
-            ).negate()
-        ).whileTrue(teleopDriveCommand.applyLeftStationHeadingLock());
-
-        m_driverController.b().whileTrue(teleopDriveCommand.applyRightStationHeadingLock());
-        */
-
-        // m_driverController.y().whileTrue(teleopDriveCommand.applyForwardHeadingLock()); Oliver didn't want this
 
         m_driverController.leftBumper().and(
             m_driverController.rightBumper().and(
@@ -565,6 +521,10 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.intakeCoral())
             .whileFalse(superstructureCommands.stopIntake());
 
+        m_operatorController.povLeft()
+            .whileTrue(superstructureCommands.grabberIntakeCoral())
+            .onFalse(superstructureCommands.stopGrabber());
+
         // Manual coral intake and transfer
         m_operatorController.povUp()
             .onTrue(
@@ -596,15 +556,6 @@ public class RobotContainer {
 
         // Interrupts any wrist command when the right joystick is moved
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
-
-        // Interrupts any elevator command when the the left joystick is moved
-        // m_operatorController.leftStick().onTrue(superstructureCommands.interruptWristevator());
-
-        /*
-        m_operatorController.start().whileTrue(m_elevator.zeroEncoderJoystickControl(
-            m_operatorController::getLeftX
-        ));
-        */
         
         m_operatorController.rightBumper()
             .onTrue(superstructureCommands.removeAlgae())
@@ -627,13 +578,14 @@ public class RobotContainer {
         );*/
     }
 
-  /**
+   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        return AutoBuilder.buildAuto("J4_K4 - E4_D4");
+        return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
+        // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }
 
@@ -666,7 +618,7 @@ public class RobotContainer {
     public static Command threadCommand() {
         return Commands.sequence(
             Commands.waitSeconds(20),
-            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, SystemConstants.threadPriority))
-        );
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10))
+        ).ignoringDisable(true);
     }
 }

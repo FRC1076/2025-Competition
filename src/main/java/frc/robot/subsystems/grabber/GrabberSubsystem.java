@@ -19,15 +19,14 @@ public class GrabberSubsystem extends SubsystemBase{
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
     private final LinearFilter currentFilter;
-    private final Debouncer debouncer;
     private final double kCoralCurrentThreshold;
     private double filteredCurrent;
 
     public GrabberSubsystem(GrabberIO io) {
         this.io = io;
-        this.currentFilter = LinearFilter.movingAverage(5);
-        this.debouncer = new Debouncer(0.33);
-        this.kCoralCurrentThreshold = 6;
+        this.currentFilter = LinearFilter.movingAverage(8);
+        // this.debouncer = new Debouncer(0.33);
+        this.kCoralCurrentThreshold = 14;
     }
 
     /** Sets both motors to the same voltage */
@@ -44,17 +43,17 @@ public class GrabberSubsystem extends SubsystemBase{
         runVolts(0);
     }
 
-    public boolean getOutPutCurrentAboveNormal() {
-        return debouncer.calculate(filteredCurrent > kCoralCurrentThreshold);
+    public double getPosition() {
+        return inputs.motorPositionRadians;
     }
 
-    public double getPosition(){
-        return inputs.motorPositionRadians;
+    public boolean hasCoral() {
+        return filteredCurrent > kCoralCurrentThreshold;
     }
 
     @Override
     public void periodic() {
-        filteredCurrent = currentFilter.calculate(io.getOutputCurrent());
+        filteredCurrent = currentFilter.calculate(io.getOutputCurrent() > 25 ? 0 : io.getOutputCurrent());
         io.updateInputs(inputs);
         Logger.processInputs("Grabber", inputs);
     }
@@ -91,18 +90,6 @@ public class GrabberSubsystem extends SubsystemBase{
      */
     public Command applyRadiansBangBang(double volts, double radians) {
         return new ApplyRadians(volts, radians, this);
-        /*
-        double setpoint = inputs.motorPositionRadians + radians;
-        boolean positiveDirection = (setpoint > inputs.motorPositionRadians);
-        return new FunctionalCommand(
-            () -> runVolts(volts),
-            () -> {},
-            (interrupted) -> stop(),
-            positiveDirection 
-                ? () -> inputs.motorPositionRadians >= setpoint
-                : () -> inputs.motorPositionRadians <= setpoint,
-            this
-        );*/
     }
 
     /**

@@ -85,7 +85,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
-        //System.out.println("Elevator: " + this.getPositionMeters());
         io.updateInputs(inputs);
         Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
         Logger.processInputs("Elevator", inputs);
@@ -154,6 +153,10 @@ public class ElevatorSubsystem extends SubsystemBase {
             () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters,
             this
         );
+    }
+
+    public Command holdPosition(double positionMeters) {
+        return run(() -> setPosition(positionMeters));
     }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.
