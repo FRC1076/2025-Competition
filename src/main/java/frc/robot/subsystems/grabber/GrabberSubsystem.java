@@ -26,7 +26,7 @@ public class GrabberSubsystem extends SubsystemBase{
         this.io = io;
         this.currentFilter = LinearFilter.movingAverage(8);
         // this.debouncer = new Debouncer(0.33);
-        this.kCoralCurrentThreshold = 6;
+        this.kCoralCurrentThreshold = 14;
     }
 
     /** Sets both motors to the same voltage */
@@ -53,7 +53,7 @@ public class GrabberSubsystem extends SubsystemBase{
 
     @Override
     public void periodic() {
-        filteredCurrent = currentFilter.calculate(io.getOutputCurrent() > 10 ? 0 : io.getOutputCurrent());
+        filteredCurrent = currentFilter.calculate(io.getOutputCurrent() > 25 ? 0 : io.getOutputCurrent());
         io.updateInputs(inputs);
         Logger.processInputs("Grabber", inputs);
     }

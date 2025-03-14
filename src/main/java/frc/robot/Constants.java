@@ -109,7 +109,7 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Red;
+        public static Alliance teamColor = Alliance.Blue;
         public static AutonSides autonSide = AutonSides.Right;
         
         public enum TeamColors {
@@ -278,7 +278,7 @@ public final class Constants {
 
         // Index State
         public enum IndexState {
-            TRANSFER(3),
+            TRANSFER(4.5),
             IDLE(0), // Never implemented, just an option
             BACKWARDS(-1);
             

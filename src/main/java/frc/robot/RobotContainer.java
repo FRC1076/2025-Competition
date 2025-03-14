@@ -521,7 +521,9 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.intakeCoral())
             .whileFalse(superstructureCommands.stopIntake());
 
-        m_operatorController.povLeft().whileTrue(superstructureCommands.grabberIntakeCoral());
+        m_operatorController.povLeft()
+            .whileTrue(superstructureCommands.grabberIntakeCoral())
+            .onFalse(superstructureCommands.stopGrabber());
 
         // Manual coral intake and transfer
         m_operatorController.povUp()
@@ -582,7 +584,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        return AutoBuilder.buildAuto("J4_K4 - E4_D4");
+        return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
+        // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }
 

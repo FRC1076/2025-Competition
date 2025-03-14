@@ -477,10 +477,10 @@ public class Superstructure {
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
                 ).until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
-                Commands.waitSeconds(0.3),
+                Commands.waitSeconds(0.2),
                 Commands.waitUntil(m_transferBeamBreak),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
-                superstructure.m_grabber.applyRotationsBangBang(12, 1.7), // Adjust rotations
+                superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
@@ -517,9 +517,10 @@ public class Superstructure {
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
-                        applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE)
-                        .until(m_grabber::hasCoral),
-                        m_grabber.applyRotationsBangBang(1, 0)
+                        applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
+                        Commands.waitSeconds(0.2),
+                        Commands.waitUntil(m_grabber::hasCoral),
+                        m_grabber.applyRotationsBangBang(8, 0.3)
                     )
                 ),
                 Commands.parallel(
