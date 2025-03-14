@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -264,6 +265,34 @@ public class Superstructure {
         );
     }
 
+    private Command applyWristevatorStateGrabberDown(WristevatorState position) {
+
+        Runnable ledSignal = () -> {
+            safeToFeedCoral = false;
+            safeToMoveElevator = false;
+        };
+
+        Command wristPreMoveCommand = m_wrist.applyAngle(Rotation2d.fromDegrees(-90));
+
+        Command wristHoldCommand = m_wrist.holdAngle(Rotation2d.fromDegrees(-90));
+
+        // Due to command composition semantics, the command composition itself cannot require the subsystems directly
+        
+        return Commands.sequence(
+            wristPreMoveCommand.asProxy(),
+            Commands.deadline(
+                m_elevator.applyPosition(position.elevatorHeightMeters),
+                wristHoldCommand
+            ).asProxy(),
+            CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
+            m_wrist.applyAngle(position.wristAngle).asProxy(),
+            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
+        ).alongWith(
+            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            Commands.runOnce(ledSignal)
+        );
+    }
+
     /**
      * Sets grabber wheels to run at desired state
      * @param state the GrabberState
@@ -410,28 +439,48 @@ public class Superstructure {
          * Set elevator and wrist to L1 preset
          */
         public Command preL1(){
-            return superstructure.applyWristevatorState(WristevatorState.L1);
+            return 
+                Commands.either(
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L1),
+                    superstructure.applyWristevatorState(WristevatorState.L1),
+                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                );
         }
 
         /**
          * Set elevator and wrist to L2 preset
          */
         public Command preL2(){
-            return superstructure.applyWristevatorState(WristevatorState.L2);
+            return 
+                Commands.either(
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2),
+                    superstructure.applyWristevatorState(WristevatorState.L2),
+                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                );
         }
 
         /**
          * Set elevator and wrist to L3 preset
          */
         public Command preL3(){
-            return superstructure.applyWristevatorState(WristevatorState.L3);
+            return 
+                Commands.either(
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3),
+                    superstructure.applyWristevatorState(WristevatorState.L3),
+                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                );
         }
 
         /**
          * Set elevator and wrist to L4 preset
          */
         public Command preL4(){
-            return superstructure.applyWristevatorState(WristevatorState.L4);
+            return 
+                Commands.either(
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4),
+                    superstructure.applyWristevatorState(WristevatorState.L4),
+                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                );
         }
 
         /**
@@ -506,7 +555,8 @@ public class Superstructure {
                     transferCoral()
                 ),
                 Commands.parallel(
-                    superstructure.applyWristevatorState(WristevatorState.TRAVEL),
+                    //superstructure.applyWristevatorState(WristevatorState.TRAVEL),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL),
                     Commands.run(() -> safeToMoveElevator = true)
                 )
             );
@@ -521,7 +571,7 @@ public class Superstructure {
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
                         Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral),
-                        m_grabber.applyRotationsBangBang(8, 0.3)
+                        m_grabber.applyRotationsBangBang(8, 0.2)
                     )
                 ),
                 Commands.parallel(
