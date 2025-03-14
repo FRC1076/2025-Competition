@@ -19,8 +19,10 @@ public class GrabberSubsystem extends SubsystemBase{
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
     private final LinearFilter currentFilter;
+    private final Debouncer currentDebouncer = new Debouncer(0.1);
     private final double kCoralCurrentThreshold;
     private double filteredCurrent;
+    private boolean debounced;
 
     public GrabberSubsystem(GrabberIO io) {
         this.io = io;
@@ -54,8 +56,13 @@ public class GrabberSubsystem extends SubsystemBase{
     @Override
     public void periodic() {
         filteredCurrent = currentFilter.calculate(io.getOutputCurrent() > 25 ? 0 : io.getOutputCurrent());
+        debounced = currentDebouncer.calculate(4 >= io.getOutputCurrent() && io.getOutputCurrent() >= 8);
         io.updateInputs(inputs);
         Logger.processInputs("Grabber", inputs);
+    }
+
+    public boolean debouncerSignal() {
+        return debounced;
     }
 
     /* ######################################################################## */
