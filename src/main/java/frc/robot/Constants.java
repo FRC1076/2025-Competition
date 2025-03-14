@@ -505,7 +505,7 @@ public final class Constants {
         public static final double kMaxWristAngleRadians = Units.degreesToRadians(90);
 
         public static final double maxOperatorControlVolts = 1;
-        public static final double kSmartCurrentLimit = 15.0;
+        public static final double kSmartCurrentLimit = 20.0;
 
         public static final boolean kLeadMotorInverted = true;
 

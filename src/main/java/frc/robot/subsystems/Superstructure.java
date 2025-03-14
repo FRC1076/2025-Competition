@@ -575,7 +575,7 @@ public class Superstructure {
                     )
                 ),
                 Commands.parallel(
-                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.TRAVEL),
                     Commands.run(() -> safeToMoveElevator = true)
                 )
             );
