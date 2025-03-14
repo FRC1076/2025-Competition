@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Superstructure class that contains all subsystems and commands for the robot's superstructure <p>
@@ -133,9 +134,9 @@ public class Superstructure {
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
-        /*
+        
         CommandUtils.makePeriodic(() -> Logger.processInputs("Superstructure", superState));
-        */
+        
         CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
 
