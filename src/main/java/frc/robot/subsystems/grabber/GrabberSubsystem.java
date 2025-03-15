@@ -19,7 +19,7 @@ public class GrabberSubsystem extends SubsystemBase{
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
     private final LinearFilter currentFilter;
-    private final Debouncer currentDebouncer = new Debouncer(0.1);
+    private final Debouncer currentDebouncer = new Debouncer(0);
     private final double kCoralCurrentThreshold;
     private double filteredCurrent;
     private boolean debounced;
@@ -62,7 +62,8 @@ public class GrabberSubsystem extends SubsystemBase{
     }
 
     public boolean debouncerSignal() {
-        return debounced;
+        return !(4 >= io.getOutputCurrent() && io.getOutputCurrent() >= 8);
+        //return debounced;
     }
 
     /* ######################################################################## */
