@@ -46,9 +46,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "grabberIntakeCoral"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "autonGrabberIntakeCoral"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -65,9 +78,28 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "preL4Direct"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "autonGrabberAdjustCoral"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "preL4Direct"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -90,9 +122,22 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "grabberIntakeCoral"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "autonGrabberIntakeCoral"
+                      }
+                    }
+                  ]
                 }
               }
             ]
@@ -109,9 +154,28 @@
                 }
               },
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "preL4Direct"
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "autonGrabberAdjustCoral"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "preL4Direct"
+                      }
+                    }
+                  ]
                 }
               }
             ]

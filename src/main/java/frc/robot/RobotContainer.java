@@ -366,11 +366,12 @@ public class RobotContainer {
         NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
         NamedCommands.registerCommand("autonIntakeCoral", superstructureCommands.autonIntakeCoral());
-        NamedCommands.registerCommand("grabberIntakeCoral", superstructureCommands.grabberIntakeCoral());
+        NamedCommands.registerCommand("autonGrabberIntakeCoral", superstructureCommands.autonGrabberIntakeCoral());
+        NamedCommands.registerCommand("autonGrabberAdjustCoral", superstructureCommands.autonGrabberAdjustCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
-        NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
+        // NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp()); didn't work before
     }
 
     private void configureSharedBindings() {
@@ -584,7 +585,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
+        // return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
+        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }
