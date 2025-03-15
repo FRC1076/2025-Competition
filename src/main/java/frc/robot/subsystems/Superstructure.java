@@ -575,7 +575,7 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.2),
+                        Commands.waitSeconds(0.1),
                         Commands.waitUntil(m_grabber::hasCoral),
                         m_grabber.applyRotationsBangBang(8, 0.2)
                     )
@@ -602,7 +602,7 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.2),
+                        Commands.waitSeconds(0.1),
                         Commands.waitUntil(m_grabber::hasCoral)
                         // m_grabber.applyRotationsBangBang(8, 0.2) moved to autonGrabberAdjustCoral instead to save time
                     )

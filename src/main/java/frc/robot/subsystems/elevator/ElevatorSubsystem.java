@@ -120,6 +120,10 @@ public class ElevatorSubsystem extends SubsystemBase {
         io.setVoltage(volts + m_feedforwardController.getKg());
     }
 
+    public void setVoltageUnrestricted(double volts) {
+        io.setVoltage(volts + m_feedforwardController.getKg());
+    }
+
     /** Set kG of the elevator's feedforward
      * @param kg New kG value in volts
      */
@@ -165,8 +169,8 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public Command applyManualControl(DoubleSupplier controlSupplier, BooleanSupplier higherMaxSpeedSupplier) {
         return run(higherMaxSpeedSupplier.getAsBoolean()
-            ? () -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.fasterMaxOperatorControlVolts)
-            : () -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts)
+            ? () -> setVoltageUnrestricted(controlSupplier.getAsDouble() * ElevatorConstants.fasterMaxOperatorControlVolts)
+            : () -> setVoltageUnrestricted(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts)
         );
     }
 
