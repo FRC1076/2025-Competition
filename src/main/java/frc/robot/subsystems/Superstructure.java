@@ -562,6 +562,12 @@ public class Superstructure {
             );
         }
 
+        /**
+         * Moves the elevator and wrist to the intake position, intakes the coral,
+         * moves it out 0.2 rotations to avoid hitting the carriage,
+         * and the moves the elevator and wrist to the travel position
+         * @return a command sequence
+         */
         public Command grabberIntakeCoral() {
             return Commands.sequence(
                 superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE),
@@ -581,6 +587,45 @@ public class Superstructure {
             );
         }
 
+        /**
+         * Moves the elevator and wrist to the intake position directly and intakes the coral
+         * 
+         * <p> This command is different because it applies the wristevator state directly,
+         * doesn't adjust the coral,
+         * and doesn't return to the travel position afterwards
+         * @return a command sequence
+         */
+        public Command autonGrabberIntakeCoral() {
+            return Commands.sequence(
+                superstructure.applyWristevatorStateDirect(WristevatorState.GRABBER_CORAL_INTAKE),
+                Commands.parallel(
+                    Commands.runOnce(() -> safeToFeedCoral = true),
+                    Commands.sequence(
+                        applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
+                        Commands.waitSeconds(0.2),
+                        Commands.waitUntil(m_grabber::hasCoral)
+                        // m_grabber.applyRotationsBangBang(8, 0.2) moved to autonGrabberAdjustCoral instead to save time
+                    )
+                )   
+                // Commands.run(() -> safeToMoveElevator = true)
+            );
+        }
+
+        /**
+         * This is scheduled after autonGrabberIntakeCoral to avoid the grabber hitting the carriage
+         * @return
+         */
+        public Command autonGrabberAdjustCoral() {
+            return Commands.sequence(
+                m_grabber.applyRotationsBangBang(8, 0.2),
+                Commands.runOnce(() -> safeToMoveElevator = true)
+            );
+        }
+
+        /**
+         * Stops grabber, and holds the indexer in a backwards state
+         * @return
+         */
         public Command stopIntake() {
             return Commands.parallel(
                     holdIndexState(IndexState.BACKWARDS),
