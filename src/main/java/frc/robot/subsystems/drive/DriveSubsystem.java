@@ -352,12 +352,12 @@ public class DriveSubsystem extends SubsystemBase {
             return new SelectCommand<>(rightBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
-        public Command dynamicSysID(){
-            return null; // WIP
+        public Command dynamicSysID(SysIdRoutine.Direction direction){
+            return m_sysIdRoutineToApply.dynamic(direction);
         }
 
-        public Command quasistaticSysID(){
-            return null; // WIP
+        public Command quasistaticSysID(SysIdRoutine.Direction direction){
+            return m_sysIdRoutineToApply.quasistatic(direction);
         }
         
         public Command applySwerveRequest(Supplier<SwerveRequest> requestSupplier) {

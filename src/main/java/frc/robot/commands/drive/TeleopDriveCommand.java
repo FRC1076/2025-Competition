@@ -237,15 +237,18 @@ public class TeleopDriveCommand extends Command {
             (vx, vy, omega) -> {
                 goalPose = GeometryUtils.rotatePose(
                     Localization.getClosestReefFace(m_drive.getPose()).leftBranch.transformBy(robotOffset),
-                    Rotation2d.k180deg);
+                    Rotation2d.k180deg
+                );
 
                 translationPIDController.reset(
                     m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
-                    m_drive.getVelocityMPS());
+                    m_drive.getVelocityMPS()
+                );
 
                 rotationPIDController.reset(
                     m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
-                    m_drive.getAngularVelocityRadPerSec());
+                    m_drive.getAngularVelocityRadPerSec()
+                );
 
                 return new ApplyRobotSpeeds().withSpeeds(
                     m_DriveController.calculate(
