@@ -18,6 +18,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SystemConstants.SystemModes;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 /**
@@ -56,14 +57,14 @@ public class Robot extends LoggedRobot {
         }
 
     // Set up data receivers & replay source
-    if (Constants.SystemConstants.currentMode == 0){
+    if (Constants.SystemConstants.systemMode == SystemModes.kReal){
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
-    } else if (Constants.SystemConstants.currentMode == 1) {
+    } else if (Constants.SystemConstants.systemMode == SystemModes.kSim) {
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());
-    } else if (Constants.SystemConstants.currentMode == 2) {
+    } else if (Constants.SystemConstants.systemMode == SystemModes.kReplay) {
         // Replaying a log, set up replay source
         setUseTiming(false); // Run as fast as possible
         String logPath = LogFileUtil.findReplayLog();
@@ -76,8 +77,12 @@ public class Robot extends LoggedRobot {
     // Start AdvantageKit logger
     Logger.start();
 
+    if (SystemConstants.logCTRE) {
+        SignalLogger.start();
+    }
 
-    SignalLogger.enableAutoLogging(SystemConstants.logCTRE);
+    SignalLogger.enableAutoLogging(false); // We NEVER want match autologging, we decide manually if we want CTRE logging
+
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
@@ -85,8 +90,6 @@ public class Robot extends LoggedRobot {
     m_robotContainer.setAutonState(true);
 
     RobotContainer.threadCommand().schedule();
-
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     FollowPathCommand.warmupCommand().schedule();
 
@@ -136,6 +139,7 @@ public class Robot extends LoggedRobot {
      */
 
     m_robotContainer.setAutonState(true);
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {

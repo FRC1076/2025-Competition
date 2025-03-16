@@ -12,6 +12,7 @@ import frc.robot.subsystems.drive.DriveIOHardware;
 import frc.robot.subsystems.drive.DriveIOSim;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.TunerConstants;
+import frc.robot.subsystems.drive.DriveSubsystem.DrivetrainSysIDRoutine;
 import frc.robot.subsystems.elevator.ElevatorIOHardware;
 import frc.robot.subsystems.elevator.ElevatorIOSim;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
@@ -38,9 +39,12 @@ import lib.vision.Limelight.LEDState;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
+import frc.robot.Constants.SystemConstants.SysIDModes;
+import frc.robot.Constants.SystemConstants.SystemModes;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
@@ -87,6 +91,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -169,19 +174,21 @@ public class RobotContainer {
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
         
-        if (SystemConstants.currentMode == 0) {
+        if (SystemConstants.systemMode == SystemModes.kReal) {
             m_visionSim = null;
             m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
 
             // BLUE
+            /* 
             if(GameConstants.teamColor == Alliance.Blue){
-                m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180)));
+                m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.k180deg));
             }
             // RED
             else{ 
-                m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0)));
+                m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.kZero));
             }
+            */
             
             m_elevator = new ElevatorSubsystem(new ElevatorIOHardware(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOHardware(), this::getLoopTime);
@@ -201,7 +208,7 @@ public class RobotContainer {
                     config.defaultMultiTagStdDevs)
                 );
             }
-        } else if (SystemConstants.currentMode == 1) {
+        } else {//if (SystemConstants.currentMode == SystemMode.SIM || SystemConstants.currentMode == SystemMode.REPLAY) {
             m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
@@ -305,12 +312,12 @@ public class RobotContainer {
         //Build the auto chooser with PathPlanner
         m_autoChooser = AutoBuilder.buildAutoChooser();
         m_autoChooser.addOption(
-            "DoNothingBlue180", 
-            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))))
+            "SeedPoseBlue180", 
+            Commands.runOnce(() -> m_drive.resetPose(PoseOfInterest.BLUE_AUTON_START.pose))
         );
         m_autoChooser.addOption(
-            "DoNothingRed0", 
-            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0))))
+            "SeedPoseRed0", 
+            Commands.runOnce(() -> m_drive.resetPose(PoseOfInterest.RED_AUTON_START.pose))
         );
         SmartDashboard.putData(m_autoChooser);
 
@@ -384,60 +391,108 @@ public class RobotContainer {
     }
 
     private void configureDriverBindings() {
-        m_driverController.a().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
-        );
-
-        m_driverController.b().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestRightBranch()
-        );
-        
-        // Point to reef
-        // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
-
-        // Apply single clutch
-        m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
-            .whileTrue(teleopDriveCommand.applySingleClutch());
-
-        // Apply double clutch
-        m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
-            .whileTrue(teleopDriveCommand.applyDoubleClutch());
-
-        // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
-        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
-            .whileTrue(
-                Commands.parallel(
-                    teleopDriveCommand.applyDoubleClutch(),
-                    Commands.startEnd(
-                        () -> slewRateLimiterEnabled = false,
-                        () -> slewRateLimiterEnabled = true
-                    )
-                )
+        if (SystemConstants.sysIDMode == SysIDModes.kNone){
+            m_driverController.a().whileTrue(
+                m_drive.CommandBuilder.directDriveToNearestLeftBranch()
             );
 
-        m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
-            .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL, 5));
+            m_driverController.b().whileTrue(
+                m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            );
+            
+            // Point to reef
+            // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
-        m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
+            // Apply single clutch
+            m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
+                .whileTrue(teleopDriveCommand.applySingleClutch());
 
-        m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
+            // Apply double clutch
+            m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
+                .whileTrue(teleopDriveCommand.applyDoubleClutch());
 
-        m_driverController.leftBumper().and(
+            // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
+            m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
+                .whileTrue(
+                    Commands.parallel(
+                        teleopDriveCommand.applyDoubleClutch(),
+                        Commands.startEnd(
+                            () -> slewRateLimiterEnabled = false,
+                            () -> slewRateLimiterEnabled = true
+                        )
+                    )
+                );
+
+            m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
+                .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL, 5));
+
+            m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
+
+            m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
+
+            m_driverController.leftBumper().and(
+                m_driverController.rightBumper().and(
+                    m_driverController.x()
+                )
+            ).onTrue(new InstantCommand(
+                () -> m_drive.resetHeading()
+            )); 
+
+        } else if (SystemConstants.sysIDMode == SysIDModes.kDriveTranslation) {
+            // Quasistatic and Dynamic control scheme for Translational Sysid
+            m_driverController.rightBumper().and(
+                m_driverController.a()
+            ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.TRANSLATION,Direction.kForward));
+            
+            m_driverController.rightBumper().and(
+                m_driverController.b()
+            ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.TRANSLATION,Direction.kReverse));
+
             m_driverController.rightBumper().and(
                 m_driverController.x()
-            )
-        ).onTrue(new InstantCommand(
-            () -> m_drive.resetHeading()
-        )); 
-
-        if (SystemConstants.driverSysID) {
+            ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.TRANSLATION,Direction.kForward));
             
-        }
-    }
+            m_driverController.rightBumper().and(
+                m_driverController.y()
+            ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.TRANSLATION,Direction.kForward));
+        
+        } else if (SystemConstants.sysIDMode == SysIDModes.kDriveRotation) {
+                // Quasistatic and Dynamic control scheme for Translational Sysid
+            m_driverController.rightBumper().and(
+                m_driverController.a()
+            ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.ROTATION,Direction.kForward));
+            
+            m_driverController.rightBumper().and(
+                m_driverController.b()
+            ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.ROTATION,Direction.kReverse));
 
-    private void configureOperatorBindings() {
-
-        if (SystemConstants.operatorSysID) {
+            m_driverController.rightBumper().and(
+                m_driverController.x()
+            ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.ROTATION,Direction.kForward));
+            
+            m_driverController.rightBumper().and(
+                m_driverController.y()
+            ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.ROTATION,Direction.kReverse));
+    
+        } else if (SystemConstants.sysIDMode == SysIDModes.kDriveSteer) {
+            // Quasistatic and Dynamic control scheme for Translational Sysid
+            m_driverController.rightBumper().and(
+                m_driverController.a()
+            ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.STEER,Direction.kForward));
+             
+            m_driverController.rightBumper().and(
+                m_driverController.b()
+            ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.STEER,Direction.kReverse));
+ 
+             m_driverController.rightBumper().and(
+                m_driverController.x()
+            ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.STEER,Direction.kForward));
+             
+            m_driverController.rightBumper().and(
+                m_driverController.y()
+            ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.STEER,Direction.kReverse));
+     
+        } else if (SystemConstants.sysIDMode == SysIDModes.kElevator) {
             
             // Quasistsic and Dynamic control scheme for Elevator Sysid
             m_driverController.rightBumper().and(   
@@ -455,7 +510,9 @@ public class RobotContainer {
             m_driverController.rightBumper().and(
                 m_driverController.y()
             ).whileTrue(m_elevator.elevatorSysIdDynamic(SysIdRoutine.Direction.kReverse));
-            
+        
+        } else if (SystemConstants.sysIDMode == SysIDModes.kElevator) {
+
             //Quasistsic and Dynamic control scheme for Wrist Sysid
             
             m_driverController.rightBumper().and(
@@ -474,6 +531,9 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kReverse));
         }
+    }
+
+    private void configureOperatorBindings() {
          
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
         
@@ -621,7 +681,8 @@ public class RobotContainer {
     public static Command threadCommand() {
         return Commands.sequence(
             Commands.waitSeconds(20),
-            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10))
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10)),
+            Commands.print("MAIN THREAD PRIORITY RAISED TO RT10")
         ).ignoringDisable(true);
     }
 }

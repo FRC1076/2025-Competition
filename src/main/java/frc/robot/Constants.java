@@ -22,11 +22,15 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants.SystemConstants.SystemModes;
 
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
 
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -144,11 +148,23 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 0; // 0 is real, 1 is sim
-        public static final boolean operatorSysID = false;
-        public static final boolean driverSysID = false;
+        public static class SystemModes {
+            public static final int kReal = 0;
+            public static final int kSim = 1;
+            public static final int kReplay = 2;
+        }
+        public static class SysIDModes {
+            public static final int kNone = 0;
+            public static final int kDriveTranslation = 1;
+            public static final int kDriveRotation = 2;
+            public static final int kDriveSteer = 3;
+            public static final int kElevator = 4;
+            public static final int kWrist = 5;
+        }
+        public static final int systemMode = SystemModes.kReal; // 0 is real, 1 is sim
+        public static final int sysIDMode = SysIDModes.kNone;
         public static final boolean logOdometry = false;
-        public static final boolean logCTRE = true; // Whether CTRE hoot logging should be enabled
+        public static final boolean logCTRE = false; // Whether or not to enable CTRE hoot logging
         public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
     }
     
@@ -215,33 +231,34 @@ public final class Constants {
         // Grabber Possession State
         public enum GrabberPossession {
             EMPTY(
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG 
                     : ElevatorSimConstants.Control.kG),
             CORAL(
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG 
                     : ElevatorSimConstants.Control.kG),
             ALGAE(
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG 
                     : ElevatorSimConstants.Control.kG),
             TRANSFERRING(
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG
                     : WristSimConstants.Control.kG,
-                SystemConstants.currentMode == 0
+                SystemConstants.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG
-                    : ElevatorSimConstants.Control.kG);
+                    : ElevatorSimConstants.Control.kG
+                );
 
             public final double wrist_kG;
             public final double elevator_kG;
@@ -399,12 +416,17 @@ public final class Constants {
             BLU_RIGHT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(25.80), 55),
             BLU_LEFT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(291.20), 305),
             RED_RIGHT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(291.20), -125),
-            RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125);
+            RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125),
+            BLUE_AUTON_START(new Pose2d(7.177, 5.147, Rotation2d.k180deg)),
+            RED_AUTON_START(new Pose2d(10.380, 3.043, Rotation2d.kZero));
 
             public final Pose2d pose;
 
             private PoseOfInterest(double xMeters, double yMeters, double omegaDeg) {
                 this.pose = new Pose2d(xMeters, yMeters, Rotation2d.fromDegrees(omegaDeg));
+            }
+            private PoseOfInterest(Pose2d pose) {
+                this.pose = pose;
             }
         }
     }
