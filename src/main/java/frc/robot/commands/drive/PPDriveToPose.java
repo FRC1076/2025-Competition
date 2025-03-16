@@ -69,9 +69,7 @@ public class PPDriveToPose extends Command {
     }
 
     @Override
-    public void execute(){
-        followPathCommand.execute();
-    }
+    public void execute(){}
     
     @Override
     public boolean isFinished() {
@@ -80,6 +78,8 @@ public class PPDriveToPose extends Command {
     
     @Override
     public void end(boolean interrupted) {
+        System.out.println("PPDriveToPose .end() called"); //FOR DEBUGGING TODO: COMMENT THIS LINE OUT
         followPathCommand.cancel();
+        System.out.println(followPathCommand.isScheduled()); //FOR DEBUGGING TODO: COMMENT THIS LINE OUT
     }
 }

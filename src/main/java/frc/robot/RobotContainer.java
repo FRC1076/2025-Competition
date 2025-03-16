@@ -429,12 +429,16 @@ public class RobotContainer {
         ).onTrue(new InstantCommand(
             () -> m_drive.resetHeading()
         )); 
+
+        if (SystemConstants.driverSysID) {
+            
+        }
     }
 
     private void configureOperatorBindings() {
 
-        //if (SystemConstants.operatorSysID) {
-            /*
+        if (SystemConstants.operatorSysID) {
+            
             // Quasistsic and Dynamic control scheme for Elevator Sysid
             m_driverController.rightBumper().and(   
                 m_driverController.a()
@@ -452,8 +456,6 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_elevator.elevatorSysIdDynamic(SysIdRoutine.Direction.kReverse));
             
-        */
-        /*
             //Quasistsic and Dynamic control scheme for Wrist Sysid
             
             m_driverController.rightBumper().and(
@@ -471,8 +473,7 @@ public class RobotContainer {
             m_driverController.rightBumper().and(
                 m_driverController.y()
             ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kReverse));
-        */
-        //}
+        }
          
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
         
@@ -586,9 +587,9 @@ public class RobotContainer {
    */
     public Command getAutonomousCommand() {
         // return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
-        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        // return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
-        // return m_autoChooser.getSelected();
+        return m_autoChooser.getSelected();
     }
 
     /**

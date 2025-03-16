@@ -49,6 +49,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
+import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentric;
 import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
@@ -84,6 +85,9 @@ public class TeleopDriveCommand extends Command {
 
     private Pose2d goalPose = new Pose2d();
 
+    private SwerveRequest.FieldCentric defaultDriveRequest;
+    private SwerveRequest.FieldCentricFacingAngle defaultHeadingLockedDriveRequest;
+
     // Request Generator declarations
 
     // The request generator is a function that takes three doubles as parameters and returns a SwerveRequest.
@@ -105,6 +109,11 @@ public class TeleopDriveCommand extends Command {
         rawXSupplier = () -> xSupplier.getAsDouble() * maxTranslationSpeedMPS;
         rawYSupplier = () -> ySupplier.getAsDouble() * maxTranslationSpeedMPS;
         rawOmegaSupplier = () -> omegaSupplier.getAsDouble() * maxRotationSpeedRadPerSec;
+        defaultDriveRequest = new FieldCentric().withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+        defaultHeadingLockedDriveRequest = new FieldCentricFacingAngle()
+            .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective)
+            .withHeadingPID(5.0,0.0,0.0);
+        defaultHeadingLockedDriveRequest.HeadingController.enableContinuousInput(-Math.PI,Math.PI);
         addRequirements(drive);
     }
 
@@ -150,20 +159,17 @@ public class TeleopDriveCommand extends Command {
             requestGenerator = requestGeneratorOverride.get();
         } else if (headingSupplier.isPresent()) {
             requestGenerator = (vx, vy, omega) -> {
-                FieldCentricFacingAngle request = new FieldCentricFacingAngle()
+                return defaultHeadingLockedDriveRequest
                     .withVelocityX(vx)
                     .withVelocityY(vy)
-                    .withTargetDirection(headingSupplier.get().get())
-                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
-                request.HeadingController.setPID(5, 0, 0);
-                request.HeadingController.enableContinuousInput(-Math.PI, Math.PI);
-                return request;
+                    .withTargetDirection(headingSupplier.get().get());
             };
         } else {
             requestGenerator = (vx, vy, omega) -> {
-                return new ApplyFieldSpeeds()
-                    .withSpeeds(new ChassisSpeeds(vx, vy, omega))
-                    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
+                return defaultDriveRequest
+                    .withVelocityX(vx)
+                    .withVelocityY(vy)
+                    .withRotationalRate(omega);
             };
         }
     }
@@ -270,7 +276,8 @@ public class TeleopDriveCommand extends Command {
                     m_DriveController.calculate(
                         m_drive.getPose(),
                         goalPose
-                    ));
+                    )
+                );
             }
         );
     }
