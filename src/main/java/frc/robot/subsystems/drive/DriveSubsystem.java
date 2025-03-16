@@ -21,6 +21,7 @@ import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffse
 import lib.utils.GeometryUtils;
 import lib.vision.VisionLocalizationSystem;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.DoubleSupplier;
@@ -56,6 +57,13 @@ import com.ctre.phoenix6.swerve.SwerveRequest.FieldCentricFacingAngle;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 public class DriveSubsystem extends SubsystemBase {
+
+    public static enum DrivetrainSysIDRoutine {
+        TRANSLATION,
+        ROTATION,
+        STEER
+    }
+
     private final DriveIO io;
     private final DriveIOInputsAutoLogged driveInputs = new DriveIOInputsAutoLogged();
     //private final ModuleIOInputsAutoLogged frontLeftInputs = new ModuleIOInputsAutoLogged();
@@ -132,8 +140,7 @@ public class DriveSubsystem extends SubsystemBase {
         )
     );
 
-    /* The SysId routine to test */
-    private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+    private final Map<DrivetrainSysIDRoutine,SysIdRoutine> sysIDMap = new EnumMap<>(DrivetrainSysIDRoutine.class);
 
     public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision, Elastic elastic) {
         this.io = io;
@@ -180,6 +187,11 @@ public class DriveSubsystem extends SubsystemBase {
         } catch (Exception ex) {
             DriverStation.reportError("Failed to load PathPlanner config and configure AutoBuilder", ex.getStackTrace());
         }
+        // Configure SysID map
+        sysIDMap.put(DrivetrainSysIDRoutine.TRANSLATION,m_sysIdRoutineTranslation);
+        sysIDMap.put(DrivetrainSysIDRoutine.ROTATION,m_sysIdRoutineRotation);
+        sysIDMap.put(DrivetrainSysIDRoutine.STEER,m_sysIdRoutineSteer);
+
         CommandBuilder = new DriveCommandFactory(this);
 
         
@@ -352,12 +364,12 @@ public class DriveSubsystem extends SubsystemBase {
             return new SelectCommand<>(rightBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
-        public Command dynamicSysID(SysIdRoutine.Direction direction){
-            return m_sysIdRoutineToApply.dynamic(direction);
+        public Command dynamicSysID(DrivetrainSysIDRoutine routineKey, SysIdRoutine.Direction direction){
+            return sysIDMap.get(routineKey).quasistatic(direction);
         }
 
-        public Command quasistaticSysID(SysIdRoutine.Direction direction){
-            return m_sysIdRoutineToApply.quasistatic(direction);
+        public Command quasistaticSysID(DrivetrainSysIDRoutine routineKey, SysIdRoutine.Direction direction){
+            return sysIDMap.get(routineKey).quasistatic(direction);
         }
         
         public Command applySwerveRequest(Supplier<SwerveRequest> requestSupplier) {
