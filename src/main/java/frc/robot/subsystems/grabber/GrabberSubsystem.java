@@ -28,7 +28,7 @@ public class GrabberSubsystem extends SubsystemBase{
         this.io = io;
         this.currentFilter = LinearFilter.movingAverage(8);
         // this.debouncer = new Debouncer(0.33);
-        this.kCoralCurrentThreshold = 14;
+        this.kCoralCurrentThreshold = 12;
     }
 
     /** Sets both motors to the same voltage */
