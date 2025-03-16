@@ -110,7 +110,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Left;
+        public static AutonSides autonSide = AutonSides.Right;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -148,7 +148,7 @@ public final class Constants {
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
-        public static final boolean logCTRE = true; // Whether CTRE hoot logging should be enabled
+        public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
         public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
     }
     

@@ -70,7 +70,7 @@ public class PPDriveToPose extends Command {
 
     @Override
     public void execute(){
-        followPathCommand.execute();
+       // followPathCommand.execute();
     }
     
     @Override
