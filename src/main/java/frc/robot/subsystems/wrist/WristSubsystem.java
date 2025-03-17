@@ -110,13 +110,17 @@ public class WristSubsystem extends SubsystemBase {
         m_feedforwardController.setKg(kg);
     }
 
+    public void resetController(){
+        m_profiledPIDController.reset(getAngleRadians());
+    }
+
     /** Returns a command that sets the wrist at the desired angle 
      * ENDS WHEN ANGLE IS REACHED
      * @param angle The desired angle of the wrist
     */
     public Command applyAngle(Rotation2d angle) {
         return new FunctionalCommand(
-            () -> m_profiledPIDController.reset(getAngleRadians()),
+            () -> {},
             () -> setAngle(angle), 
             (interrupted) -> {},
             () -> Math.abs(angle.minus(getAngle()).getRadians()) < WristConstants.wristAngleToleranceRadians,

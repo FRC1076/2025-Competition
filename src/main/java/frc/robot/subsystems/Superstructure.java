@@ -188,9 +188,14 @@ public class Superstructure {
         return elevatorClutch;
     }
 
+    private void resetWristevatorControllers() {
+        m_elevator.resetController();
+        m_wrist.resetController();
+    }
+
     public Trigger elevatorClutchTrigger() {
         return elevatorClutchTrigger;
-    }
+    }   
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
@@ -329,15 +334,17 @@ public class Superstructure {
         );
     }
 
-    public Command interruptWrist(){
+    private Command interruptWrist(){
         return Commands.runOnce(() -> {
+            resetWristevatorControllers();
             if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
         });
         
     }
 
-    public Command interruptElevator(){
+    private Command interruptElevator(){
         return Commands.runOnce(() -> {
+            resetWristevatorControllers();
             if(m_elevator.getCurrentCommand() != null) m_elevator.getCurrentCommand().cancel();
         });
     }
