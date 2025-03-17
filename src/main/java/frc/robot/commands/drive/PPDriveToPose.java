@@ -34,7 +34,6 @@ public class PPDriveToPose extends Command {
     public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose) {
         this.m_drive = drive;
         this.targetPose = targetPose;
-        addRequirements(drive);
     }
 
     @Override
@@ -80,9 +79,7 @@ public class PPDriveToPose extends Command {
     
     @Override
     public void end(boolean interrupted) {
-        System.out.println("AAAAAAAAAAAAAAAAAAAA");
         followPathCommand.cancel();
-        System.out.println("BBBBBBBBBBBBBBBBBBBB");
     }
 
     public void setTargetPose(Pose2d targetPose){
