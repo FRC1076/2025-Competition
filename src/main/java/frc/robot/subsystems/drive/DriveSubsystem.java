@@ -8,6 +8,7 @@ import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
+import frc.robot.commands.drive.DirectDriveToPose;
 import frc.robot.commands.drive.PPDriveToPose;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
@@ -31,6 +32,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SelectCommand;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -240,6 +242,7 @@ public class DriveSubsystem extends SubsystemBase {
         private final Map<ReefFace, Command> leftBranchAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
+        private final PPDriveToPose driveToNetCommand;
         private DriveCommandFactory(DriveSubsystem drive) {
             this.drive = drive;
             for (ReefFace face : ReefFace.values()) {
@@ -247,6 +250,7 @@ public class DriveSubsystem extends SubsystemBase {
                 reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
                 rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
             }
+            driveToNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
         }
 
         public Command pathfindToPose(Pose2d targetPose) {
@@ -281,6 +285,8 @@ public class DriveSubsystem extends SubsystemBase {
             );*/
         }
 
+
+
         public Command directDriveToNearestLeftBranch() {
             return new SelectCommand<>(leftBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
@@ -291,6 +297,28 @@ public class DriveSubsystem extends SubsystemBase {
 
         public Command directDriveToNearestRightBranch() {
             return new SelectCommand<>(rightBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
+        }
+
+        public Command directDriveToNearestNetLocation() {
+            return new FunctionalCommand(
+                () -> {
+                    driveToNetCommand.setTargetPose(
+                        new Pose2d(
+                            getPose().getX() < 8.785
+                            ? 7.618
+                            : 9.922,
+                            getPose().getY(),
+                            getPose().getX() < 8.785
+                            ? Rotation2d.kZero
+                            : Rotation2d.k180deg
+                        )
+                    );
+                    driveToNetCommand.schedule();
+                },
+                () -> {},
+                (interrupted) -> driveToNetCommand.cancel(),
+                () -> driveToNetCommand.isFinished()
+            );
         }
         
         public Command applySwerveRequest(Supplier<SwerveRequest> requestSupplier) {

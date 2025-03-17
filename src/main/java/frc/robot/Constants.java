@@ -144,7 +144,7 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 0; // 0 is real, 1 is sim
+        public static final int currentMode = 1; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
@@ -400,6 +400,8 @@ public final class Constants {
             BLU_LEFT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(291.20), 305),
             RED_RIGHT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(291.20), -125),
             RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125);
+            // 7.618 blue x for net
+            // 9.922 red x for net
 
             public final Pose2d pose;
 

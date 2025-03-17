@@ -429,6 +429,10 @@ public class RobotContainer {
         ).onTrue(new InstantCommand(
             () -> m_drive.resetHeading()
         )); 
+
+        m_driverController.y().whileTrue(
+            m_drive.CommandBuilder.directDriveToNearestNetLocation()
+        );
     }
 
     private void configureOperatorBindings() {

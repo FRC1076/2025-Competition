@@ -28,7 +28,7 @@ import com.pathplanner.lib.path.Waypoint;
 public class PPDriveToPose extends Command {
 
     private Command followPathCommand;
-    private final Pose2d targetPose;
+    private Pose2d targetPose;
     private final DriveSubsystem m_drive;
 
     public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose) {
@@ -70,7 +70,7 @@ public class PPDriveToPose extends Command {
 
     @Override
     public void execute(){
-       // followPathCommand.execute();
+        System.out.println(followPathCommand.isScheduled());
     }
     
     @Override
@@ -80,6 +80,12 @@ public class PPDriveToPose extends Command {
     
     @Override
     public void end(boolean interrupted) {
+        System.out.println("AAAAAAAAAAAAAAAAAAAA");
         followPathCommand.cancel();
+        System.out.println("BBBBBBBBBBBBBBBBBBBB");
+    }
+
+    public void setTargetPose(Pose2d targetPose){
+        this.targetPose = targetPose;
     }
 }
