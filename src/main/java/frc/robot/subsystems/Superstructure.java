@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightMeters;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
@@ -188,6 +189,11 @@ public class Superstructure {
         return elevatorClutch;
     }
 
+    private void resetWristevatorControllers() {
+        m_elevator.resetController();
+        m_wrist.resetController();
+    }
+
     public Trigger elevatorClutchTrigger() {
         return elevatorClutchTrigger;
     }
@@ -331,13 +337,15 @@ public class Superstructure {
 
     public Command interruptWrist(){
         return Commands.runOnce(() -> {
+            resetWristevatorControllers();
             if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
         });
         
     }
 
-    public Command interruptElevator(){
+    private Command interruptElevator(){
         return Commands.runOnce(() -> {
+            resetWristevatorControllers();
             if(m_elevator.getCurrentCommand() != null) m_elevator.getCurrentCommand().cancel();
         });
     }
@@ -666,6 +674,19 @@ public class Superstructure {
 
         public Command autonShoot() {
             return m_grabber.applyRotationsBangBang(12, 3);
+        }
+
+        public Command scoreNet() {
+            return Commands.sequence(
+                applyWristevatorStateDirect(WristevatorState.PRE_NET),
+                Commands.parallel(
+                    applyWristevatorStateDirect(WristevatorState.NET),
+                    Commands.sequence(
+                        Commands.waitUntil(() -> m_elevator.getPositionMeters() >= algaeNetReleaseHeightMeters),
+                        applyGrabberState(GrabberState.ALGAE_OUTTAKE)
+                    )
+                )
+            );
         }
 
         public Command autonAlgaeIntakeAndHold() {

@@ -227,6 +227,7 @@ public final class Constants {
 
         public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
         public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(80);
+        public static double algaeNetReleaseHeightMeters = 2.109;
 
         // Grabber Possession State
         public enum GrabberPossession {
@@ -327,7 +328,8 @@ public final class Constants {
             HIGH_INTAKE(1.44998, -27.02),
 
             PROCESSOR(0.184277 + 0.15, 0),
-            NET(2.109649 + 3 * 0.00635, 65);
+            NET(2.109649 + 3 * 0.00635, 65),
+            PRE_NET(1.4,65);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
