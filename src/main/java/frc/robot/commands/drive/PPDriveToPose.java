@@ -81,5 +81,6 @@ public class PPDriveToPose extends Command {
     @Override
     public void end(boolean interrupted) {
         followPathCommand.cancel();
+        System.out.println(followPathCommand.isScheduled());
     }
 }
