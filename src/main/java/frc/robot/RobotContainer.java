@@ -577,7 +577,7 @@ public class RobotContainer {
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
         
         m_operatorController.rightBumper()
-            .onTrue(superstructureCommands.removeAlgae())
+            .onTrue(superstructureCommands.doGrabberAction())
             .onFalse(superstructureCommands.stopGrabber());
 
         m_operatorController.start().whileTrue(
