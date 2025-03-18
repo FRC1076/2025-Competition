@@ -188,11 +188,6 @@ public class Superstructure {
         return elevatorClutch;
     }
 
-    private void resetWristevatorControllers() {
-        m_elevator.resetController();
-        m_wrist.resetController();
-    }
-
     public Trigger elevatorClutchTrigger() {
         return elevatorClutchTrigger;
     }   
@@ -336,7 +331,6 @@ public class Superstructure {
 
     private Command interruptWrist(){
         return Commands.runOnce(() -> {
-            resetWristevatorControllers();
             if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
         });
         
@@ -344,7 +338,6 @@ public class Superstructure {
 
     private Command interruptElevator(){
         return Commands.runOnce(() -> {
-            resetWristevatorControllers();
             if(m_elevator.getCurrentCommand() != null) m_elevator.getCurrentCommand().cancel();
         });
     }
@@ -583,7 +576,7 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.1),
+                        Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral),
                         m_grabber.applyRotationsBangBang(8, 0.2)
                     )
@@ -610,7 +603,7 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.1),
+                        Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral)
                         // m_grabber.applyRotationsBangBang(8, 0.2) moved to autonGrabberAdjustCoral instead to save time
                     )
@@ -673,7 +666,7 @@ public class Superstructure {
         }
 
         public Command autonShoot() {
-            return m_grabber.applyRotationsBangBang(12, 3);
+            return m_grabber.applyRotationsBangBang(12, 2);
         }
 
         public Command autonAlgaeIntakeAndHold() {

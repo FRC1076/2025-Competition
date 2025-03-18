@@ -144,7 +144,7 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static final int currentMode = 1; // 0 is real, 1 is sim
+        public static final int currentMode = 0; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
@@ -306,10 +306,10 @@ public final class Constants {
             L4(2.109649 + 3 * 0.00635, -38),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0, 0),
-            LOW_INTAKE(0.98407, -27.02),
+            LOW_INTAKE(0.98407,-27.02),
             HIGH_INTAKE(1.44998, -27.02),
 
-            PROCESSOR(0.184277 + 0.15, 0),
+            PROCESSOR(0.2536, 0),
             NET(2.109649 + 3 * 0.00635, 65);
 
             public final double elevatorHeightMeters;

@@ -299,14 +299,36 @@ public class DriveSubsystem extends SubsystemBase {
             return new SelectCommand<>(rightBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
-        public Command directDriveToNearestNetLocation() {
+        public Command directDriveToNearestPreNetLocation() {
             return new FunctionalCommand(
                 () -> {
                     driveToNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
-                            ? 7.618
-                            : 9.922,
+                            ? 7.618 - 2 * 0.3048
+                            : 9.922 + 2 * 0.3048,
+                            getPose().getY(),
+                            getPose().getX() < 8.785
+                            ? Rotation2d.kZero
+                            : Rotation2d.k180deg
+                        )
+                    );
+                    driveToNetCommand.schedule();
+                },
+                () -> {},
+                (interrupted) -> driveToNetCommand.cancel(),
+                () -> driveToNetCommand.isFinished()
+            );
+        }
+
+        public Command directDriveToNearestScoreNetLocation() {
+            return new FunctionalCommand(
+                () -> {
+                    driveToNetCommand.setTargetPose(
+                        new Pose2d(
+                            getPose().getX() < 8.785
+                            ? 7.618 - 0.1
+                            : 9.922 + 0.1,
                             getPose().getY(),
                             getPose().getX() < 8.785
                             ? Rotation2d.kZero

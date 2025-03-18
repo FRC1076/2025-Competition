@@ -69,7 +69,7 @@ public class PPDriveToPose extends Command {
 
     @Override
     public void execute(){
-        System.out.println(followPathCommand.isScheduled());
+        //System.out.println(followPathCommand.isScheduled());
     }
     
     @Override

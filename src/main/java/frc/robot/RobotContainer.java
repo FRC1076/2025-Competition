@@ -384,6 +384,8 @@ public class RobotContainer {
     }
 
     private void configureDriverBindings() {
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
         m_driverController.a().whileTrue(
             m_drive.CommandBuilder.directDriveToNearestLeftBranch()
         );
@@ -397,7 +399,8 @@ public class RobotContainer {
 
         // Apply single clutch
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
-            .whileTrue(teleopDriveCommand.applySingleClutch());
+            .onTrue(superstructureCommands.doGrabberAction())
+            .onFalse(superstructureCommands.stopGrabber());
 
         // Apply double clutch
         m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
@@ -430,8 +433,19 @@ public class RobotContainer {
             () -> m_drive.resetHeading()
         )); 
 
+        
         m_driverController.y().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestNetLocation()
+            Commands.sequence(
+                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                superstructureCommands.preNet(),
+                Commands.parallel(
+                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        superstructureCommands.doGrabberAction()
+                    )
+                )
+            )
         );
     }
 
