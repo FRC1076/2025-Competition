@@ -447,6 +447,25 @@ public class RobotContainer {
                 )
             )
         );
+        /*
+        m_driverController.y().whileTrue(
+            Commands.sequence(
+                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                Commands.parallel(
+                    superstructureCommands.preNet(),
+                    Commands.parallel(
+                        Commands.sequence(
+                            Commands.waitSeconds(0.2),
+                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
+                        ),
+                        Commands.sequence(
+                            Commands.waitSeconds(0.5),
+                            superstructureCommands.doGrabberAction()
+                        )
+                    )
+                )
+            )
+        );*/
     }
 
     private void configureOperatorBindings() {
