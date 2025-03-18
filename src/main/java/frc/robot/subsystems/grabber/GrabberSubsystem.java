@@ -13,22 +13,24 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static frc.robot.Constants.ElevatorConstants.Electrical.kCurrentLimit;
+
 import org.littletonrobotics.junction.Logger;
 
 public class GrabberSubsystem extends SubsystemBase{
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
     private final LinearFilter currentFilter;
-    private final Debouncer currentDebouncer = new Debouncer(0);
     private final double kCoralCurrentThreshold;
+    private final double kCoralFunnelIntakeThreshold;
     private double filteredCurrent;
-    private boolean debounced;
 
     public GrabberSubsystem(GrabberIO io) {
         this.io = io;
         this.currentFilter = LinearFilter.movingAverage(8);
         // this.debouncer = new Debouncer(0.33);
-        this.kCoralCurrentThreshold = 14;
+        this.kCoralCurrentThreshold = 12; // for grabber current
+        this.kCoralFunnelIntakeThreshold = 5;// for funnel current
     }
 
     /** Sets both motors to the same voltage */
@@ -53,17 +55,20 @@ public class GrabberSubsystem extends SubsystemBase{
         return filteredCurrent > kCoralCurrentThreshold;
     }
 
+    /**
+     * 
+     * @return boolean whether or not coral has entered the grabber from funnel side
+     */
+    public boolean hasFunnelCurrentSpike(){
+        return getAppliedCurrent() > kCoralFunnelIntakeThreshold;
+        //return filteredCurrent > kCoralFunnelIntakeThreshold;
+    }
+
     @Override
     public void periodic() {
         filteredCurrent = currentFilter.calculate(io.getOutputCurrent() > 25 ? 0 : io.getOutputCurrent());
-        debounced = currentDebouncer.calculate(4 >= io.getOutputCurrent() && io.getOutputCurrent() >= 8);
         io.updateInputs(inputs);
         Logger.processInputs("Grabber", inputs);
-    }
-
-    public boolean debouncerSignal() {
-        return !(4 >= io.getOutputCurrent() && io.getOutputCurrent() >= 8);
-        //return debounced;
     }
 
     /* ######################################################################## */

@@ -392,7 +392,9 @@ public class RobotContainer {
 
     private void configureDriverBindings() {
         if (SystemConstants.sysIDMode == SysIDModes.kNone){
-            m_driverController.a().whileTrue(
+            final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
+        m_driverController.a().whileTrue(
                 m_drive.CommandBuilder.directDriveToNearestLeftBranch()
             );
 
@@ -405,7 +407,8 @@ public class RobotContainer {
 
             // Apply single clutch
             m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
-                .whileTrue(teleopDriveCommand.applySingleClutch());
+                .onTrue(superstructureCommands.doGrabberAction())
+            .onFalse(superstructureCommands.stopGrabber());
 
             // Apply double clutch
             m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
@@ -437,6 +440,40 @@ public class RobotContainer {
             ).onTrue(new InstantCommand(
                 () -> m_drive.resetHeading()
             )); 
+
+        
+        m_driverController.y().whileTrue(
+            Commands.sequence(
+                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                superstructureCommands.preNet(),
+                Commands.parallel(
+                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        superstructureCommands.doGrabberAction()
+                    )
+                )
+            )
+        );
+        /*
+        m_driverController.y().whileTrue(
+            Commands.sequence(
+                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                Commands.parallel(
+                    superstructureCommands.preNet(),
+                    Commands.parallel(
+                        Commands.sequence(
+                            Commands.waitSeconds(0.2),
+                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
+                        ),
+                        Commands.sequence(
+                            Commands.waitSeconds(0.5),
+                            superstructureCommands.doGrabberAction()
+                        )
+                    )
+                )
+            )
+        );*/
 
         } else if (SystemConstants.sysIDMode == SysIDModes.kDriveTranslation) {
             // Quasistatic and Dynamic control scheme for Translational Sysid
@@ -620,7 +657,7 @@ public class RobotContainer {
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
         
         m_operatorController.rightBumper()
-            .onTrue(superstructureCommands.removeAlgae())
+            .onTrue(superstructureCommands.doGrabberAction())
             .onFalse(superstructureCommands.stopGrabber());
 
         m_operatorController.start().whileTrue(

@@ -26,7 +26,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.2
+            "waitTime": 0.05
           }
         },
         {
@@ -74,7 +74,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LOUT-K4"
+                  "pathName": "Grabber LOUT-K4"
                 }
               },
               {
@@ -108,7 +108,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.15
+            "waitTime": 0.0
           }
         },
         {
@@ -156,7 +156,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LOUT-L4"
+                  "pathName": "Grabber LOUT-L4"
                 }
               },
               {
@@ -190,7 +190,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 0.15
+            "waitTime": 0.0
           }
         },
         {

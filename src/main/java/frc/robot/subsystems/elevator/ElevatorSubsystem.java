@@ -155,7 +155,7 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public Command applyPosition(double positionMeters) {
         return new FunctionalCommand(
-            () -> {},//m_profiledPIDController.reset(getPositionMeters()),
+            () -> {m_profiledPIDController.reset(getPositionMeters());},
             () -> setPosition(positionMeters),
             (interrupted) -> {},
             () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters,

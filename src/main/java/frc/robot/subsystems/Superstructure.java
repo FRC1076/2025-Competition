@@ -196,7 +196,7 @@ public class Superstructure {
 
     public Trigger elevatorClutchTrigger() {
         return elevatorClutchTrigger;
-    }
+    }   
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
@@ -335,7 +335,7 @@ public class Superstructure {
         );
     }
 
-    public Command interruptWrist(){
+    private Command interruptWrist(){
         return Commands.runOnce(() -> {
             resetWristevatorControllers();
             if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
@@ -536,7 +536,8 @@ public class Superstructure {
                     superstructure.holdIndexState(IndexState.TRANSFER)
                 ).until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
                 Commands.waitUntil(m_transferBeamBreak),
-                Commands.waitUntil(m_grabber::debouncerSignal),
+                Commands.waitSeconds(0.2),
+                Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
@@ -583,7 +584,7 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.1),
+                        Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral),
                         m_grabber.applyRotationsBangBang(8, 0.2)
                     )
@@ -610,7 +611,7 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.1),
+                        Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral)
                         // m_grabber.applyRotationsBangBang(8, 0.2) moved to autonGrabberAdjustCoral instead to save time
                     )
@@ -673,7 +674,7 @@ public class Superstructure {
         }
 
         public Command autonShoot() {
-            return m_grabber.applyRotationsBangBang(12, 3);
+            return m_grabber.applyRotationsBangBang(12, 2);
         }
 
         public Command scoreNet() {
