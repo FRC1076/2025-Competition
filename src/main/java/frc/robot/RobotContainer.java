@@ -394,7 +394,7 @@ public class RobotContainer {
         if (SystemConstants.sysIDMode == SysIDModes.kNone){
             final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
 
-        m_driverController.a().whileTrue(
+            m_driverController.a().whileTrue(
                 m_drive.CommandBuilder.directDriveToNearestLeftBranch()
             );
 
@@ -440,40 +440,20 @@ public class RobotContainer {
             ).onTrue(new InstantCommand(
                 () -> m_drive.resetHeading()
             )); 
-
         
-        m_driverController.y().whileTrue(
-            Commands.sequence(
-                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
-                superstructureCommands.preNet(),
-                Commands.parallel(
-                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                    Commands.sequence(
-                        Commands.waitSeconds(0.5),
-                        superstructureCommands.doGrabberAction()
-                    )
-                )
-            )
-        );
-        /*
-        m_driverController.y().whileTrue(
-            Commands.sequence(
-                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
-                Commands.parallel(
-                    superstructureCommands.preNet(),
+            m_driverController.y().whileTrue(
+                Commands.sequence(
+                    m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
                     Commands.parallel(
-                        Commands.sequence(
-                            Commands.waitSeconds(0.2),
-                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
-                        ),
-                        Commands.sequence(
-                            Commands.waitSeconds(0.5),
-                            superstructureCommands.doGrabberAction()
+                        superstructureCommands.preNet(),
+                        Commands.waitSeconds(0.2),
+                        Commands.parallel(
+                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                            superstructureCommands.scoreNet()
                         )
                     )
                 )
-            )
-        );*/
+            );
 
         } else if (SystemConstants.sysIDMode == SysIDModes.kDriveTranslation) {
             // Quasistatic and Dynamic control scheme for Translational Sysid

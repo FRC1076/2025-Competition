@@ -495,7 +495,7 @@ public class Superstructure {
          * Set elevator and wrist to net preset
          */
         public Command preNet(){
-            return superstructure.applyWristevatorState(WristevatorState.NET);
+            return superstructure.applyWristevatorState(WristevatorState.PRE_NET);
         }
 
         /**
@@ -686,6 +686,17 @@ public class Superstructure {
                         Commands.waitUntil(() -> m_elevator.getPositionMeters() >= algaeNetReleaseHeightMeters),
                         applyGrabberState(GrabberState.ALGAE_OUTTAKE)
                     )
+                )
+            );
+        }
+
+        // Scores net without first moving to pre net
+        public Command scoreNetDirect() {
+            return Commands.parallel(
+                applyWristevatorStateDirect(WristevatorState.NET),
+                Commands.sequence(
+                    Commands.waitUntil(() -> m_elevator.getPositionMeters() >= algaeNetReleaseHeightMeters),
+                    applyGrabberState(GrabberState.ALGAE_OUTTAKE)
                 )
             );
         }
