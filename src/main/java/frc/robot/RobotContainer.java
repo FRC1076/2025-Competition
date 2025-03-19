@@ -110,6 +110,7 @@ public class RobotContainer {
     private final WristSubsystem m_wrist;
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
+    private final Trigger driverInterrupt;
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
@@ -170,6 +171,7 @@ public class RobotContainer {
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
+        driverInterrupt = new Trigger(() -> m_driverController.getLeftX() != 0 || m_driverController.getLeftY() != 0 || m_driverController.getRightX() != 0);
     
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
@@ -394,11 +396,11 @@ public class RobotContainer {
         if (SystemConstants.sysIDMode == SysIDModes.kNone){
             final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
 
-            m_driverController.a().whileTrue(
+            m_driverController.a().onTrue(
                 m_drive.CommandBuilder.directDriveToNearestLeftBranch()
             );
 
-            m_driverController.b().whileTrue(
+            m_driverController.b().onTrue(
                 m_drive.CommandBuilder.directDriveToNearestRightBranch()
             );
             
@@ -444,16 +446,16 @@ public class RobotContainer {
             m_driverController.y().whileTrue(
                 Commands.sequence(
                     m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                    superstructureCommands.preNet(),
+                    //Commands.waitSeconds(0.2), // TODO: Test if this is needed
                     Commands.parallel(
-                        superstructureCommands.preNet(),
-                        Commands.waitSeconds(0.2),
-                        Commands.parallel(
-                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                            superstructureCommands.scoreNet()
-                        )
+                        m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                        superstructureCommands.scoreNet()
                     )
-                )
+                ).until(() -> driverInterrupt.getAsBoolean())
             );
+
+            driverInterrupt.onTrue(teleopDriveCommand);
 
         } else if (SystemConstants.sysIDMode == SysIDModes.kDriveTranslation) {
             // Quasistatic and Dynamic control scheme for Translational Sysid
@@ -474,7 +476,7 @@ public class RobotContainer {
             ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.TRANSLATION,Direction.kForward));
         
         } else if (SystemConstants.sysIDMode == SysIDModes.kDriveRotation) {
-                // Quasistatic and Dynamic control scheme for Translational Sysid
+            // Quasistatic and Dynamic control scheme for Translational Sysid
             m_driverController.rightBumper().and(
                 m_driverController.a()
             ).whileTrue(m_drive.CommandBuilder.quasistaticSysID(DrivetrainSysIDRoutine.ROTATION,Direction.kForward));
