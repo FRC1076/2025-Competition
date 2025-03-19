@@ -443,7 +443,7 @@ public class RobotContainer {
                 () -> m_drive.resetHeading()
             )); 
         
-            m_driverController.y().whileTrue(
+            m_driverController.y().onTrue(
                 Commands.sequence(
                     m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
                     superstructureCommands.preNet(),
