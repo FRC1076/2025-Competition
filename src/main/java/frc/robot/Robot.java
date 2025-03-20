@@ -19,7 +19,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SystemConstants;
 import frc.robot.SystemConfig.SystemModes;
-import frc.robot.utils.Diagnostics;
 import frc.robot.utils.VirtualSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
@@ -158,11 +157,12 @@ public class Robot extends LoggedRobot {
   @Override
   public void autonomousPeriodic() {}
 
+  //TODO: Move autonState to RobotSuperState
   @Override
   public void teleopInit() {
     m_robotContainer.setAutonState(false);
 
-    var fdaqs = Diagnostics.getFailedDaqs();
+    var fdaqs = RobotSuperState.getInstance().getFailedDaqs();
     if (fdaqs > SystemConstants.maxFailedDaqs) {
         DriverStation.reportWarning(fdaqs + " failed daqs detected. An unusually high number of failed daqs may be a symptom of thread starvation.",false);
     }

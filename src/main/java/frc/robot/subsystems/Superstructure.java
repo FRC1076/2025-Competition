@@ -44,66 +44,6 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Superstructure extends VirtualSubsystem {
 
-    /** A mutable (you can change the state after instantiation) class representing the Superstructure's desired state */
-    @AutoLog
-    public static class MutableSuperState {
-
-        protected GrabberState grabberState;
-        protected WristevatorState wristevatorState;
-        protected IndexState indexState;
-        protected GrabberPossession grabberPossession;
-
-        public MutableSuperState(GrabberState grabberState, WristevatorState wristevatorState){
-            this.grabberState = grabberState;
-            this.wristevatorState = wristevatorState;
-            grabberPossession = GrabberPossession.EMPTY;
-        }
-
-        public MutableSuperState() {
-            this.grabberState = GrabberState.IDLE;
-            this.wristevatorState = WristevatorState.TRAVEL;
-            grabberPossession = GrabberPossession.EMPTY;
-        }
-        
-        /** Set state of the wristevator <p>
-         * States include elevator heights and wrist angles corresponding to specific actions
-         */
-        public void setWristevatorState(WristevatorState position) {
-            this.wristevatorState = position;
-        }
-
-        /** Set state of the grabber. <p>
-         * States include voltage to run grabber wheels at for different actions (intake, outtake, idle)
-         */
-        public void setGrabberState(GrabberState state) {
-            this.grabberState = state;
-        }
-
-        public void setIndexerState(IndexState state) {
-            this.indexState = state;
-        }
-
-        public void setGrabberPossession(GrabberPossession possession) {
-            this.grabberPossession = possession;
-        }
-
-        public GrabberState getGrabberState() {
-            return grabberState;
-        }
-
-        public WristevatorState getWristevatorState() {
-            return wristevatorState;
-        }
-
-        public IndexState getIndexerState() {
-            return indexState;
-        }
-
-        public GrabberPossession getGrabberPossession(){
-            return grabberPossession;
-        }
-    }
-
     private final ElevatorSubsystem m_elevator;
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
