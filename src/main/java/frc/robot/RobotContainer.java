@@ -433,7 +433,7 @@ public class RobotContainer {
             () -> m_drive.resetHeading()
         )); 
 
-        
+        /*
         m_driverController.y().whileTrue(
             Commands.sequence(
                 m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
@@ -446,8 +446,8 @@ public class RobotContainer {
                     )
                 )
             )
-        );
-        /*
+        );*/
+        
         m_driverController.y().whileTrue(
             Commands.sequence(
                 m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
@@ -455,17 +455,17 @@ public class RobotContainer {
                     superstructureCommands.preNet(),
                     Commands.parallel(
                         Commands.sequence(
-                            Commands.waitSeconds(0.2),
+                            Commands.waitSeconds(0.4),
                             m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
                         ),
                         Commands.sequence(
-                            Commands.waitSeconds(0.5),
+                            Commands.waitSeconds(1),
                             superstructureCommands.doGrabberAction()
                         )
                     )
                 )
             )
-        );*/
+        );
     }
 
     private void configureOperatorBindings() {

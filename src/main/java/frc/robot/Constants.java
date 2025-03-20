@@ -41,7 +41,7 @@ import org.apache.commons.lang3.NotImplementedException;
 public final class Constants {
     
      public static class VisionConstants {
-        public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         public static class Photonvision {
 
             public static final String driverCamName = "DRIVER_CAM"; //PV name of the driver camera
@@ -110,7 +110,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Right;
+        public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -149,7 +149,7 @@ public final class Constants {
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
         public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
-        public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
+        // public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
     }
     
     public static class DriveConstants {
@@ -297,7 +297,7 @@ public final class Constants {
             ALGAE_TRAVEL(0.134983912 + 0.00635, 65),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
-            GRABBER_CORAL_INTAKE(0.703, 55.21410),
+            GRABBER_CORAL_INTAKE(0.703 + 0.03, 55.21410),
             HIGH_TRAVEL(0.3, -90),
 
             L1(0.42019, 23.9365), // Placeholder

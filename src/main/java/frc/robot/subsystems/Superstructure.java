@@ -427,6 +427,16 @@ public class Superstructure {
             );
         }
 
+        /**
+         * Call this on button releases after scoring game pieces, stops grabber movement and retracts GRABBER ONLY
+         */
+        public Command stopAndRetractGrabber(){
+            return Commands.parallel(
+                stopGrabber(),
+                wristFlickUp()
+            );
+        }
+
         public Command wristFlickUp() {
             return m_wrist.applyAngle(coralTravelAngle);
         }
