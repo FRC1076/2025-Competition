@@ -18,6 +18,7 @@ import frc.robot.subsystems.wrist.WristSubsystem;
 
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
+import lib.functional.FunctionalUtils;
 import lib.functional.NegatableBooleanSupplier;
 
 import java.util.function.BooleanSupplier;
@@ -535,14 +536,8 @@ public class Superstructure {
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
-                ),
-                /*
-                Commands.waitUntil(m_transferBeamBreak),
-                Commands.waitSeconds(0.2),
-                Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
-                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
-                */
-                CommandUtils.waitUntilDebounced(m_transferBeamBreak, 0.2),
+                ).until(FunctionalUtils.debounce(m_transferBeamBreak,0.25)),
+                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
