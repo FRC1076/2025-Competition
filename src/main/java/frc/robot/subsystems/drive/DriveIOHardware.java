@@ -19,6 +19,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.RobotSuperState;
 import frc.robot.SystemConfig;
 import frc.robot.Constants.SystemConstants;
 
@@ -198,6 +199,11 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
         for (var module : getModules()) {
             module.getDriveMotor().getConfigurator().apply(currentConfigs);
         }
+    }
+
+    @Override
+    public void updateState(RobotSuperState state) {
+        state.updateDriveState(getState());
     }
 
 }

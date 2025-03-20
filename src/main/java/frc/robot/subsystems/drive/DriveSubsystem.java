@@ -5,6 +5,7 @@
 package frc.robot.subsystems.drive;
 
 import frc.robot.Constants.DriveConstants.PathPlannerConstants;
+import frc.robot.RobotSuperState;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
@@ -204,6 +205,7 @@ public class DriveSubsystem extends SubsystemBase {
         // updateModuleInputs and processInputs are only used for logging
         io.periodic(); //currently just for calling sim
         vision.update();
+        io.updateState(RobotSuperState.getInstance());
         io.updateInputs(driveInputs);
         // io.updateModuleInputs(frontLeftInputs, 0);
         // io.updateModuleInputs(frontRightInputs, 1);

@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SystemConstants;
 import frc.robot.SystemConfig.SystemModes;
 import frc.robot.utils.Diagnostics;
+import frc.robot.utils.VirtualSubsystem;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
@@ -110,6 +111,8 @@ public class Robot extends LoggedRobot {
    */
   @Override
   public void robotPeriodic() {
+
+    VirtualSubsystem.periodicAll();
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic

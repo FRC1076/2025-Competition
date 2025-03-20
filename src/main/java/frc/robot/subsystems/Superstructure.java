@@ -8,6 +8,7 @@ import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightM
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
+import frc.robot.RobotSuperState;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
@@ -15,7 +16,7 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
-
+import frc.robot.utils.VirtualSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 import lib.functional.FunctionalUtils;
@@ -41,7 +42,7 @@ import org.littletonrobotics.junction.Logger;
  * Allows sensors to interact with subystems <p>
  * Contains command factories for actions requiring multiple systems <p>
  */
-public class Superstructure {
+public class Superstructure extends VirtualSubsystem {
 
     /** A mutable (you can change the state after instantiation) class representing the Superstructure's desired state */
     @AutoLog
@@ -108,14 +109,13 @@ public class Superstructure {
     private final IndexSubsystem m_index;
     private final WristSubsystem m_wrist;
     private final Elastic m_elastic;
+    private final RobotSuperState m_state = RobotSuperState.getInstance();
     private final Trigger elevatorClutchTrigger;
 
     public final SuperstructureCommandFactory CommandBuilder;
 
-    //Super State
-    private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
 
-    private final NegatableBooleanSupplier possessAlgae = () -> superState.getGrabberPossession() == GrabberPossession.ALGAE;
+    private final NegatableBooleanSupplier possessAlgae = () -> m_state.getPossession() == GrabberPossession.ALGAE;;
 
     private Boolean safeToFeedCoral;
     private Boolean safeToMoveElevator;
@@ -138,8 +138,6 @@ public class Superstructure {
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
-        CommandUtils.makePeriodic(() -> Logger.processInputs("Superstructure", superState));
-        
         CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
 
@@ -147,8 +145,11 @@ public class Superstructure {
         this.safeToMoveElevator = false;
     }
 
-    public MutableSuperState getSuperState() {
-        return this.superState;
+    @Override
+    public void periodic() {
+        m_state.updateElevatorHeight(m_elevator.getPositionMeters());
+        m_state.updateWristAngle(m_wrist.getAngle());
+        m_state.logSuperstructureToAkit();
     }
 
     public ElevatorSubsystem getElevator() {
@@ -240,7 +241,7 @@ public class Superstructure {
             m_wrist.applyAngle(position.wristAngle).asProxy(),
             CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
         ).alongWith(
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            Commands.runOnce(() -> m_state.updateWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
     }
@@ -259,7 +260,7 @@ public class Superstructure {
         };
         
         return Commands.parallel(
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            Commands.runOnce(() -> m_state.updateWristevatorState(position)),
             Commands.runOnce(ledSignal),
             Commands.sequence(
                 m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
@@ -295,7 +296,7 @@ public class Superstructure {
             m_wrist.applyAngle(position.wristAngle).asProxy(),
             CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
         ).alongWith(
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            Commands.runOnce(() -> m_state.updateWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
     }
@@ -307,7 +308,7 @@ public class Superstructure {
      */
     public Command applyGrabberState(GrabberState state) {
         return Commands.parallel(
-            Commands.runOnce(() -> superState.setGrabberState(state)),
+            Commands.runOnce(() -> m_state.updateGrabberState(state)),
             m_grabber.applyDifferentialVolts(state.leftVoltage, state.rightVoltage) //Can do a runOnce because runVolts is sticky
         );
     }
@@ -318,7 +319,7 @@ public class Superstructure {
 
     public Command applyIndexState(IndexState state) {
         return Commands.parallel(
-            Commands.runOnce(() -> superState.setIndexerState(state)),
+            Commands.runOnce(() -> m_state.updateIndexState(state)),
             m_index.applyVolts(state.volts)
         );
     }
@@ -330,7 +331,7 @@ public class Superstructure {
      */
     public Command holdIndexState(IndexState state) {
         return Commands.sequence(
-            Commands.runOnce(() -> superState.setIndexerState(state)),
+            Commands.runOnce(() -> m_state.updateIndexState(state)),
             m_index.applyVolts(state.volts),
             Commands.idle(m_index)//.onlyIf(() -> state.running) //Can do a runOnce because runVolts is sticky
         );
@@ -369,22 +370,16 @@ public class Superstructure {
             grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
             grabberActionCommands.put(WristevatorState.L4, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
-            grabberActionCommands.put(WristevatorState.GROUND_INTAKE,
-                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
-                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
+            grabberActionCommands.put(WristevatorState.GROUND_INTAKE, () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE));
             grabberActionCommands.put(WristevatorState.PROCESSOR, () -> superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
-            grabberActionCommands.put(WristevatorState.LOW_INTAKE,
-                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
-                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
-            grabberActionCommands.put(WristevatorState.HIGH_INTAKE,
-                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
-                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
+            grabberActionCommands.put(WristevatorState.LOW_INTAKE, () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE));
+            grabberActionCommands.put(WristevatorState.HIGH_INTAKE, () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE));
             grabberActionCommands.put(WristevatorState.NET, () -> superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
 
             grabberActionCommandFactory = new SelectWithFallbackCommandFactory<WristevatorState>(
                     grabberActionCommands,
                     () -> superstructure.applyGrabberState(GrabberState.DEFAULT_OUTTAKE),
-                    this.superstructure.getSuperState()::getWristevatorState
+                    m_state::getWristevatorState
                 );
         }
 
@@ -396,8 +391,8 @@ public class Superstructure {
             return Commands.parallel(
                 grabberActionCommandFactory.buildCommand(),
                 Commands.runOnce(() -> {safeToMoveElevator = false;}),
-                Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(
-                    algaeIntakeWristevatorStates.contains(superstructure.getSuperState().getWristevatorState())
+                Commands.runOnce(() -> m_state.updatePossession(
+                    algaeIntakeWristevatorStates.contains(m_state.getWristevatorState())
                             ? GrabberPossession.ALGAE
                             : GrabberPossession.EMPTY)
                 )
@@ -411,7 +406,7 @@ public class Superstructure {
             return Commands.either(
                 superstructure.applyGrabberState(GrabberState.ALGAE_HOLD), 
                 superstructure.applyGrabberState(GrabberState.IDLE),
-                () -> (superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE)
+                superstructure.possessAlgae
             );
         }
 
@@ -422,7 +417,7 @@ public class Superstructure {
             return Commands.either(
                 superstructure.applyWristevatorState(WristevatorState.ALGAE_TRAVEL),
                 superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                () -> (superstructure.getSuperState().getGrabberPossession() == GrabberPossession.ALGAE)
+                superstructure.possessAlgae
             );
         }
 
@@ -452,7 +447,7 @@ public class Superstructure {
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L1),
                     superstructure.applyWristevatorState(WristevatorState.L1),
-                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                    () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
 
@@ -464,7 +459,7 @@ public class Superstructure {
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2),
                     superstructure.applyWristevatorState(WristevatorState.L2),
-                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                    () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
 
@@ -476,7 +471,7 @@ public class Superstructure {
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3),
                     superstructure.applyWristevatorState(WristevatorState.L3),
-                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                    () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
 
@@ -488,7 +483,7 @@ public class Superstructure {
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4),
                     superstructure.applyWristevatorState(WristevatorState.L4),
-                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                    () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
 
@@ -668,7 +663,7 @@ public class Superstructure {
 
         public Command holdAlgae() {
             return Commands.parallel(
-                Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(GrabberPossession.ALGAE)),
+                Commands.runOnce(() -> m_state.updatePossession(GrabberPossession.ALGAE)),
                 superstructure.applyGrabberState(GrabberState.ALGAE_HOLD));
         }
 

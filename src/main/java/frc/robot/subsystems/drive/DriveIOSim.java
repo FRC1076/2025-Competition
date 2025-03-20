@@ -30,6 +30,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.RobotSuperState;
 import edu.wpi.first.wpilibj.RobotController;
 
 import org.littletonrobotics.junction.Logger;
@@ -190,5 +191,10 @@ public class DriveIOSim extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder> imp
         for (var module : getModules()) {
             module.getDriveMotor().getConfigurator().apply(currentConfigs);
         }
+    }
+
+    @Override
+    public void updateState(RobotSuperState state) {
+        state.updateDriveState(getState());
     }
 }

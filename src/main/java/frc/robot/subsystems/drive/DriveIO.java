@@ -13,6 +13,7 @@ import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import frc.robot.RobotSuperState;
 import edu.wpi.first.math.geometry.Pose2d;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -87,4 +88,5 @@ public interface DriveIO {
     public abstract void setAllianceRotation(Rotation2d allianceRotation);
     public abstract void periodic();
     public abstract void setDriveStatorCurrentLimit(double currentLimit);
+    public abstract void updateState(RobotSuperState state);
 }
