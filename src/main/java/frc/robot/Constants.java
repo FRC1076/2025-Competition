@@ -161,7 +161,20 @@ public final class Constants {
             public static final int kElevator = 4;
             public static final int kWrist = 5;
         }
-        public static final int systemMode = SystemModes.kReal; // 0 is real, 1 is sim
+
+        /*
+         * COMPETITION SYSTEM CONSTANTS
+         * 
+         * systemMode: SystemModes.kReal
+         * sysIDMode: SysIDModes.kNone
+         * logOdometry: false
+         * logCTRE: false
+         * raiseThreadPriority: true
+         * 
+         * VERIFY THAT THE SYSTEM CONSTANTS MATCH WHAT IS SHOWN ABOVE BEFORE DEPLOYING CODE FOR A MATCH
+         */
+
+        public static final int systemMode = SystemModes.kReal;
         public static final int sysIDMode = SysIDModes.kNone;
         public static final boolean logOdometry = false;
         public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled

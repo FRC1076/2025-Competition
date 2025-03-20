@@ -94,7 +94,9 @@ public class Robot extends LoggedRobot {
     FollowPathCommand.warmupCommand().schedule();
 
     // This raises thread priority after a delay of 20 seconds
-    RobotContainer.threadCommand().schedule();
+    if(SystemConstants.raiseThreadPriority){
+        RobotContainer.threadCommand().schedule();
+    }
   }
 
   /**

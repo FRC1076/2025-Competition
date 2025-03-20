@@ -18,6 +18,7 @@ import frc.robot.subsystems.wrist.WristSubsystem;
 
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
+import lib.functional.NegatableBooleanSupplier;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
@@ -113,7 +114,7 @@ public class Superstructure {
     //Super State
     private final MutableSuperStateAutoLogged superState = new MutableSuperStateAutoLogged();
 
-    private final BooleanSupplier possessAlgae = () -> superState.getGrabberPossession() == GrabberPossession.ALGAE;
+    private final NegatableBooleanSupplier possessAlgae = () -> superState.getGrabberPossession() == GrabberPossession.ALGAE;
 
     private Boolean safeToFeedCoral;
     private Boolean safeToMoveElevator;
@@ -136,7 +137,6 @@ public class Superstructure {
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
-        
         CommandUtils.makePeriodic(() -> Logger.processInputs("Superstructure", superState));
         
         CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak);
@@ -530,21 +530,26 @@ public class Superstructure {
          * Transfers a coral from the indexer to the grabber, without checking for position 
          */
         private Command transferCoral() {
+            
             return Commands.sequence(
-                Commands.sequence(
+                Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
-                ).until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
+                ),
+                /*
                 Commands.waitUntil(m_transferBeamBreak),
                 Commands.waitSeconds(0.2),
                 Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
                 Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
+                */
+                CommandUtils.waitUntilDebounced(m_transferBeamBreak, 0.2),
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
             );
+
         }
 
         /**
@@ -553,7 +558,6 @@ public class Superstructure {
          * waits for a signal that it is safe to transfer the coral to the grabber,
          * rotates the wrist down,
          * and the rotates the motors to bring the coral into the grabber.
-         * @param safeSignal a supplier indicating whether or not is safe to transfer the coral from the indexer to the grabber
          * @return a command sequence
          */
         public Command intakeCoral() { // (BooleanSupplier safeSignal)
@@ -567,7 +571,7 @@ public class Superstructure {
                     //superstructure.applyWristevatorState(WristevatorState.TRAVEL),
                     superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL),
                     Commands.run(() -> safeToMoveElevator = true)
-                )
+                ).onlyIf(() -> !m_transferBeamBreak.getAsBoolean())
             );
         }
 

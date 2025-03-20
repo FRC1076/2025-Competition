@@ -46,4 +46,8 @@ public class CommandUtils {
     public static void makePeriodic(Runnable action) {
         CommandScheduler.getInstance().schedule(Commands.run(action).ignoringDisable(false));
     }
+
+    public static Command waitUntilDebounced(BooleanSupplier signal,double debounceTimeSeconds) {
+        return new DebounceDelayCommand(signal, debounceTimeSeconds);
+    }
 }
