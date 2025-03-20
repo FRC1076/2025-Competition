@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.AutoLog;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -125,7 +126,7 @@ public class Superstructure {
         IndexSubsystem index,
         WristSubsystem wrist,
         Elastic elastic,
-        BooleanSupplier transferBeamBreak //returns true when beam broken
+        Trigger transferBeamBreak //returns true when beam broken
     ) {
         m_elevator = elevator;
         m_grabber = grabber;
@@ -345,14 +346,14 @@ public class Superstructure {
     /** Contains all the command factories for the superstructure */
     public class SuperstructureCommandFactory { 
         private final Superstructure superstructure;
-        private final BooleanSupplier m_transferBeamBreak;
+        private final Trigger m_transferBeamBreak;
         private final Map<WristevatorState, Supplier<Command>> grabberActionCommands = new HashMap<WristevatorState, Supplier<Command>>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
         private final SelectWithFallbackCommandFactory<WristevatorState> grabberActionCommandFactory;
         private final Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
 
         private SuperstructureCommandFactory (
             Superstructure superstructure,
-            BooleanSupplier transferBeamBreak
+            Trigger transferBeamBreak
         ) {
             this.superstructure = superstructure;
             m_transferBeamBreak = transferBeamBreak;
@@ -536,11 +537,9 @@ public class Superstructure {
                 Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
-                ).until(m_transferBeamBreak), // Wait until the coral starts to exit the funnel
-                Commands.waitUntil(m_transferBeamBreak),
-                Commands.waitSeconds(0.2),
-                Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
-                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()), // Wait until the coral fully exits the funnel
+                ).until(m_transferBeamBreak.debounce(0.25)), // Wait until the coral starts to exit the funnel
+                //Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
+                Commands.waitUntil(m_transferBeamBreak.negate()), // W ait until the coral fully exits the funnel
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
@@ -686,5 +685,9 @@ public class Superstructure {
             );
         }
 
+        @AutoLogOutput()
+        public boolean getTransferBeambreak(){
+            return m_transferBeamBreak.getAsBoolean();
+        }
     }
 }
