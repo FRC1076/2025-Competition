@@ -118,4 +118,9 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
     public String getName() {
         return camera.getName();
     }
+
+    @Override
+    public boolean isConnected() {
+        return camera.isConnected();
+    }
 }

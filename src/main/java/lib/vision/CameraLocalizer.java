@@ -28,6 +28,10 @@ public interface CameraLocalizer {
 
     public abstract String getName();
 
+    public default boolean isConnected() {
+        return true;
+    }
+
     public default void addHeadingSupplier(Supplier<Rotation2d> heading) {}
 
     public default void setPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy) {}

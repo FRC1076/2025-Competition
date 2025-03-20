@@ -22,7 +22,8 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import frc.robot.Constants.SystemConstants.SystemModes;
+import frc.robot.SystemConfig.SystemModes;
+import frc.robot.SystemConfig;
 
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
@@ -148,37 +149,9 @@ public final class Constants {
     }
 
     public static class SystemConstants {
-        public static class SystemModes {
-            public static final int kReal = 0;
-            public static final int kSim = 1;
-            public static final int kReplay = 2;
-        }
-        public static class SysIDModes {
-            public static final int kNone = 0;
-            public static final int kDriveTranslation = 1;
-            public static final int kDriveRotation = 2;
-            public static final int kDriveSteer = 3;
-            public static final int kElevator = 4;
-            public static final int kWrist = 5;
-        }
-
-        /*
-         * COMPETITION SYSTEM CONSTANTS
-         * 
-         * systemMode: SystemModes.kReal
-         * sysIDMode: SysIDModes.kNone
-         * logOdometry: false
-         * logCTRE: false
-         * raiseThreadPriority: true
-         * 
-         * VERIFY THAT THE SYSTEM CONSTANTS MATCH WHAT IS SHOWN ABOVE BEFORE DEPLOYING CODE FOR A MATCH
-         */
-
-        public static final int systemMode = SystemModes.kReal;
-        public static final int sysIDMode = SysIDModes.kNone;
-        public static final boolean logOdometry = false;
-        public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
-        public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
+        public static final int maxFailedDaqs = 20; // Checks if there are at least this many failed daqs at the beginning of the teleop period
+        public static final double threadWaitTime = 20.0;
+        public static final int threadPriority = 10;
     }
     
     public static class DriveConstants {
@@ -245,31 +218,31 @@ public final class Constants {
         // Grabber Possession State
         public enum GrabberPossession {
             EMPTY(
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG 
                     : ElevatorSimConstants.Control.kG),
             CORAL(
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG 
                     : ElevatorSimConstants.Control.kG),
             ALGAE(
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG 
                     : WristSimConstants.Control.kG,
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG 
                     : ElevatorSimConstants.Control.kG),
             TRANSFERRING(
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? WristConstants.Control.kG
                     : WristSimConstants.Control.kG,
-                SystemConstants.systemMode == SystemModes.kReal
+                SystemConfig.systemMode == SystemModes.kReal
                     ? ElevatorConstants.Control.kG
                     : ElevatorSimConstants.Control.kG
                 );

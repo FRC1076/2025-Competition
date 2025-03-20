@@ -95,6 +95,10 @@ public class VisionLocalizationSystem {
         }
     }
 
+    public boolean isCameraConnected(String cam) {
+        return cameras.get(cam).camera.isConnected();
+    }
+
     /**
      * Fetches pose estimate from cameras and sends them to all consumers. This function should be called exactly once every main function loop
      */

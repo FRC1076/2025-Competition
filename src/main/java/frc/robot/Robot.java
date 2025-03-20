@@ -18,7 +18,9 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.Constants.SystemConstants;
-import frc.robot.Constants.SystemConstants.SystemModes;
+import frc.robot.SystemConfig.SystemModes;
+import frc.robot.utils.Diagnostics;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
 /**
@@ -28,6 +30,7 @@ import edu.wpi.first.wpilibj.Timer;
  * project.
  */
 public class Robot extends LoggedRobot {
+
     private Command m_autonomousCommand;
 
     private RobotContainer m_robotContainer;
@@ -57,14 +60,14 @@ public class Robot extends LoggedRobot {
         }
 
     // Set up data receivers & replay source
-    if (Constants.SystemConstants.systemMode == SystemModes.kReal){
+    if (SystemConfig.systemMode == SystemModes.kReal){
         // Running on a real robot, log to a USB stick ("/U/logs")
         Logger.addDataReceiver(new WPILOGWriter());
         Logger.addDataReceiver(new NT4Publisher());
-    } else if (Constants.SystemConstants.systemMode == SystemModes.kSim) {
+    } else if (SystemConfig.systemMode == SystemModes.kSim) {
         // Running a physics simulator, log to NT
         Logger.addDataReceiver(new NT4Publisher());
-    } else if (Constants.SystemConstants.systemMode == SystemModes.kReplay) {
+    } else if (SystemConfig.systemMode == SystemModes.kReplay) {
         // Replaying a log, set up replay source
         setUseTiming(false); // Run as fast as possible
         String logPath = LogFileUtil.findReplayLog();
@@ -72,13 +75,12 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
     }
 
-  
-
     // Start AdvantageKit logger
     Logger.start();
 
-    if (SystemConstants.logCTRE) {
+    if (SystemConfig.logCTRE) {
         SignalLogger.start();
+        DriverStation.reportWarning("CTRE signal logging is enabled",false);
     }
 
     SignalLogger.enableAutoLogging(false); // We NEVER want match autologging, we decide manually if we want CTRE logging
@@ -89,12 +91,12 @@ public class Robot extends LoggedRobot {
 
     m_robotContainer.setAutonState(true);
 
-    RobotContainer.threadCommand().schedule();
+    m_robotContainer.checkPhotonVision();
 
     FollowPathCommand.warmupCommand().schedule();
 
     // This raises thread priority after a delay of 20 seconds
-    if(SystemConstants.raiseThreadPriority){
+    if(SystemConfig.raiseThreadPriority){
         RobotContainer.threadCommand().schedule();
     }
   }
@@ -156,6 +158,11 @@ public class Robot extends LoggedRobot {
   @Override
   public void teleopInit() {
     m_robotContainer.setAutonState(false);
+
+    var fdaqs = Diagnostics.getFailedDaqs();
+    if (fdaqs > SystemConstants.maxFailedDaqs) {
+        DriverStation.reportWarning(fdaqs + " failed daqs detected. An unusually high number of failed daqs may be a symptom of thread starvation.",false);
+    }
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to

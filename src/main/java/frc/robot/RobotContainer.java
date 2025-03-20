@@ -43,8 +43,8 @@ import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
-import frc.robot.Constants.SystemConstants.SysIDModes;
-import frc.robot.Constants.SystemConstants.SystemModes;
+import frc.robot.SystemConfig.SysIDModes;
+import frc.robot.SystemConfig.SystemModes;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
@@ -79,6 +79,7 @@ import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -176,7 +177,7 @@ public class RobotContainer {
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
         
-        if (SystemConstants.systemMode == SystemModes.kReal) {
+        if (SystemConfig.systemMode == SystemModes.kReal) {
             m_visionSim = null;
             m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
@@ -393,7 +394,7 @@ public class RobotContainer {
     }
 
     private void configureDriverBindings() {
-        if (SystemConstants.sysIDMode == SysIDModes.kNone){
+        if (SystemConfig.sysIDMode == SysIDModes.kNone){
             final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
 
             m_driverController.a().onTrue(
@@ -457,7 +458,7 @@ public class RobotContainer {
 
             driverInterrupt.onTrue(teleopDriveCommand);
 
-        } else if (SystemConstants.sysIDMode == SysIDModes.kDriveTranslation) {
+        } else if (SystemConfig.sysIDMode == SysIDModes.kDriveTranslation) {
             // Quasistatic and Dynamic control scheme for Translational Sysid
             m_driverController.rightBumper().and(
                 m_driverController.a()
@@ -475,7 +476,7 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.TRANSLATION,Direction.kForward));
         
-        } else if (SystemConstants.sysIDMode == SysIDModes.kDriveRotation) {
+        } else if (SystemConfig.sysIDMode == SysIDModes.kDriveRotation) {
             // Quasistatic and Dynamic control scheme for Translational Sysid
             m_driverController.rightBumper().and(
                 m_driverController.a()
@@ -493,7 +494,7 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.ROTATION,Direction.kReverse));
     
-        } else if (SystemConstants.sysIDMode == SysIDModes.kDriveSteer) {
+        } else if (SystemConfig.sysIDMode == SysIDModes.kDriveSteer) {
             // Quasistatic and Dynamic control scheme for Translational Sysid
             m_driverController.rightBumper().and(
                 m_driverController.a()
@@ -511,7 +512,7 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_drive.CommandBuilder.dynamicSysID(DrivetrainSysIDRoutine.STEER,Direction.kReverse));
      
-        } else if (SystemConstants.sysIDMode == SysIDModes.kElevator) {
+        } else if (SystemConfig.sysIDMode == SysIDModes.kElevator) {
             
             // Quasistsic and Dynamic control scheme for Elevator Sysid
             m_driverController.rightBumper().and(   
@@ -530,7 +531,7 @@ public class RobotContainer {
                 m_driverController.y()
             ).whileTrue(m_elevator.elevatorSysIdDynamic(SysIdRoutine.Direction.kReverse));
         
-        } else if (SystemConstants.sysIDMode == SysIDModes.kElevator) {
+        } else if (SystemConfig.sysIDMode == SysIDModes.kElevator) {
 
             //Quasistsic and Dynamic control scheme for Wrist Sysid
             
@@ -699,9 +700,14 @@ public class RobotContainer {
 
     public static Command threadCommand() {
         return Commands.sequence(
-            Commands.waitSeconds(20),
-            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10)),
-            Commands.print("MAIN THREAD PRIORITY RAISED TO RT10")
+            Commands.waitSeconds(SystemConstants.threadWaitTime),
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, SystemConstants.threadPriority)),
+            Commands.print("Main thread priority raised to " + SystemConstants.threadPriority + " at " + Timer.getFPGATimestamp())
         ).ignoringDisable(true);
+    }
+
+    public void checkPhotonVision() {
+        if (!m_vision.isCameraConnected("FRONT_LEFT_CAM")) DriverStation.reportWarning("Front Left Camera is disconnected",false);
+        if (!m_vision.isCameraConnected("FRONT_RIGHT_CAM")) DriverStation.reportWarning("Front Right Camera is disconnected",false);
     }
 }

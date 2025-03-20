@@ -19,6 +19,7 @@ import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Voltage;
+import frc.robot.SystemConfig;
 import frc.robot.Constants.SystemConstants;
 
 import com.ctre.phoenix6.StatusSignal;
@@ -58,7 +59,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
             odometryUpdateFrequency,
             moduleConstants
         );
-        if (SystemConstants.logOdometry) {
+        if (SystemConfig.logOdometry) {
             super.registerTelemetry(
                 (state) -> {
                     odometryCache.offer(state);
@@ -112,7 +113,7 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
     public void updateInputs(DriveIOInputs inputs) {
         inputs.fromSwerveDriveState(getState());
         inputs.operatorForwardDirection = getOperatorForwardDirection();
-        if (SystemConstants.logOdometry) {
+        if (SystemConfig.logOdometry) {
             int drainSize = drainCache();
             inputs.odometryTimestamps = new double[drainSize];
             inputs.odometryHeadings = new Rotation2d[drainSize];
