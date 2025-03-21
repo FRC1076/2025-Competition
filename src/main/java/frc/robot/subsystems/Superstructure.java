@@ -263,7 +263,7 @@ public class Superstructure {
                 m_wrist.applyAngle(position.wristAngle).asProxy(),
                 CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
             )
-        );
+        ).until(override);
     }
 
     /**
