@@ -245,7 +245,7 @@ public class Superstructure {
      * @param position
      * @return
      */
-    private Command applyWristevatorStateDirect(WristevatorState position) {
+    private Command applyWristevatorStateDirect(WristevatorState position, BooleanSupplier override) {
 
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
@@ -257,14 +257,26 @@ public class Superstructure {
             Commands.runOnce(ledSignal),
             Commands.sequence(
                 m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
-                CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters))
+                CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters), override)
             ),
             Commands.sequence(
                 m_wrist.applyAngle(position.wristAngle).asProxy(),
-                CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
+                CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
             )
         );
     }
+
+    /**
+     * Applies a wristevator state directly without any premoves. Potentially dangerous if used when right up against the
+     * reef, because the grabber could hit the branches
+     * @param position
+     * @return
+     */
+    private Command applyWristevatorStateDirect(WristevatorState position) {
+        return applyWristevatorStateDirect(position, () -> false);
+    }
+
+    
 
     private Command applyWristevatorStateGrabberDown(WristevatorState position) {
 
@@ -539,7 +551,7 @@ public class Superstructure {
                     superstructure.holdIndexState(IndexState.TRANSFER)
                 ).until(m_transferBeamBreak.debounce(0.25)), // Wait until the coral starts to exit the funnel
                 //Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
-                Commands.waitUntil(m_transferBeamBreak.negate()), // W ait until the coral fully exits the funnel
+                Commands.waitUntil(m_transferBeamBreak.negate().debounce(0.06)), // W ait until the coral fully exits the funnel
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
@@ -566,12 +578,23 @@ public class Superstructure {
                 ),
                 Commands.parallel(
                     //superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL, m_transferBeamBreak.debounce(0.06)),
                     Commands.run(() -> safeToMoveElevator = true)
+                ).unless(elevatorClutchTrigger)
+            );
+        }
+/* 
+        private Command completeTransfer() {
+            return Commands.sequence(
+                superstructure.holdIndexState(IndexState.TRANSFER).until(m_transferBeamBreak.negate().debounce(0.06)),
+                superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // TODO: Adjust rotations
+                Commands.parallel(
+                    superstructure.applyGrabberState(GrabberState.IDLE),
+                    superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
             );
         }
-
+*/
         /**
          * Moves the elevator and wrist to the intake position, intakes the coral,
          * moves it out 0.2 rotations to avoid hitting the carriage,
