@@ -388,11 +388,17 @@ public class RobotContainer {
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
 
         m_driverController.a().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            )
         );
 
         m_driverController.b().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            )
         );
         
         // Point to reef
@@ -450,18 +456,21 @@ public class RobotContainer {
         );*/
         
         m_driverController.y().whileTrue(
-            Commands.sequence(
-                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
-                Commands.parallel(
-                    superstructureCommands.preNet(),
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                Commands.sequence(    
+                    m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
                     Commands.parallel(
-                        Commands.sequence(
-                            Commands.waitSeconds(0.4),
-                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
-                        ),
-                        Commands.sequence(
-                            Commands.waitSeconds(1),
-                            superstructureCommands.doGrabberAction()
+                        superstructureCommands.preNet(),
+                        Commands.parallel(
+                            Commands.sequence(
+                                Commands.waitSeconds(0.4),
+                                m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
+                            ),
+                            Commands.sequence(
+                                Commands.waitSeconds(1),
+                                superstructureCommands.doGrabberAction()
+                            )
                         )
                     )
                 )
