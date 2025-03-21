@@ -552,7 +552,7 @@ public class Superstructure {
                 ).until(m_transferBeamBreak.debounce(0.25)), // Wait until the coral starts to exit the funnel
                 //Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
                 Commands.waitUntil(m_transferBeamBreak.negate().debounce(0.06)), // W ait until the coral fully exits the funnel
-                superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
+                superstructure.m_grabber.applyRotationsBangBang(12, 1.15), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
