@@ -75,6 +75,7 @@ import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -657,7 +658,8 @@ public class RobotContainer {
     public static Command threadCommand() {
         return Commands.sequence(
             Commands.waitSeconds(20),
-            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10))
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10)),
+            Commands.print("Main Thread Priority raised to 10 at " + Timer.getFPGATimestamp())
         ).ignoringDisable(true);
     }
 }
