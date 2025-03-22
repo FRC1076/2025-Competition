@@ -39,7 +39,7 @@ import org.apache.commons.lang3.NotImplementedException;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    
+     
      public static class VisionConstants {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         public static class Photonvision {

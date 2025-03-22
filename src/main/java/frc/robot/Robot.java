@@ -84,7 +84,7 @@ public class Robot extends LoggedRobot {
 
     m_robotContainer.setAutonState(true);
 
-    RobotContainer.threadCommand().schedule();
+    // RobotContainer.threadCommand().schedule();
 
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 

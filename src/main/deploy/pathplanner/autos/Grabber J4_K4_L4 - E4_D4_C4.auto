@@ -106,12 +106,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "autonShoot"
@@ -188,21 +182,28 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.0
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "autonShoot"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "preL4"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "preL4"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "L4-LOUT"
+                }
+              }
+            ]
           }
         }
       ]

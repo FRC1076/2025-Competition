@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.499038461538461,
-        "y": 7.564935897435897
+        "x": 1.5854829545454543,
+        "y": 7.549957386363636
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.8825390198205496,
-        "y": 5.732297573086279
+        "x": 2.968983512827543,
+        "y": 5.717319062014018
       },
       "isLocked": false,
       "linkedName": "Grabber LOUT"
@@ -30,7 +30,7 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.5062166962699787,
+      "waypointRelativePos": 0.51,
       "rotationDegrees": -59.99999999999999
     }
   ],
