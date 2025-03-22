@@ -8,6 +8,7 @@ import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import frc.robot.RobotSuperState;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
+import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.commands.drive.DirectDriveToPose;
 import frc.robot.commands.drive.PPDriveToPose;
@@ -327,6 +328,7 @@ public class DriveSubsystem extends SubsystemBase {
         private final Map<ReefFace, Command> leftBranchAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
+        private final Map<Pose2d, Command> coralStationAlignmentCommands = new HashMap<>();
         private final PPDriveToPose driveToNetCommand;
         private DriveCommandFactory(DriveSubsystem drive) {
             this.drive = drive;
@@ -334,6 +336,11 @@ public class DriveSubsystem extends SubsystemBase {
                 leftBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.leftBranch.transformBy(robotOffset), Rotation2d.k180deg)));
                 reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
                 rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
+            }
+            for (Pose2d pose : DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red 
+            ? Localization.getRedCoralStationPoses() 
+            : Localization.getBlueCoralStationPoses()){
+                coralStationAlignmentCommands.put(pose,directDriveToPose(pose));
             }
             driveToNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
         }

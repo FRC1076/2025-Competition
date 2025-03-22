@@ -315,11 +315,11 @@ public class RobotContainer {
         //Build the auto chooser with PathPlanner
         m_autoChooser = AutoBuilder.buildAutoChooser();
         m_autoChooser.addOption(
-            "SeedPoseBlue180", 
+            "SeedPoseBlue", 
             Commands.runOnce(() -> m_drive.resetPose(PoseOfInterest.BLUE_AUTON_START.pose))
         );
         m_autoChooser.addOption(
-            "SeedPoseRed0", 
+            "SeedPoseRed", 
             Commands.runOnce(() -> m_drive.resetPose(PoseOfInterest.RED_AUTON_START.pose))
         );
         SmartDashboard.putData(m_autoChooser);

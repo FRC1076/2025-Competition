@@ -31,7 +31,9 @@ import com.pathplanner.lib.path.PathConstraints;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -416,6 +418,26 @@ public final class Constants {
             private PoseOfInterest(Pose2d pose) {
                 this.pose = pose;
             }
+        }
+
+        public static Set<PoseOfInterest> bluCoralStations = new HashSet<>();
+        static {
+            bluCoralStations.add(PoseOfInterest.BLU_RIGHT_STATION);
+            bluCoralStations.add(PoseOfInterest.BLU_LEFT_STATION);
+        }
+
+        public static Set<PoseOfInterest> redCoralStations = new HashSet<>();
+        static {
+            redCoralStations.add(PoseOfInterest.RED_RIGHT_STATION);
+            redCoralStations.add(PoseOfInterest.RED_LEFT_STATION);
+        }
+        
+        public static Set<PoseOfInterest> coralStations = new HashSet<>();
+        static {
+            coralStations.add(PoseOfInterest.BLU_RIGHT_STATION);
+            coralStations.add(PoseOfInterest.BLU_LEFT_STATION);
+            coralStations.add(PoseOfInterest.RED_RIGHT_STATION);
+            coralStations.add(PoseOfInterest.RED_LEFT_STATION);
         }
     }
 

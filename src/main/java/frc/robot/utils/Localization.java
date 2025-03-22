@@ -41,6 +41,8 @@ public final class Localization {
         return closestFace;
     }
 
+    public static PoseOfInterest getClosestCoral
+
     /** 
      * Returns the pose of the nearest coral station 
      * 
