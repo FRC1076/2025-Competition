@@ -29,6 +29,7 @@ public class RobotSuperState {
     private IndexState indexState;
     private GrabberState grabberState;
     private GrabberPossession possession;
+    private boolean transferBeambreak;
 
     public static RobotSuperState getInstance() {
         if (inst == null) {
@@ -45,6 +46,7 @@ public class RobotSuperState {
         indexState = IndexState.BACKWARDS;
         grabberState = GrabberState.IDLE;
         possession = GrabberPossession.EMPTY;
+        transferBeambreak = false;
     }
 
     public void updateDriveState(SwerveDriveState driveState){
@@ -82,6 +84,10 @@ public class RobotSuperState {
 
     public void updatePossession(GrabberPossession possession){
         this.possession = possession;
+    }
+
+    public void updateTransferBeambreak(boolean transferBeambreak){
+        this.transferBeambreak = transferBeambreak;
     }
 
     public SwerveDriveState getDriveState() {
@@ -126,6 +132,10 @@ public class RobotSuperState {
 
     public GrabberPossession getPossession() {
         return possession;
+    }
+
+    public boolean getTransferBeambreak() {
+        return transferBeambreak;
     }
 
     //NOTE: Only logs superstructure states, since subsystems are already logged

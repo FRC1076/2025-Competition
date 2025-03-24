@@ -328,7 +328,7 @@ public class DriveSubsystem extends SubsystemBase {
         private final Map<ReefFace, Command> leftBranchAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
-        private final Map<Pose2d, Command> coralStationAlignmentCommands = new HashMap<>();
+        private final Map<PoseOfInterest, Command> coralStationAlignmentCommands = new HashMap<>();
         private final PPDriveToPose driveToNetCommand;
         private DriveCommandFactory(DriveSubsystem drive) {
             this.drive = drive;
@@ -337,10 +337,8 @@ public class DriveSubsystem extends SubsystemBase {
                 reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
                 rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
             }
-            for (Pose2d pose : DriverStation.getAlliance().orElse(Alliance.Red) == Alliance.Red 
-            ? Localization.getRedCoralStationPoses() 
-            : Localization.getBlueCoralStationPoses()){
-                coralStationAlignmentCommands.put(pose,directDriveToPose(pose));
+            for (PoseOfInterest station : FieldConstants.coralStations) {
+                coralStationAlignmentCommands.put(station, directDriveToPose(station.pose.transformBy(robotOffset)));
             }
             driveToNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
         }
@@ -397,6 +395,10 @@ public class DriveSubsystem extends SubsystemBase {
                 (interrupted) -> driveToNetCommand.cancel(),
                 () -> driveToNetCommand.isFinished()
             );
+        }
+
+        public Command directDriveToNearestCoralStation() {
+            return new SelectCommand<>(coralStationAlignmentCommands, () -> Localization.getClosestCoralStation(drive.getPose()));
         }
 
         public Command directDriveToNearestScoreNetLocation() {
