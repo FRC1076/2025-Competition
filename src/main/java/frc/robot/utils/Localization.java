@@ -6,8 +6,10 @@ package frc.robot.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.FieldConstants.ReefFace;
 
@@ -25,7 +27,6 @@ public final class Localization {
      * @param robotPose
      * @return the closest Reef Face
      */
-    
     public static ReefFace getClosestReefFace(Pose2d robotPose){
         double closestDistance = Double.MAX_VALUE; // Distance away from april tag
         ReefFace closestFace = null;
@@ -41,23 +42,46 @@ public final class Localization {
         return closestFace;
     }
 
-    public static PoseOfInterest getClosestCoral
+    private static PoseOfInterest getClosestPoseOfInterest(Set<PoseOfInterest> poses,Pose2d robotPose){
+        double closestDistance = Double.MAX_VALUE;
+        PoseOfInterest closestPose = null;
 
-    /** 
-     * Returns the pose of the nearest coral station 
-     * 
+        for (PoseOfInterest pose : poses) {
+            double distance = robotPose.getTranslation().getDistance(pose.pose.getTranslation());
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestPose = pose;
+            }
+        }
+
+        return closestPose;
+    }
+
+    /**
      * @author Jesse Kane
+     * @param robotPose
+     * @return the closest coral station
      */
-    public static Pose2d getClosestCoralStation(Pose2d robotPose) {
-        return robotPose.nearest(getCoralStationPoses());
+    public static PoseOfInterest getClosestCoralStation(Pose2d robotPose) {
+       return getClosestPoseOfInterest(FieldConstants.coralStations,robotPose);
     }
 
-    public static Pose2d getClosestBlueCoralStation(Pose2d robotPose) {
-        return robotPose.nearest(getBlueCoralStationPoses());
+    /**
+     * @author Jesse Kane
+     * @param robotPose
+     * @return the closest blue coral station
+     */
+    public static PoseOfInterest getClosestBluCoralStation(Pose2d robotPose) {
+       return getClosestPoseOfInterest(FieldConstants.bluCoralStations,robotPose);
     }
 
-    public static Pose2d getClosestRedCoralStation(Pose2d robotPose) {
-        return robotPose.nearest(getRedCoralStationPoses());
+    /**
+     * @author Jesse Kane
+     * @param robotPose
+     * @return the closest coral station
+     */
+    public static PoseOfInterest getClosestRedCoralStation(Pose2d robotPose) {
+       return getClosestPoseOfInterest(FieldConstants.redCoralStations,robotPose);
     }
 
     /** Returns a list of all coral stations */

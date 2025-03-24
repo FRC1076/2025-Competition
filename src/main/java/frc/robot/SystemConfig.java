@@ -26,6 +26,7 @@ public final class SystemConfig {
     * 
     * systemMode: SystemModes.kReal
     * sysIDMode: SysIDModes.kNone
+    * weldedField = true if welded, false if AndyMark
     * logOdometry: false
     * logCTRE: false
     * raiseThreadPriority: true
@@ -34,6 +35,7 @@ public final class SystemConfig {
     */
     public static final int systemMode = SystemModes.kReal;
     public static final int sysIDMode = SysIDModes.kNone;
+    public static final boolean weldedField = true;
     public static final boolean logOdometry = false;
     public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
     public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised

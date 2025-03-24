@@ -48,7 +48,9 @@ import org.apache.commons.lang3.NotImplementedException;
 public final class Constants {
     
      public static class VisionConstants {
-        public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(
+            SystemConfig.weldedField ? AprilTagFields.k2025ReefscapeWelded : AprilTagFields.k2025ReefscapeAndyMark
+        );
         public static class Photonvision {
 
             public static final String driverCamName = "DRIVER_CAM"; //PV name of the driver camera
