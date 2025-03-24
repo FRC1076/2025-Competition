@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.6332051282051276,
-        "y": 7.358525641025641
+        "x": 1.4857670454545455,
+        "y": 7.629730113636364
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.132428986449395,
-        "y": 7.083823652238304
+        "x": 1.9849909036988131,
+        "y": 7.355028124849027
       },
       "isLocked": false,
       "linkedName": "LOUT"
     },
     {
       "anchor": {
-        "x": 4.955880681818181,
-        "y": 5.186690340909092
+        "x": 5.019474337748345,
+        "y": 5.267156456953642
       },
       "prevControl": {
-        "x": 4.71516025813605,
-        "y": 5.87168162394753
+        "x": 4.778753914066214,
+        "y": 5.95214773999208
       },
       "nextControl": null,
       "isLocked": false,
@@ -34,7 +34,7 @@
   "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.0,
-    "maxAcceleration": 4.0,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 540.0,
     "nominalVoltage": 12.0,

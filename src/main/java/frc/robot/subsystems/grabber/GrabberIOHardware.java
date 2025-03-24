@@ -24,6 +24,7 @@ public class GrabberIOHardware implements GrabberIO{
     private final SparkMaxConfig m_rightMotorConfig;
 
     public GrabberIOHardware() {
+        // motor port constant is currently unknown. Change when known.
         m_leftMotor = new SparkMax(GrabberConstants.kLeftMotorPort, MotorType.kBrushless);
         m_rightMotor = new SparkMax(GrabberConstants.kRightMotorPort, MotorType.kBrushless);
 

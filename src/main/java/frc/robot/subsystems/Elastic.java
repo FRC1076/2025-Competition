@@ -111,6 +111,6 @@ public class Elastic {
     /** Returns true to mirror the auton from the left side to the right side
      * when in autonomous mode and the auton is selected as mirrored to the right side */
     public boolean getPathPlannerMirrored() {
-        return m_robotContainer.getAutonState() && (GameConstants.autonSide == AutonSides.Right);// autonSideChooser.getSelected().isRightSide;
+        return m_robotContainer.getAutonState() && (GameConstants.autonSide == AutonSides.Right);//autonSideChooser.getSelected().isRightSide;
     }
 }

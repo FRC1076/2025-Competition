@@ -4,39 +4,35 @@
 
 package lib.extendedcommands;
 
+import java.util.function.Supplier;
 import java.util.function.BooleanSupplier;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
+/* A wrapper that executes a command in the background without blocking execution of a CommandSequence 
+NOTE: If possible, use parallel and sequential command groups instead of this class. */
 public class DaemonCommand extends Command {
-    
-    Command command;
+    Supplier<Command> commandSupplier;
+    BooleanSupplier endCondition;
     /**
-     * Constructs a new DaemonCommand. NOTE: This class follows the same semantics as Command Compositions, and the command passed to this class cannot be scheduled or composed independently
-     * @param command the command to run as a Daemon
+     * Constructs a new DaemonCommand
+     * @param commandSupplier the command to run as a Daemon
      * @param endCondition the condition when the DaemonCommand should end
      */
-    public DaemonCommand(Command command, BooleanSupplier endCondition) {
-        this.command = command.until(endCondition);
-    }
-
-    public DaemonCommand(Command command) {
-        this.command = command;
+    public DaemonCommand(Supplier<Command> commandSupplier, BooleanSupplier endCondition) {
+        this.commandSupplier = commandSupplier;
+        this.endCondition = endCondition;
     }
 
     @Override
     public void initialize() {
-        command.schedule();
+        CommandScheduler.getInstance().schedule(commandSupplier.get().until(endCondition));
     }
 
     @Override
     public boolean isFinished() {
         return true;
     }
-
-    @Override
-    public boolean runsWhenDisabled() {
-        return true;
-    }
-    
 }
+

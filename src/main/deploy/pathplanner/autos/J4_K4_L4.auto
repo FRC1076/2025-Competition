@@ -17,16 +17,10 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "preL4Direct"
+                  "name": "preL4"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
           }
         },
         {
@@ -46,31 +40,18 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 1.0
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "preIntakeCoral"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "autonIntakeCoral"
-                      }
-                    }
-                  ]
+                  "name": "preIntakeCoral"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autonIntakeCoral"
           }
         },
         {
@@ -86,7 +67,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "preL4Direct"
+                  "name": "preL4"
                 }
               }
             ]
@@ -109,31 +90,18 @@
                 }
               },
               {
-                "type": "sequential",
+                "type": "named",
                 "data": {
-                  "commands": [
-                    {
-                      "type": "wait",
-                      "data": {
-                        "waitTime": 1.0
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "preIntakeCoral"
-                      }
-                    },
-                    {
-                      "type": "named",
-                      "data": {
-                        "name": "autonIntakeCoral"
-                      }
-                    }
-                  ]
+                  "name": "preIntakeCoral"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "autonIntakeCoral"
           }
         },
         {
@@ -149,7 +117,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "preL4Direct"
+                  "name": "preL4"
                 }
               }
             ]
@@ -162,9 +130,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "preL4"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "L4-LOUT"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "preIntakeCoral"
+                }
+              }
+            ]
           }
         }
       ]

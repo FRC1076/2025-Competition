@@ -9,16 +9,13 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-import com.ctre.phoenix6.SignalLogger;
-import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Constants.SystemConstants;
-import edu.wpi.first.wpilibj.Threads;
+
 import edu.wpi.first.wpilibj.Timer;
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -29,6 +26,9 @@ import edu.wpi.first.wpilibj.Timer;
 public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
 
+    private double m_lastLoopTimeSeconds = 0.0;
+    private double m_lastTimeSeconds = Timer.getFPGATimestamp();
+
     private RobotContainer m_robotContainer;
 
     /**
@@ -37,6 +37,7 @@ public class Robot extends LoggedRobot {
      */
     @Override
     public void robotInit() {
+        //PathfindingCommand.warmupCommand().schedule();
         // Configure AdvantageKit. This must be done BEFORE any other instatiation
         Logger.recordMetadata("ProjectName", BuildConstants.MAVEN_NAME);
         Logger.recordMetadata("BuildDate", BuildConstants.BUILD_DATE);
@@ -71,27 +72,17 @@ public class Robot extends LoggedRobot {
         Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
     }
 
-  
-
     // Start AdvantageKit logger
     Logger.start();
-
-
-    SignalLogger.enableAutoLogging(SystemConstants.logCTRE);
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
     m_robotContainer.setAutonState(true);
 
-    // RobotContainer.threadCommand().schedule();
-
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
-    FollowPathCommand.warmupCommand().schedule();
-
-    // This raises thread priority after a delay of 20 seconds
-    RobotContainer.threadCommand().schedule();
+    //PathfindingCommand.warmupCommand().schedule();
   }
 
   /**
@@ -110,10 +101,10 @@ public class Robot extends LoggedRobot {
     CommandScheduler.getInstance().run();
     //CommandScheduler.getInstance().printWatchdogEpochs(); // WARNING: Uses a lot of resources
 
-    //m_lastLoopTimeSeconds = Timer.getFPGATimestamp() - m_lastTimeSeconds;
-    //m_lastTimeSeconds = Timer.getFPGATimestamp();
+    m_lastLoopTimeSeconds = Timer.getFPGATimestamp() - m_lastTimeSeconds;
+    m_lastTimeSeconds = Timer.getFPGATimestamp();
 
-    //m_robotContainer.updateLoopTime(m_lastLoopTimeSeconds);
+    m_robotContainer.updateLoopTime(m_lastLoopTimeSeconds);
     //m_robotContainer.updateInterface();
   }
 
@@ -134,8 +125,6 @@ public class Robot extends LoggedRobot {
      * = new MyAutoCommand(); break; case "Default Auto": default:
      * autonomousCommand = new ExampleCommand(); break; }
      */
-
-    m_robotContainer.setAutonState(true);
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {

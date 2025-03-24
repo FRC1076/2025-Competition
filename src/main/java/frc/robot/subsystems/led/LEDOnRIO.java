@@ -19,10 +19,6 @@ public class LEDOnRIO implements LEDBase {
     private final LEDPattern solidPurple = LEDPattern
         .solid(Color.kPurple)
         .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
-    
-        private final LEDPattern solidWhite = LEDPattern
-        .solid(Color.kWhite)
-        .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
 
     private final LEDPattern solidGreen = LEDPattern
         .solid(Color.kGreen)

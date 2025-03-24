@@ -25,15 +25,16 @@ import com.pathplanner.lib.path.Waypoint;
 /** This automatically drives to a pose without using A* to generate a trajectory, 
   * useful for when we know there are no obstructions on the field between the robot 
   * and the desired pose */
-public class PPDriveToPose extends Command {
+public class DirectDriveToPoseCommand extends Command {
 
     private Command followPathCommand;
-    private Pose2d targetPose;
+    private final Pose2d targetPose;
     private final DriveSubsystem m_drive;
 
-    public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose) {
+    public DirectDriveToPoseCommand(DriveSubsystem drive, Pose2d targetPose) {
         this.m_drive = drive;
         this.targetPose = targetPose;
+        addRequirements(drive);
     }
 
     @Override
@@ -69,7 +70,7 @@ public class PPDriveToPose extends Command {
 
     @Override
     public void execute(){
-        //System.out.println(followPathCommand.isScheduled());
+        followPathCommand.execute();
     }
     
     @Override
@@ -79,10 +80,6 @@ public class PPDriveToPose extends Command {
     
     @Override
     public void end(boolean interrupted) {
-        followPathCommand.cancel();
-    }
-
-    public void setTargetPose(Pose2d targetPose){
-        this.targetPose = targetPose;
+        followPathCommand.end(interrupted);
     }
 }

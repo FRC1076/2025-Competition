@@ -12,7 +12,6 @@ import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -31,7 +30,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     private final ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
-    private final ProfiledPIDController m_profiledPIDController;
+    private final DynamicProfiledPIDController m_profiledPIDController;
     private final DynamicElevatorFeedforward m_feedforwardController;
     
     private boolean homed = false;
@@ -42,14 +41,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public ElevatorSubsystem(ElevatorIO io, DoubleSupplier periodSupplier){
         this.io = io;
         var controlConstants = io.getControlConstants();
-
-        m_profiledPIDController = new ProfiledPIDController(
-            controlConstants.kP(),
-            controlConstants.kI(),
-            controlConstants.kD(),
-            controlConstants.kProfileConstraints()
-        );
-        /*
         m_profiledPIDController = new DynamicProfiledPIDController(
             controlConstants.kP(),
             controlConstants.kI(),
@@ -58,7 +49,7 @@ public class ElevatorSubsystem extends SubsystemBase {
             0.02,
             0.2,
             controlConstants.kProfileConstraints()
-        );*/
+        );
 
         m_feedforwardController = new DynamicElevatorFeedforward(
             controlConstants.kS(),
@@ -85,6 +76,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     @Override
     public void periodic(){
+        //System.out.println("Elevator: " + this.getPositionMeters());
         io.updateInputs(inputs);
         Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
         Logger.processInputs("Elevator", inputs);
@@ -120,10 +112,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         io.setVoltage(volts + m_feedforwardController.getKg());
     }
 
-    public void setVoltageUnrestricted(double volts) {
-        io.setVoltage(volts + m_feedforwardController.getKg());
-    }
-
     /** Set kG of the elevator's feedforward
      * @param kg New kG value in volts
      */
@@ -140,6 +128,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public boolean isZeroed() {
         return homed;
     }
+
     
     /* ######################################################################## */
     /* # Public Command Factories                                             # */
@@ -150,16 +139,15 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public Command applyPosition(double positionMeters) {
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getPositionMeters());},
+            () -> m_profiledPIDController.reset(getPositionMeters()),
             () -> setPosition(positionMeters),
             (interrupted) -> {},
+            // () -> {io.resetController();},
+            // () -> {setPosition(positionMeters);},
+            // (interrupted) -> {setVoltage(io.getFFkG());},
             () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters,
             this
         );
-    }
-
-    public Command holdPosition(double positionMeters) {
-        return run(() -> setPosition(positionMeters));
     }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.
@@ -168,8 +156,8 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public Command applyManualControl(DoubleSupplier controlSupplier, BooleanSupplier higherMaxSpeedSupplier) {
         return run(higherMaxSpeedSupplier.getAsBoolean()
-            ? () -> setVoltageUnrestricted(controlSupplier.getAsDouble() * ElevatorConstants.fasterMaxOperatorControlVolts)
-            : () -> setVoltageUnrestricted(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts)
+            ? () -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.fasterMaxOperatorControlVolts)
+            : () -> setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts)
         );
     }
 

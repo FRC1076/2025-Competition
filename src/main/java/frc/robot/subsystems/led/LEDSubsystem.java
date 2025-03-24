@@ -41,6 +41,24 @@ public class LEDSubsystem extends SubsystemBase{
         this.previousState = this.io.getState();
         this.io.setState(state);
     }
+
+    /*
+    private Command updateBuilder(boolean isAutoAligned, boolean safeToMoveElevator, boolean elevatorZeroed) {
+        if (isAutoAligned) {
+            return setStateTimed(LEDStates.AUTO_ALIGNED, 2.0);
+        } else if (safeToMoveElevator) {
+            return setStateTimed(LEDStates.CORAL_INDEXED, 2.0);
+        } else if (elevatorZeroed) {
+            return setStateTimed(LEDStates.ELEVATOR_ZEROED, 2.0);
+        } else {
+            return Commands.runOnce(() -> {});
+        }
+    }
+
+    public Command update(BooleanSupplier isAutoAligned, BooleanSupplier safeToMoveElevator, BooleanSupplier elevatorZeroed) {
+        return new DeferredCommand(() -> updateBuilder(isAutoAligned.getAsBoolean(), safeToMoveElevator.getAsBoolean(), elevatorZeroed.getAsBoolean()), Set.of(this));
+    }
+    */
     
     /** Sets the state of the LEDs through the chosen IO layer,
      * and then reverts the LEDs to the IDLE state.
