@@ -632,8 +632,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        // return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
         return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }
