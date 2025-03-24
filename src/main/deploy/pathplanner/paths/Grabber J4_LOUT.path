@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.299600949820522,
-        "y": 5.102456968163375
+        "x": 4.955880681818181,
+        "y": 5.186690340909092
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.501943385156848,
-        "y": 5.623725542344834
+        "x": 3.781776487188954,
+        "y": 5.665196462354833
       },
       "isLocked": false,
-      "linkedName": "I"
+      "linkedName": "J"
     },
     {
       "anchor": {
-        "x": 1.6332051282051276,
-        "y": 7.358525641025641
+        "x": 1.5854829545454543,
+        "y": 7.549957386363636
       },
       "prevControl": {
-        "x": 2.2503217671107807,
-        "y": 6.980617970104573
+        "x": 1.9985680725471064,
+        "y": 7.323856262268717
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LOUT"
+      "linkedName": "Grabber LOUT"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -54.0
+    "rotation": 126.0
   },
   "reversed": false,
   "folder": null,

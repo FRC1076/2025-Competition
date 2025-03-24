@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
@@ -38,9 +39,9 @@ import org.apache.commons.lang3.NotImplementedException;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-    
+     
      public static class VisionConstants {
-        public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025Reefscape);
+        public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
         public static class Photonvision {
 
             public static final String driverCamName = "DRIVER_CAM"; //PV name of the driver camera
@@ -68,26 +69,7 @@ public final class Constants {
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     12.389, -11.683, 11.513639, // 15 - 7.163, -(15 - 2.892), 19.162, 
                     0, 0, 20 // -11.385, 17.961, 40
-                ); //,
-                /*
-                REAR_LEFT_CAM(
-                    "REAR_LEFT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
-                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    0, 0, 0,
-                    0, 0, 0
-                ),
-                REAR_RIGHT_CAM("REAR_RIGHT_CAM",
-                    kDefaultSingleTagStdDevs,
-                    kDefaultMultiTagStdDevs,
-                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    0, 0, 0,
-                    0, 0, 0
                 );
-                */
 
                 public final String name;
                 public final Transform3d offset;
@@ -162,10 +144,20 @@ public final class Constants {
     }
 
     public static class SystemConstants {
+        /*
+         * Correct constants for competition:
+         * currentMode = 0
+         * operatorSysId = false
+         * driverSysId = false
+         * logOdometry = false
+         * logCTRE = false
+         */
         public static final int currentMode = 0; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
+        public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
+        // public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
     }
     
     public static class DriveConstants {
@@ -188,20 +180,24 @@ public final class Constants {
 
             public static final InterpolatingDoubleTreeMap elevatorAccelerationTable = new InterpolatingDoubleTreeMap(); // A table that maps elevator heights to slew rate limits
             static {
-                // TODO: add deadzone if needed
                 elevatorAccelerationTable.put(0.0,100000.0);
-                // elevatorAccelerationTable.put(1.0,1000000000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
+                elevatorAccelerationTable.put(1.0,100000.0); // Deadzone with no acceleration limiting between 0.0 and 1.348 (THE END OF THIS DEADZONE *MUST* BE SLIGHTLY LOWER THAN THE POINT WHERE WE ACTUALLY WANT ELEVATOR ACCELERATION LIMITING TO BEGIN)
                 // elevatorAccelerationTable.put(0.0, 12.66793578);
-                elevatorAccelerationTable.put(0.253, 100000.0);
-                elevatorAccelerationTable.put(0.254, 10.15773958 / 5);
-                elevatorAccelerationTable.put(0.508, 8.477828029 / 5);
-                elevatorAccelerationTable.put(0.762, 7.274717623 / 5);
+                // elevatorAccelerationTable.put(0.253, 100000.0);
+                // elevatorAccelerationTable.put(0.254, 10.15773958 / 5);
+                // elevatorAccelerationTable.put(0.508, 8.477828029 / 5);
+                // elevatorAccelerationTable.put(0.762, 7.274717623 / 5);
                 elevatorAccelerationTable.put(1.016, 6.370643237 / 5);
                 elevatorAccelerationTable.put(1.27, 5.666439564 / 6);
                 elevatorAccelerationTable.put(1.524, 5.102204373 / 7);
                 elevatorAccelerationTable.put(1.778, 4.640342002 / 8);
                 elevatorAccelerationTable.put(1.8288, 4.557930098 / 8);
             }
+        }
+
+        public static class DirectDriveConstants {
+            public static final Constraints translationConstraints = new Constraints(2, 2);
+            public static final Constraints headingConstraints = new Constraints(Units.degreesToRadians(360), Units.degreesToRadians(360));
         }
 
         public static class PathPlannerConstants {
@@ -216,7 +212,7 @@ public final class Constants {
             }
         }
 
-        public static final double kOdometryUpdateFrequency = 50.0;
+        public static final double kOdometryUpdateFrequency = 250.0;
     }
 
     public static class SuperstructureConstants {
@@ -273,6 +269,7 @@ public final class Constants {
             ALGAE_HOLD(-2, -2),
             CORAL_INTAKE(12, 12),
             REVERSE_CORAL_INTAKE(-12, -12),
+            GRABBER_CORAL_INTAKE(-12, -12),
 
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
@@ -289,7 +286,7 @@ public final class Constants {
 
         // Index State
         public enum IndexState {
-            TRANSFER(3),
+            TRANSFER(4.5),
             IDLE(0), // Never implemented, just an option
             BACKWARDS(-1);
             
@@ -304,31 +301,31 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.1349839121 + 0.00635, 90, false),
-            ALGAE_TRAVEL(0.134983912 + 0.00635, 65 , false),
+            TRAVEL(0.1349839121 + 0.00635, 90),
+            ALGAE_TRAVEL(0.134983912 + 0.00635, 65),
 
-            CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2, false), // Same as CORAL_DIRECT_INTAKE
+            CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
+            GRABBER_CORAL_INTAKE(0.784, 36.956),
+            HIGH_TRAVEL(0.3, -90),
 
-            L1(0.42019, 23.9365, false), // Placeholder
-            L2(0.910, -35, false), //0.71628, -35),
-            L3(1.348 + 2 * 0.00889, -35, false), //1.11252, -35),
-            L4(2.109649 + 3 * 0.00635, -38, false),//-40.4130051, true), //1.8161, -45),
+            L1(0.42019, 23.9365), // Placeholder
+            L2(0.910, -35), //0.71628, -35),
+            L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),
+            L4(2.109649 + 3 * 0.00635, -38),//-40.4130051, true), //1.8161, -45),
 
-            GROUND_INTAKE(0.184277, -20, false),
-            LOW_INTAKE(0.98407, -27.02, false),
-            HIGH_INTAKE(1.44998, -27.02, false),
+            GROUND_INTAKE(0, 0),
+            LOW_INTAKE(0.98407,-27.02),
+            HIGH_INTAKE(1.44998, -27.02),
 
-            PROCESSOR(0.184277 + 0.15, 0, false),
-            NET(2.109649 + 3 * 0.00635, 65, false);
+            PROCESSOR(0.2536, 0),
+            NET(2.109649 + 3 * 0.00635, 65);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
-            public final boolean elevatorClutch;
             
-            private WristevatorState(double elevatorHeightMeters, double wristAngleDegrees, boolean elevatorClutch) {
+            private WristevatorState(double elevatorHeightMeters, double wristAngleDegrees) {
                 this.elevatorHeightMeters = elevatorHeightMeters;
                 this.wristAngle = Rotation2d.fromDegrees(wristAngleDegrees);
-                this.elevatorClutch = elevatorClutch;
             }
         }
     }
@@ -411,6 +408,8 @@ public final class Constants {
             BLU_LEFT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(291.20), 305),
             RED_RIGHT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(291.20), -125),
             RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125);
+            // 7.618 blue x for net
+            // 9.922 red x for net
 
             public final Pose2d pose;
 
@@ -444,10 +443,6 @@ public final class Constants {
         public static final double kVelocityConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635 / 60.0; //Gear ratio & chain pitch & rpm -> m/s
         public static final double kPositionConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635; //Gear ratio & chain pitch
 
-        /*
-        public static final double kMaxVelocityMeters = 1.0;
-        public static final double kMaxAccelerationMetersSquared = 0.5;
-        */
         public static class Electrical {
             public static final double kVoltageCompensation = 10.5;
             public static final double kCurrentLimit = 60;
@@ -461,10 +456,10 @@ public final class Constants {
             public static final double kD = 0.0;
 
             // Feedforward constant
-            public static final double kS = 0.082814;  //0.059004; //Static gain (voltage)
-            public static final double kG = 0.74003;  //0.77763;//1.2;//0.97369; // 0.6 //Gravity gain (voltage)
-            public static final double kV = 3.1265;  //2.8829; // 12.0 // velocity game
-            public static final double kA = 0.0; //Acceleration Gain
+            public static final double kS = 0.082814;  // 0.059004; //Static gain (voltage)
+            public static final double kG = 0.74003;  // 0.77763; //Gravity gain (voltage)
+            public static final double kV = 3.1265;  // 2.8829; // velocity game
+            public static final double kA = 0.0; // Acceleration Gain
 
             public static final Constraints kProfileConstraints = new Constraints(4, 5.25);
         }
@@ -505,7 +500,7 @@ public final class Constants {
         public static final int kRightMotorPort = 42;
         
         public static final double kCurrentLimit = 20; 
-        public static final double kGearRatio = 45;
+        public static final double kGearRatio = 20;
         public static final double kPositionConversionFactor = Math.PI * 2 * (1/kGearRatio);
 
         public static final boolean kLeftMotorInverted = true;
@@ -520,15 +515,15 @@ public final class Constants {
         public static final double kMaxWristAngleRadians = Units.degreesToRadians(90);
 
         public static final double maxOperatorControlVolts = 1;
-        public static final double kSmartCurrentLimit = 15.0;
+        public static final double kSmartCurrentLimit = 20.0;
 
         public static final boolean kLeadMotorInverted = true;
 
         // Source: https://docs.revrobotics.com/brushless/spark-max/encoders/alternate-encoder
         public static final int kCountsPerRevolution = 8192;
-        public static final double kPositionConversionFactor = 2 * Math.PI;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI);// (1/117.1875) * 2 * Math.PI; // rotations to radians
-        public static final double kVelocityConversionFactor = 2 * Math.PI / 60;//(1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60;// (1/117.1875) * (2 * Math.PI) / 60.0; // rpm to radians/second
-        public static final double kZeroOffsetRadians = 2.4820003267948962; // -0.6595923267948967;
+        public static final double kPositionConversionFactor = 2 * Math.PI; // (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) // rotations to radians
+        public static final double kVelocityConversionFactor = 2 * Math.PI / 60; // (1.0/125.0) * (32.0/50.0) * (2 * Math.PI) / 60; // rpm to radians/second
+        public static final double kZeroOffsetRadians = -1.7236260000051038; // -0.6595923267948967;
 
         public static final class Control {
             // PID constants
@@ -538,7 +533,7 @@ public final class Constants {
 
             // Feedforward constants
             public static final double kS = 0.16629; //0.26649; // static gain in volts
-            public static final double kG = 0.13459; // 0.13459; // 0.13593; // gravity gain in volts
+            public static final double kG = 0.13459; // 0.13459; // gravity gain in volts
             public static final double kV = 1.8105; // 0.92013; // velocity gain in volts per radian per second
             public static final double kA = 0.0; // acceleration gain in volts per radian per second squared
 
@@ -572,10 +567,8 @@ public final class Constants {
 
     public static class IndexConstants {
         public static final int kLeadMotorPort = 51;
-        // public static final int kFollowMotorPort = 52;
 
         public static final double kCurrentLimit = 20.0;
-        // public static final double kIndexVoltage = 12.0;
 
         public static final boolean kLeadMotorInverted = false;
         public static final boolean kFollowMotorInverted = true;

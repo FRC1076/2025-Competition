@@ -3,16 +3,16 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.6332051282051276,
-        "y": 7.358525641025641
+        "x": 1.5854829545454543,
+        "y": 7.549957386363636
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.4117448040419482,
-        "y": 6.481029835207172
+        "x": 3.9059161847071544,
+        "y": 4.4101745660767815
       },
       "isLocked": false,
-      "linkedName": "LOUT"
+      "linkedName": "Grabber LOUT"
     },
     {
       "anchor": {
@@ -20,16 +20,35 @@
         "y": 5.007201704545454
       },
       "prevControl": {
-        "x": 3.425194629086957,
-        "y": 5.3394108385860255
+        "x": 3.7889648113871113,
+        "y": 5.252228299421591
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": "L"
     }
   ],
-  "rotationTargets": [],
-  "constraintZones": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.31261101243339356,
+      "rotationDegrees": -59.99999999999999
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.31,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 4.0,
+        "maxAcceleration": 1.8,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 540.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -48,7 +67,7 @@
   "folder": null,
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -54.0
+    "rotation": 126.0
   },
   "useDefaultConstraints": true
 }

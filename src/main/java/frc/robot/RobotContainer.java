@@ -28,7 +28,7 @@ import frc.robot.subsystems.led.LEDSubsystem;
 import frc.robot.subsystems.wrist.WristIOHardware;
 import frc.robot.subsystems.wrist.WristIOSim;
 import frc.robot.subsystems.wrist.WristSubsystem;
-import lib.control.DynamicSlewRateLimiter;
+import lib.control.DynamicSlewRateLimiter2d;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
 import lib.vision.LoggedPhotonVisionLocalizer;
@@ -38,6 +38,7 @@ import lib.vision.Limelight.LEDState;
 import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
+import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
@@ -73,6 +74,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Threads;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -104,7 +107,6 @@ public class RobotContainer {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final Trigger m_transferBeamBreak;
-    private final Trigger m_interruptDrive;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
     // private final Trigger m_isDisabled;
@@ -140,8 +142,7 @@ public class RobotContainer {
 
     private final VisionSystemSim m_visionSim;
 
-    private final DynamicSlewRateLimiter xLimiter;
-    private final DynamicSlewRateLimiter yLimiter;
+    private final DynamicSlewRateLimiter2d slewRateLimiter;
     private boolean slewRateLimiterEnabled = true;
 
    // private final PhotonCamera m_driveCamera;
@@ -163,7 +164,6 @@ public class RobotContainer {
     
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
-        m_interruptDrive = m_driverController.leftTrigger();
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
     
@@ -190,7 +190,6 @@ public class RobotContainer {
             m_index = new IndexSubsystem(new IndexIOHardware());
             m_LEDs = new LEDSubsystem(new LEDOnRIO());
             for (PhotonConfig config : PhotonConfig.values()){
-                
                 var cam = new PhotonCamera(config.name);
                 m_vision.addCamera(new PhotonVisionLocalizer(
                     cam, 
@@ -237,42 +236,38 @@ public class RobotContainer {
             m_index, 
             m_wrist, 
             m_elastic,
-            () -> false,
-            m_transferBeamBreak, 
-            () -> false
+            m_transferBeamBreak
         );
 
-        xLimiter = new DynamicSlewRateLimiter(
+        superVis = new SuperstructureVisualizer(m_superstructure);
+
+        slewRateLimiter = new DynamicSlewRateLimiter2d(
             () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
-            m_elevator.getPositionMeters()
+            0
         );
 
-        yLimiter = new DynamicSlewRateLimiter(
-            () -> elevatorAccelerationTable.get(m_elevator.getPositionMeters()),
-            m_elevator.getPositionMeters()
+        teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
+            () -> slewRateLimiterEnabled
+                ? slewRateLimiter.calculateY(-m_driverController.getLeftX(), -m_driverController.getLeftY())
+                : -m_driverController.getLeftY(),
+            () -> slewRateLimiterEnabled
+                ? slewRateLimiter.calculateX(-m_driverController.getLeftX(), -m_driverController.getLeftY())
+                : -m_driverController.getLeftX(),
+            () -> -m_driverController.getRightX()
         );
 
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
         m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
-        m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+        // m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+        m_isAutoAligned = new Trigger(() -> teleopDriveCommand.isAutoAligned());
         m_elevatorZeroed = new Trigger(() -> m_elevator.isZeroed());
-
-        superVis = new SuperstructureVisualizer(m_superstructure);
-
-        teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> slewRateLimiterEnabled
-                ? yLimiter.calculate(-m_driverController.getLeftY())
-                : -m_driverController.getLeftY(),
-            () -> slewRateLimiterEnabled
-                ? xLimiter.calculate(-m_driverController.getLeftX())
-                : -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()
-        );
 
         m_drive.setDefaultCommand(
             teleopDriveCommand
         );
+
+        //m_grabber.setDefaultCommand(m_superstructure.getCommandBuilder().stopGrabber());
 
         m_wrist.setDefaultCommand(m_wrist.applyManualControl(
             () -> -m_operatorController.getRightY()
@@ -335,14 +330,6 @@ public class RobotContainer {
    * joysticks}.
    */
     private void configureBindings() {
-        // m_superstructure.elevatorClutchTrigger().whileTrue(teleopDriveCommand.applyClutchFactor(ElevatorClutchTransFactor, ElevatorClutchRotFactor));
-        /*m_isDisabled
-            .onTrue(
-                Commands.runOnce(() -> m_LEDs.setState(LEDStates.OFF)).ignoringDisable(true))
-            .onFalse(
-                Commands.runOnce(() -> m_LEDs.setState(LEDStates.IDLE))
-            );*/
-
         m_isAutoAligned
             .onTrue(
                 m_LEDs.setStateTimed(LEDStates.AUTO_ALIGNED))
@@ -373,17 +360,19 @@ public class RobotContainer {
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
         NamedCommands.registerCommand("preL3", superstructureCommands.preL3());
         NamedCommands.registerCommand("preL4", superstructureCommands.preL4());
+        NamedCommands.registerCommand("preL4Direct", superstructureCommands.preL4Direct());
         NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
         NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
         NamedCommands.registerCommand("autonIntakeCoral", superstructureCommands.autonIntakeCoral());
+        NamedCommands.registerCommand("autonGrabberIntakeCoral", superstructureCommands.autonGrabberIntakeCoral());
+        NamedCommands.registerCommand("autonGrabberAdjustCoral", superstructureCommands.autonGrabberAdjustCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
-        // NamedCommands.registerCommand("doGrabberAction", superstructureCommands.doGrabberAction());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
-        NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
+        // NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp()); didn't work before
     }
 
     private void configureSharedBindings() {
@@ -393,37 +382,39 @@ public class RobotContainer {
             .or(m_operatorController.rightTrigger())
                 .onTrue(superstructureCommands.doGrabberAction())
                     .whileFalse(superstructureCommands.stopAndRetract());
-        
-        /*
-        m_driverController.rightTrigger()
-            .or(m_operatorController.rightTrigger())
-                .whileFalse(superstructureCommands.stopAndRetract());*/
     }
 
     private void configureDriverBindings() {
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
         m_driverController.a().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            )
         );
 
         m_driverController.b().whileTrue(
-            m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            )
         );
-
-        m_interruptDrive.onTrue(m_drive.getDefaultCommand());
         
         // Point to reef
         // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
         // Apply single clutch
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
-            .whileTrue(teleopDriveCommand.applySingleClutch());
+            .onTrue(superstructureCommands.doGrabberAction())
+            .onFalse(superstructureCommands.stopGrabber());
 
         // Apply double clutch
         m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
             .whileTrue(teleopDriveCommand.applyDoubleClutch());
 
         // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
-        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
+        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
             .whileTrue(
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
@@ -441,18 +432,6 @@ public class RobotContainer {
 
         m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
 
-        /*
-        m_driverController.x().and(
-            m_driverController.leftBumper().and(
-                m_driverController.rightBumper()
-            ).negate()
-        ).whileTrue(teleopDriveCommand.applyLeftStationHeadingLock());
-
-        m_driverController.b().whileTrue(teleopDriveCommand.applyRightStationHeadingLock());
-        */
-
-        // m_driverController.y().whileTrue(teleopDriveCommand.applyForwardHeadingLock()); Oliver didn't want this
-
         m_driverController.leftBumper().and(
             m_driverController.rightBumper().and(
                 m_driverController.x()
@@ -460,12 +439,49 @@ public class RobotContainer {
         ).onTrue(new InstantCommand(
             () -> m_drive.resetHeading()
         )); 
+
+        /*
+        m_driverController.y().whileTrue(
+            Commands.sequence(
+                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                superstructureCommands.preNet(),
+                Commands.parallel(
+                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        superstructureCommands.doGrabberAction()
+                    )
+                )
+            )
+        );*/
+        
+        m_driverController.y().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                Commands.sequence(    
+                    m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                    Commands.parallel(
+                        superstructureCommands.preNet(),
+                        Commands.parallel(
+                            Commands.sequence(
+                                Commands.waitSeconds(0.4),
+                                m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
+                            ),
+                            Commands.sequence(
+                                Commands.waitSeconds(1),
+                                superstructureCommands.doGrabberAction()
+                            )
+                        )
+                    )
+                )
+            )
+        );
     }
 
     private void configureOperatorBindings() {
 
         //if (SystemConstants.operatorSysID) {
-            /* 
+            /*
             // Quasistsic and Dynamic control scheme for Elevator Sysid
             m_driverController.rightBumper().and(   
                 m_driverController.a()
@@ -553,6 +569,10 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.intakeCoral())
             .whileFalse(superstructureCommands.stopIntake());
 
+        m_operatorController.povLeft()
+            .whileTrue(superstructureCommands.grabberIntakeCoral())
+            .onFalse(superstructureCommands.stopGrabber());
+
         // Manual coral intake and transfer
         m_operatorController.povUp()
             .onTrue(
@@ -584,19 +604,10 @@ public class RobotContainer {
 
         // Interrupts any wrist command when the right joystick is moved
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
-
-        // Interrupts any elevator command when the the left joystick is moved
-        // m_operatorController.leftStick().onTrue(superstructureCommands.interruptWristevator());
-
-        /*
-        m_operatorController.start().whileTrue(m_elevator.zeroEncoderJoystickControl(
-            m_operatorController::getLeftX
-        ));
-        */
         
         m_operatorController.rightBumper()
-            .onTrue(superstructureCommands.removeAlgae())
-            .whileFalse(superstructureCommands.stopGrabber());
+            .onTrue(superstructureCommands.doGrabberAction())
+            .onFalse(superstructureCommands.stopGrabber());
 
         m_operatorController.start().whileTrue(
             Commands.parallel(
@@ -615,13 +626,15 @@ public class RobotContainer {
         );*/
     }
 
-  /**
+   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        return AutoBuilder.buildAuto("J4_K4 - E4_D4");
+        // return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
+        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }
 
@@ -649,5 +662,13 @@ public class RobotContainer {
 
     public boolean getAutonState() {
         return m_autonState;
+    }
+
+    public static Command threadCommand() {
+        return Commands.sequence(
+            Commands.waitSeconds(20),
+            Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 10)),
+            Commands.print("Main Thread Priority raised to 10 at " + Timer.getFPGATimestamp())
+        ).ignoringDisable(true);
     }
 }

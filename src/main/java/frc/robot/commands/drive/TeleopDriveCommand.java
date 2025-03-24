@@ -5,9 +5,12 @@
 package frc.robot.commands.drive;
 
 import frc.robot.subsystems.drive.DriveSubsystem;
+import frc.robot.utils.Localization;
 import frc.robot.Constants.FieldConstants.PointOfInterest;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 
+import static frc.robot.Constants.DriveConstants.DirectDriveConstants.headingConstraints;
+import static frc.robot.Constants.DriveConstants.DirectDriveConstants.translationConstraints;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.FPVClutchRotationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.FPVClutchTranslationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.doubleClutchRotationFactor;
@@ -16,20 +19,33 @@ import static frc.robot.Constants.DriveConstants.DriverControlConstants.maxRotat
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.maxTranslationSpeedMPS;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.singleClutchRotationFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.singleClutchTranslationFactor;
+import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
 
+import lib.control.LQRHolonomicController;
+import lib.control.LQRHolonomicController.LQRHolonomicDriveControllerTolerances;
+import lib.control.ProfiledPIDHolonomicController;
 import lib.functional.TriFunction;
+import lib.utils.GeometryUtils;
 
 import java.util.Optional;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
+import edu.wpi.first.math.controller.HolonomicDriveController;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
@@ -38,6 +54,8 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 public class TeleopDriveCommand extends Command {
+    private static final LQRHolonomicDriveControllerTolerances tolerances = new LQRHolonomicDriveControllerTolerances(0.1, 0.5, 0.1, 0.5);
+
     // The raw speed suppliers, unaffected by the clutches. A reference to these is maintained in order to make applying and unapplying clutches easier
     private final DoubleSupplier rawXSupplier;
     private final DoubleSupplier rawYSupplier;
@@ -54,6 +72,17 @@ public class TeleopDriveCommand extends Command {
     private DoubleSupplier xSupplier;
     private DoubleSupplier ySupplier;
     private DoubleSupplier omegaSupplier;
+
+    private final ProfiledPIDController translationPIDController = new ProfiledPIDController(0.5, 0, 0, translationConstraints); // PathPlanner uses 5, 0, 0
+    private final ProfiledPIDController rotationPIDController = new ProfiledPIDController(0.5, 0, 0, headingConstraints); // 5, 0, 0
+
+    private final ProfiledPIDHolonomicController m_DriveController = 
+        new ProfiledPIDHolonomicController(
+            translationPIDController,
+            rotationPIDController
+        );
+
+    private Pose2d goalPose = new Pose2d();
 
     // Request Generator declarations
 
@@ -196,6 +225,59 @@ public class TeleopDriveCommand extends Command {
             () -> clearRequestGeneratorOverride()
         );
     }
+
+    public Command applyLeftBranchAlign() {
+        return applyRequestGenerator(
+            (vx, vy, omega) -> {
+                goalPose = GeometryUtils.rotatePose(
+                    Localization.getClosestReefFace(m_drive.getPose()).leftBranch.transformBy(robotOffset),
+                    Rotation2d.k180deg);
+
+                translationPIDController.reset(
+                    m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
+                    m_drive.getVelocityMPS());
+
+                rotationPIDController.reset(
+                    m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
+                    m_drive.getAngularVelocityRadPerSec());
+
+                return new ApplyRobotSpeeds().withSpeeds(
+                    m_DriveController.calculate(
+                        m_drive.getPose(),
+                        goalPose
+                    )
+                );
+            }
+        );
+    }
+
+    public Command applyRightBranchAlign() {
+        return applyRequestGenerator(
+            (vx, vy, omega) -> {
+                goalPose = GeometryUtils.rotatePose(
+                    Localization.getClosestReefFace(m_drive.getPose()).rightBranch.transformBy(robotOffset),
+                    Rotation2d.k180deg);
+
+                translationPIDController.reset(
+                    m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
+                    m_drive.getVelocityMPS());
+
+                rotationPIDController.reset(
+                    m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
+                    m_drive.getAngularVelocityRadPerSec());
+
+                return new ApplyRobotSpeeds().withSpeeds(
+                    m_DriveController.calculate(
+                        m_drive.getPose(),
+                        goalPose
+                    ));
+            }
+        );
+    }
+
+    public boolean isAutoAligned() {
+        return m_DriveController.atReference();
+    }   
 
     /** Returns a command that makes the drive train drive in chassis-oriented mode, with a clutch applied, for FPV branch alignment */
     public Command applyFPVDrive(){
