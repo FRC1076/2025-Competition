@@ -26,7 +26,7 @@ public final class SystemConfig {
     * 
     * systemMode: SystemModes.kReal
     * sysIDMode: SysIDModes.kNone
-    * weldedField = true if welded, false if AndyMark
+    * weldedField = true if welded, false if AndyMark (All official FiM fields are welded, The AADL field is AndyMark)
     * logOdometry: false
     * logCTRE: false
     * raiseThreadPriority: true

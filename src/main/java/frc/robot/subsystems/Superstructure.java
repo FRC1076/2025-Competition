@@ -9,6 +9,7 @@ import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.RobotSuperState;
+import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
@@ -16,6 +17,7 @@ import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
+import frc.robot.utils.Localization;
 import frc.robot.utils.VirtualSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
@@ -621,6 +623,15 @@ public class Superstructure extends VirtualSubsystem {
                         applyGrabberState(GrabberState.ALGAE_OUTTAKE)
                     )
                 )
+            );
+        }
+
+        // Automatically goes to the correct algae intake height based on pose
+        public Command goToAlgaeIntake() {
+            return Commands.either(
+                applyWristevatorState(WristevatorState.HIGH_INTAKE),
+                applyWristevatorState(WristevatorState.LOW_INTAKE),
+                Localization::isClosestReefAlgaeHigh
             );
         }
 

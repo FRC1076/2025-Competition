@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import frc.robot.RobotSuperState;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.FieldConstants.ReefFace;
@@ -42,6 +43,10 @@ public final class Localization {
         return closestFace;
     }
 
+    public static ReefFace getClosestReefFace() {
+        return getClosestReefFace(RobotSuperState.getInstance().getPose());
+    }
+
     private static PoseOfInterest getClosestPoseOfInterest(Set<PoseOfInterest> poses,Pose2d robotPose){
         double closestDistance = Double.MAX_VALUE;
         PoseOfInterest closestPose = null;
@@ -64,6 +69,14 @@ public final class Localization {
      */
     public static PoseOfInterest getClosestCoralStation(Pose2d robotPose) {
        return getClosestPoseOfInterest(FieldConstants.coralStations,robotPose);
+    }
+
+    /**
+     * @author Jesse Kane
+     * @return the closest coral station
+     */
+    public static PoseOfInterest getClosestCoralStation() {
+        return getClosestCoralStation(RobotSuperState.getInstance().getPose());
     }
 
     /**
@@ -116,5 +129,9 @@ public final class Localization {
             }
         }
         return null;
+    }
+
+    public static boolean isClosestReefAlgaeHigh(){
+        return getClosestReefFace(RobotSuperState.getInstance().getPose()).aprilTagID % 2 == 0;
     }
 }
