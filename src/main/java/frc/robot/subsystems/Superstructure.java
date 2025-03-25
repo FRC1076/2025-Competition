@@ -203,7 +203,7 @@ public class Superstructure {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position) {
+    private Command applyWristevatorState(WristevatorState position, BooleanSupplier tolerance) {
 
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
@@ -227,7 +227,7 @@ public class Superstructure {
         return Commands.sequence(
             wristPreMoveCommand.asProxy(),
             Commands.deadline(
-                m_elevator.applyPosition(position.elevatorHeightMeters),
+                m_elevator.applyPosition(position.elevatorHeightMeters).until(tolerance),
                 wristHoldCommand
             ).asProxy(),
             CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
@@ -237,6 +237,30 @@ public class Superstructure {
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
+    }
+
+    /**
+     * Folds back wrist, moves elevator, then deploys wrist
+     * <p> If the robot is already in the chosen state, it will skip the premoves
+     * <p> The wrist and elevator are held in place after they reach their setpoints with a DaemonCommand, which allows
+     * the sequential command to move forward but the action doesn't end
+     * @param position the WristevatorState, which consists of elevator height and wrist angle
+     * @return generic transition command from one state to another 
+     */
+    private Command applyWristevatorState(WristevatorState position) {
+        return applyWristevatorState(position, () -> false);
+    }
+
+    /**
+     * Folds back wrist, moves elevator, then deploys wrist
+     * <p> If the robot is already in the chosen state, it will skip the premoves
+     * <p> The wrist and elevator are held in place after they reach their setpoints with a DaemonCommand, which allows
+     * the sequential command to move forward but the action doesn't end
+     * @param position the WristevatorState, which consists of elevator height and wrist angle
+     * @return generic transition command from one state to another 
+     */
+    private Command applyWristevatorState(WristevatorState position, double tolerance) {
+        return applyWristevatorState(position, () -> m_elevator.withinTolerance(tolerance));
     }
 
     /**

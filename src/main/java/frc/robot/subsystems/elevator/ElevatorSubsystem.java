@@ -140,6 +140,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     public boolean isZeroed() {
         return homed;
     }
+
+    public boolean withinTolerance(double tolerance){
+        return Math.abs(m_profiledPIDController.getGoal().position - getPositionMeters()) < tolerance;
+    }
     
     /* ######################################################################## */
     /* # Public Command Factories                                             # */
