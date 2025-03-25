@@ -30,10 +30,18 @@ public class PPDriveToPose extends Command {
     private Command followPathCommand;
     private Pose2d targetPose;
     private final DriveSubsystem m_drive;
+    private final double endVelocity;
 
     public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose) {
         this.m_drive = drive;
         this.targetPose = targetPose;
+        this.endVelocity = 0;
+    }
+
+    public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose, double endVelocity) {
+        this.m_drive = drive;
+        this.targetPose = targetPose;
+        this.endVelocity = endVelocity;
     }
 
     @Override
@@ -53,7 +61,7 @@ public class PPDriveToPose extends Command {
                 PathPlannerConstants.pathConstraints, 
                 //new IdealStartingState(m_drive.getVelocityMPS(), m_drive.getHeading()), 
                 null,
-                new GoalEndState(0, targetPose.getRotation())
+                new GoalEndState(endVelocity, targetPose.getRotation())
             );
             path.preventFlipping = true;
             followPathCommand = AutoBuilder.followPath(path);
