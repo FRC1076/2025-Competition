@@ -71,9 +71,11 @@ public class GrabberIOHardware implements GrabberIO{
     public void updateInputs(GrabberIOInputs inputs) {
         inputs.leftMotorAppliedVoltage = m_leftMotor.getAppliedOutput() * m_leftMotor.getBusVoltage();
         inputs.leftMotorCurrent = m_leftMotor.getOutputCurrent();
+        inputs.leftMotorRPM = m_leftMotor.getEncoder().getVelocity();
         
         inputs.rightMotorAppliedVoltage = m_rightMotor.getAppliedOutput() * m_rightMotor.getBusVoltage();
         inputs.rightMotorCurrent = m_rightMotor.getOutputCurrent();
+        inputs.rightMotorRPM = m_rightMotor.getEncoder().getVelocity();
 
         inputs.motorPositionRadians = m_encoder.getPosition(); //This is used for bang-bang control
     }

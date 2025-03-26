@@ -15,9 +15,11 @@ public interface GrabberIO {
     public static class GrabberIOInputs {
         public double leftMotorAppliedVoltage = 0;
         public double leftMotorCurrent = 0;
+        public double leftMotorRPM = 0;
 
         public double rightMotorAppliedVoltage = 0;
         public double rightMotorCurrent = 0;
+        public double rightMotorRPM = 0;
 
         public double motorPositionRadians = 0;
     }
