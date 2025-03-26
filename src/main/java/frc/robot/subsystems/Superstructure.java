@@ -102,7 +102,6 @@ public class Superstructure extends SubsystemBase {
     };
     private boolean stickyControl = false;
 
-
     private Boolean safeToFeedCoral;
     private Boolean safeToMoveElevator;
 
@@ -144,6 +143,8 @@ public class Superstructure extends SubsystemBase {
         .finallyDo(() -> {
             stickyControl = false;
             this.getCurrentCommand().cancel();
+            m_state.updateWristevatorGoal(WristevatorState.OVERRIDE);
+            m_state.updateWristevatorState(WristevatorState.OVERRIDE);
         }); // When the stickyControlCommand is cancelled, cancel any state-based superstructure commands
     }
 
@@ -152,10 +153,6 @@ public class Superstructure extends SubsystemBase {
         m_state.updateElevatorHeight(m_elevator.getPositionMeters());
         m_state.updateWristAngle(m_wrist.getAngle());
         m_state.logSuperstructureToAkit();
-        if (!stickyControl){
-            stickyControlHeight = m_elevator.getPositionMeters();
-            stickyControlAngle = m_wrist.getAngle();
-        }
     }
 
     public ElevatorSubsystem getElevator() {
@@ -244,6 +241,34 @@ public class Superstructure extends SubsystemBase {
         ));
     }
 
+    // FOR USE IN THE COMMAND FACTORY, AS A STANDALONE COMMAND NOT PART OF AN EDGE COMMAND
+    private Command applyElevatorHeightExtern(double heightMeters){
+        return Commands.sequence(
+            enableStickyControl(),   
+            runOnce(() -> {
+                m_elevator.resetController();
+                stickyControlHeight = heightMeters;
+            }),
+            Commands.waitUntil(
+                () -> Math.abs(heightMeters - m_elevator.getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters
+            )
+        );
+    }
+
+    // FOR USE IN THE COMMAND FACTORY, AS A STANDALONE COMMAND NOT PART OF AN EDGE COMMAND
+    private Command applyWristAngleExtern(Rotation2d angle){
+        return Commands.sequence(
+            enableStickyControl(),
+            runOnce(() -> {
+                m_wrist.resetController();
+                stickyControlAngle = angle;
+            }),
+            Commands.waitUntil(
+                () -> Math.abs(angle.minus(m_wrist.getAngle()).getRadians()) < WristConstants.wristAngleToleranceRadians
+            )
+        );
+    }
+
     private Command updateWristevatorGoal(WristevatorState goal){
         return Commands.runOnce(() -> m_state.updateWristevatorGoal(goal));
     }
@@ -297,7 +322,11 @@ public class Superstructure extends SubsystemBase {
             edgeCommand = genericEdgeCommand(edge);
         } else if (edge.begin == WristevatorState.OVERRIDE){
             edgeCommand = genericEdgeCommand(edge);
-        }
+        } else if (algaePreScoreEdgeSet.contains(edge)){
+            edgeCommand = directEdgeCommand(edge);
+        } else {
+            edgeCommand = genericEdgeCommand(edge);
+        } //TODO: REFACTOR THIS
         edgeCommand = edgeCommand.onlyWhile(() -> stickyControl);
         edgeCommandMap.put(edge,edgeCommand);
         return edgeCommand;
@@ -638,8 +667,13 @@ public class Superstructure extends SubsystemBase {
             );
         }
 
+        //TODO: Rename this to wristFlickUpLegacy
         public Command wristFlickUp() {
             return m_wrist.applyAngle(highTravelAngle);
+        }
+
+        public Command wristFlickUpSticky() {
+            return superstructure.applyWristAngleExtern(highTravelAngle);
         }
 
         public Command removeAlgae(){
