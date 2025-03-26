@@ -6,12 +6,14 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightMeters;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
-import static frc.robot.Constants.SuperstructureConstants.coralStateSet;
+import static frc.robot.Constants.SuperstructureConstants.coralBranchStateSet;
 import static frc.robot.Constants.SuperstructureConstants.emptyTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
+import frc.robot.Constants.WristConstants;
 import frc.robot.RobotSuperState;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
@@ -30,6 +32,7 @@ import lib.utils.Combinatorics;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
+import java.security.Policy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -53,12 +56,18 @@ import org.littletonrobotics.junction.Logger;
 public class Superstructure extends VirtualSubsystem {
 
     private static record WristevatorEdge(WristevatorState begin, WristevatorState end) {}
-    private static double branchSafeDeployOffsetMeters = 0.2; // The height above a branch where it is safe to deploy wrist
+    private static final double branchUpSafeDeployOffsetMeters = 0.2; // The height above a branch where it is safe to deploy wrist TODO: TUNE THIS
+    private static final double branchDownSafeDeployOffsetMeters = 0.05; // The height below a branch where it is safe to deploy wrist, TODO: TUNE THIS
+    private static final double branchToL1SafeDeployHeightMeters = 0.5; // The height where it is safe to deploy the wrist when travelling from a branch to L1, TODO: TUNE THIS
     
     private static Set<WristevatorEdge> coralBranchEdgeSet = new HashSet<>();
+    private static Set<WristevatorEdge> branchToL1EdgeSet = new HashSet<>();
     static {
-        for (List<WristevatorState> edgeList : Combinatorics.permuteTwo(coralStateSet)){
+        for (List<WristevatorState> edgeList : Combinatorics.permuteTwo(coralBranchStateSet)){
             coralBranchEdgeSet.add(new WristevatorEdge(edgeList.get(0), edgeList.get(1)));
+        }
+        for (WristevatorState branchState : coralBranchStateSet) {
+            branchToL1EdgeSet.add(new WristevatorEdge(branchState,WristevatorState.L1));
         }
     }
 
@@ -73,12 +82,17 @@ public class Superstructure extends VirtualSubsystem {
     public final SuperstructureCommandFactory CommandBuilder;
     private final NegatableBooleanSupplier possessAlgae = () -> m_state.getPossession() == GrabberPossession.ALGAE;
     private final Map<WristevatorEdge,Command> edgeCommandMap = new HashMap<>();
+    private final Command stickyControlCommand; // A command to be scheduled when the wristevator is under sticky control
+    private boolean stickyControl = false;
 
 
     private Boolean safeToFeedCoral;
     private Boolean safeToMoveElevator;
 
     private boolean elevatorClutch = false;
+
+    private double stickyControlHeight = 0; // The goal height of the elevator under sticky control
+    private Rotation2d stickyControlAngle = new Rotation2d(); // the goal height of the wrist under sticky control
 
     public Superstructure (
         ElevatorSubsystem elevator,
@@ -101,6 +115,15 @@ public class Superstructure extends VirtualSubsystem {
 
         this.safeToFeedCoral = false;
         this.safeToMoveElevator = false;
+        this.stickyControlCommand = Commands.run(
+            () -> {
+                m_elevator.setPosition(stickyControlHeight);
+                m_wrist.setAngle(stickyControlAngle);
+            },
+            m_wrist,m_elevator
+        )
+        .beforeStarting(() -> stickyControl = true)
+        .finallyDo(() -> stickyControl = false);
     }
 
     @Override
@@ -108,6 +131,10 @@ public class Superstructure extends VirtualSubsystem {
         m_state.updateElevatorHeight(m_elevator.getPositionMeters());
         m_state.updateWristAngle(m_wrist.getAngle());
         m_state.logSuperstructureToAkit();
+        if (!stickyControl){
+            stickyControlHeight = m_elevator.getPositionMeters();
+            stickyControlAngle = m_wrist.getAngle();
+        }
     }
 
     public ElevatorSubsystem getElevator() {
@@ -158,6 +185,37 @@ public class Superstructure extends VirtualSubsystem {
         return elevatorClutchTrigger;
     }
 
+    // Returns a command whose sole purpose is to require the elevator and wrist
+    private Command requireWristevator() {
+        return Commands.runOnce(() -> {},m_wrist,m_elevator);
+    }
+
+    private void enableStickyControl(){
+        stickyControlCommand.schedule();
+    }
+
+    // Holds a certain angle on the wrist in the background
+    // WARNING: FOR INTERNAL USE ONLY
+    private Command applyStickyAngle(Rotation2d angle){
+        return Commands.runOnce(() -> {
+            m_wrist.resetController();
+            stickyControlAngle = angle;
+        }).andThen(Commands.waitUntil(
+            () -> Math.abs(angle.minus(m_wrist.getAngle()).getRadians()) < WristConstants.wristAngleToleranceRadians
+        ));
+    }
+
+    // Holds a certain angle on the elevator in the background when sticky controls are enabled
+    // WARNING: FOR INTERNAL USE ONLY
+    private Command applyStickyHeight(double heightMeters){
+        return Commands.runOnce(() -> {
+            m_elevator.resetController();
+            stickyControlHeight = heightMeters;
+        }).andThen(Commands.waitUntil(
+            () -> Math.abs(heightMeters - m_elevator.getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters
+        ));
+    }
+
     private Command updateWristevatorGoal(WristevatorState goal){
         return Commands.runOnce(() -> m_state.updateWristevatorGoal(goal));
     }
@@ -176,42 +234,86 @@ public class Superstructure extends VirtualSubsystem {
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
+    // an edgeCommand that does nothing up update the state telemetry
+    private Command nopEdgeCommand(WristevatorEdge edge){
+        return Commands.sequence(
+            updateWristevatorState(edge.end()),
+            updateWristevatorGoal(edge.end())
+        );
+    }
+
     // Constructs a new wristevator edge command, and stores it in the edgeCommandMap
     private Command buildEdgeCommand(WristevatorEdge edge){
+        /*
+        Command ledSignal = Commands.runOnce(() -> {
+            safeToFeedCoral = false;
+            safeToMoveElevator = false;
+        });
+        */
+        Command edgeCommand = Commands.none();
         if (edge.end() == WristevatorState.OVERRIDE) {
-            edgeCommandMap.put(edge,Commands.none());
-            return Commands.none();
-        }
-        if (edge.begin() == edge.end()) {
-            edgeCommandMap.put(edge,Commands.none());
-            return Commands.none();
-        }
-        if (coralBranchEdgeSet.contains(edge)){
+            edgeCommand = nopEdgeCommand(edge); // TODO: CHECK IF OVERRIDE EDGES ARE NEEDED
+        } else if (edge.begin() == edge.end()) {
+            edgeCommand = nopEdgeCommand(edge);
+        } else if (coralBranchEdgeSet.contains(edge)){
+            // If the wristevator is moving between two branch states, travel with the grabber down
+            double safeDeployHeight;
+            BooleanSupplier safeToDeployWrist;
             if (edge.begin().elevatorHeightMeters > edge.end().elevatorHeightMeters){
-                // If the wristevator is moving down between two coral states, begin deploying wrist early
-                double safeDeployHeight = edge.end().elevatorHeightMeters + branchSafeDeployOffsetMeters;
-                Command coralBranchEdgeCommand = Commands.sequence(
-                    updateWristevatorGoal(edge.end()),
-                    m_wrist.applyAngle(coralTravelAngle),
-                    Commands.deadline(
-                        Commands.sequence(
-                            m_wrist.holdAngle(coralTravelAngle).until(() -> m_elevator.getPositionMeters() <= safeDeployHeight),
-                            m_wrist.applyAngle(edge.end().wristAngle)
-                        ),
-                        Commands.sequence(
-                            m_elevator.applyPosition(edge.end().elevatorHeightMeters),
-                            m_elevator.holdPosition(edge.end().elevatorHeightMeters)
-                        )
-                    ),
-                    updateWristevatorState(edge.end())
-                ).andThen(
-                    holdWristevatorState(edge.end())
-                );
-                edgeCommandMap.put(edge,coralBranchEdgeCommand);
-                return coralBranchEdgeCommand;  
+                // If the wristevator is moving down between two coral states, begin deploying wrist slightly above elevator setpoint
+                safeDeployHeight = edge.end().elevatorHeightMeters + branchUpSafeDeployOffsetMeters;
+                safeToDeployWrist = () -> m_elevator.getPositionMeters() <= safeDeployHeight;
+            } else {
+                safeDeployHeight = edge.end().elevatorHeightMeters - branchDownSafeDeployOffsetMeters;
+                safeToDeployWrist = () -> m_elevator.getPositionMeters() >= safeDeployHeight;
             }
+            edgeCommand = coralBranchEdgeCommand(edge, safeToDeployWrist);
+        } else if (branchToL1EdgeSet.contains(edge)){
+            // If the wristevator is moving from a branch to L1, travel with the grabber up
+            return branchToL1EdgeCommand(edge);
         }
-        return Commands.none();
+        edgeCommandMap.put(edge,edgeCommand);
+        return edgeCommand;
+    }
+
+    private Command coralBranchEdgeCommand(WristevatorEdge edge, BooleanSupplier safeToDeployWrist){
+        return Commands.sequence(
+            Commands.runOnce(() -> enableStickyControl()),
+            updateWristevatorGoal(edge.end()),
+            Commands.either(
+                applyStickyAngle(coralTravelAngle),
+                applyStickyAngle(algaeTravelAngle),
+                possessAlgae
+            ),
+            Commands.parallel(
+                Commands.sequence(
+                    Commands.waitUntil(safeToDeployWrist),
+                    applyStickyAngle(edge.end().wristAngle)
+                ),
+                applyStickyHeight(edge.end().elevatorHeightMeters)
+            ),
+            updateWristevatorState(edge.end())
+        );
+    }
+
+    private Command branchToL1EdgeCommand(WristevatorEdge edge){
+        return Commands.sequence(
+            Commands.runOnce(() -> enableStickyControl()),
+            updateWristevatorGoal(edge.end()),
+            Commands.either(
+                applyStickyAngle(coralTravelAngle),
+                applyStickyAngle(algaeTravelAngle),
+                possessAlgae
+            ),
+            Commands.parallel(
+                Commands.sequence(
+                    Commands.waitUntil(() -> m_elevator.getPositionMeters() <= branchToL1SafeDeployHeightMeters),
+                    applyStickyAngle(edge.end().wristAngle)
+                ),
+                applyStickyHeight(edge.end().elevatorHeightMeters)
+            ),
+            updateWristevatorState(edge.end())
+        );
     }
 
     /**
@@ -222,7 +324,7 @@ public class Superstructure extends VirtualSubsystem {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position) {
+    private Command applyWristevatorStateLegacy(WristevatorState position) {
 
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
@@ -431,8 +533,8 @@ public class Superstructure extends VirtualSubsystem {
          */
         public Command retractMechanisms(){
             return Commands.either(
-                superstructure.applyWristevatorState(WristevatorState.ALGAE_TRAVEL),
-                superstructure.applyWristevatorState(WristevatorState.TRAVEL),
+                superstructure.applyWristevatorStateLegacy(WristevatorState.ALGAE_TRAVEL),
+                superstructure.applyWristevatorStateLegacy(WristevatorState.TRAVEL),
                 superstructure.possessAlgae
             );
         }
@@ -462,7 +564,7 @@ public class Superstructure extends VirtualSubsystem {
             return 
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L1),
-                    superstructure.applyWristevatorState(WristevatorState.L1),
+                    superstructure.applyWristevatorStateLegacy(WristevatorState.L1),
                     () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -474,7 +576,7 @@ public class Superstructure extends VirtualSubsystem {
             return 
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2),
-                    superstructure.applyWristevatorState(WristevatorState.L2),
+                    superstructure.applyWristevatorStateLegacy(WristevatorState.L2),
                     () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -486,7 +588,7 @@ public class Superstructure extends VirtualSubsystem {
             return 
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3),
-                    superstructure.applyWristevatorState(WristevatorState.L3),
+                    superstructure.applyWristevatorStateLegacy(WristevatorState.L3),
                     () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -498,7 +600,7 @@ public class Superstructure extends VirtualSubsystem {
             return 
                 Commands.either(
                     superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4),
-                    superstructure.applyWristevatorState(WristevatorState.L4),
+                    superstructure.applyWristevatorStateLegacy(WristevatorState.L4),
                     () -> m_state.getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -507,35 +609,35 @@ public class Superstructure extends VirtualSubsystem {
          * Set elevator and wrist to net preset
          */
         public Command preNet(){
-            return superstructure.applyWristevatorState(WristevatorState.PRE_NET);
+            return superstructure.applyWristevatorStateLegacy(WristevatorState.PRE_NET);
         }
 
         /**
          * Set elevator and wrist to processor preset
          */
         public Command preProcessor(){
-            return superstructure.applyWristevatorState(WristevatorState.PROCESSOR);
+            return superstructure.applyWristevatorStateLegacy(WristevatorState.PROCESSOR);
         }
 
         /**
          * Set elevator and wrist to ground algae preset
          */
         public Command groundAlgaeIntake(){
-            return superstructure.applyWristevatorState(WristevatorState.GROUND_INTAKE);
+            return superstructure.applyWristevatorStateLegacy(WristevatorState.GROUND_INTAKE);
         }
 
         /**
          * Set elevator and wrist to low algae preset
          */
         public Command lowAlgaeIntake(){
-            return superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE);  
+            return superstructure.applyWristevatorStateLegacy(WristevatorState.LOW_INTAKE);  
         }
 
         /**
          * Set elevator and wrist to high algae preset
          */
         public Command highAlgaeIntake(){
-            return superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE);
+            return superstructure.applyWristevatorStateLegacy(WristevatorState.HIGH_INTAKE);
         }
 
         /** 
@@ -568,7 +670,7 @@ public class Superstructure extends VirtualSubsystem {
          */
         public Command intakeCoral() { // (BooleanSupplier safeSignal)
             return Commands.sequence(
-                superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
+                superstructure.applyWristevatorStateLegacy(WristevatorState.CORAL_TRANSFER),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     transferCoral()
@@ -589,7 +691,7 @@ public class Superstructure extends VirtualSubsystem {
          */
         public Command grabberIntakeCoral() {
             return Commands.sequence(
-                superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE),
+                superstructure.applyWristevatorStateLegacy(WristevatorState.GRABBER_CORAL_INTAKE),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
@@ -703,8 +805,8 @@ public class Superstructure extends VirtualSubsystem {
         // Automatically goes to the correct algae intake height based on pose
         public Command goToAlgaeIntake() {
             return Commands.either(
-                applyWristevatorState(WristevatorState.HIGH_INTAKE),
-                applyWristevatorState(WristevatorState.LOW_INTAKE),
+                applyWristevatorStateLegacy(WristevatorState.HIGH_INTAKE),
+                applyWristevatorStateLegacy(WristevatorState.LOW_INTAKE),
                 Localization::isClosestReefAlgaeHigh
             );
         }

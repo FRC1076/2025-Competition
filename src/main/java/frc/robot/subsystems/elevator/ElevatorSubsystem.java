@@ -14,6 +14,7 @@ import java.util.function.DoubleSupplier;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -165,6 +166,22 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command holdPosition(double positionMeters) {
         return run(() -> setPosition(positionMeters));
+    }
+
+
+    /** THIS COMMAND DOES NOT REQUIRE THE SUBSYSTEM! USE WITH CAUTION! */
+    public Command applyPositionNoRequire(double positionMeters){
+        return new FunctionalCommand(
+            () -> {m_profiledPIDController.reset(getPositionMeters());},
+            () -> setPosition(positionMeters),
+            (interrupted) -> {},
+            () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters
+        );
+    }
+    
+    /** THIS COMMAND DOES NOT REQUIRE THE SUBSYSTEM! USE WITH CAUTION! */
+    public Command holdPositionNoRequire(double positionMeters) {
+        return Commands.run(() -> setPosition(positionMeters));
     }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.

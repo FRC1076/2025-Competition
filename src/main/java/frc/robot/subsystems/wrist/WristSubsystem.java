@@ -14,6 +14,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -134,6 +135,27 @@ public class WristSubsystem extends SubsystemBase {
     */
     public Command holdAngle(Rotation2d angle){
         return run(() -> setAngle(angle));
+    }
+
+    /** Returns a command that sets the wrist at the desired angle 
+     * ENDS WHEN ANGLE IS REACHED, DOES NOT REQUIRE SUBSYSTEM, USE WITH CAUTION
+     * @param angle The desired angle of the wrist
+    */
+    public Command applyAngleNoRequire(Rotation2d angle) {
+        return new FunctionalCommand(
+            () -> {m_profiledPIDController.reset(getAngleRadians());},
+            () -> setAngle(angle), 
+            (interrupted) -> {},
+            () -> Math.abs(angle.minus(getAngle()).getRadians()) < WristConstants.wristAngleToleranceRadians
+        );
+    }
+
+    /** Returns a command that sets the wrist at the desired angle 
+     * CONTINUES UNTIL INTERUPTED EXTERNALLY, DOES NOT REQUIRE SUBSYSTEM, USE WITH CAUTION
+     * @param angle The desired angle of the wrist
+    */
+    public Command holdAngleNoRequire(Rotation2d angle){
+        return Commands.run(() -> setAngle(angle));
     }
 
     public Command applyManualControl(DoubleSupplier controlSupplier) {

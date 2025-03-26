@@ -333,12 +333,11 @@ public final class Constants {
             }
         }
 
-        public static final Set<WristevatorState> coralStateSet = new HashSet<>();
+        public static final Set<WristevatorState> coralBranchStateSet = new HashSet<>();
         static {
-            coralStateSet.add(WristevatorState.L1);
-            coralStateSet.add(WristevatorState.L2);
-            coralStateSet.add(WristevatorState.L3);
-            coralStateSet.add(WristevatorState.L4);
+            coralBranchStateSet.add(WristevatorState.L2);
+            coralBranchStateSet.add(WristevatorState.L3);
+            coralBranchStateSet.add(WristevatorState.L4);
         }
     }
 
