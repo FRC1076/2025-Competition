@@ -301,6 +301,16 @@ public class Superstructure extends VirtualSubsystem {
         );
     }
 
+    // A generic wristevator edge command that makes no assumptions about the robot's state
+    private Command genericEdgeCommand(WristevatorEdge edge){
+        return Commands.sequence(
+            enableStickyControl(),
+            updateWristevatorGoal(edge.end()),
+            applyStickyAngle(emptyTravelAngle),
+            applyStickyHeight(edge.end().elevatorHeightMeters)
+        )
+    }
+
     private Command branchToL1EdgeCommand(WristevatorEdge edge){
         return Commands.sequence(
             enableStickyControl(),

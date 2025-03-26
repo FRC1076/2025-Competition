@@ -216,7 +216,7 @@ public final class Constants {
     public static class SuperstructureConstants {
 
         public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
-        public static Rotation2d emptyTravelAngle = Rotation2d.kCCW_90deg;
+        public static Rotation2d highTravelAngle = Rotation2d.kCCW_90deg;
         public static Rotation2d coralTravelAngle = Rotation2d.kCW_90deg;
         public static double algaeNetReleaseHeightMeters = 2.109;
 
