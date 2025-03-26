@@ -8,6 +8,7 @@ import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightM
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralBranchStateSet;
 import static frc.robot.Constants.SuperstructureConstants.emptyTravelAngle;
+import static frc.robot.Constants.SuperstructureConstants.highTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
@@ -306,9 +307,24 @@ public class Superstructure extends VirtualSubsystem {
         return Commands.sequence(
             enableStickyControl(),
             updateWristevatorGoal(edge.end()),
-            applyStickyAngle(emptyTravelAngle),
-            applyStickyHeight(edge.end().elevatorHeightMeters)
-        )
+            applyStickyAngle(highTravelAngle),
+            applyStickyHeight(edge.end().elevatorHeightMeters),
+            applyStickyAngle(edge.end().wristAngle),
+            updateWristevatorState(edge.end())
+        );
+    }
+
+    // A direct wristevator edge command, for auton
+    private Command directEdgeCommand(WristevatorEdge edge){
+        return Commands.sequence(
+            enableStickyControl(),
+            updateWristevatorGoal(edge.end()),
+            Commands.parallel(
+                applyStickyAngle(edge.end().wristAngle),
+                applyStickyHeight(edge.end().elevatorHeightMeters)
+            ),
+            updateWristevatorState(edge.end())
+        );
     }
 
     private Command branchToL1EdgeCommand(WristevatorEdge edge){
@@ -316,7 +332,7 @@ public class Superstructure extends VirtualSubsystem {
             enableStickyControl(),
             updateWristevatorGoal(edge.end()),
             Commands.either(
-                applyStickyAngle(coralTravelAngle),
+                applyStickyAngle(highTravelAngle),
                 applyStickyAngle(algaeTravelAngle),
                 possessAlgae
             ),
@@ -565,7 +581,7 @@ public class Superstructure extends VirtualSubsystem {
         }
 
         public Command wristFlickUp() {
-            return m_wrist.applyAngle(emptyTravelAngle);
+            return m_wrist.applyAngle(highTravelAngle);
         }
 
         public Command removeAlgae(){
