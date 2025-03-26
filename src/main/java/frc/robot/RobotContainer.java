@@ -463,15 +463,10 @@ public class RobotContainer {
                     m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
                     Commands.parallel(
                         superstructureCommands.preNet(),
-                        Commands.parallel(
-                            Commands.sequence(
-                                Commands.waitSeconds(0.4),
-                                m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
-                            ),
-                            Commands.sequence(
-                                Commands.waitSeconds(1),
-                                superstructureCommands.doGrabberAction()
-                            )
+                        m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                        Commands.sequence(
+                            Commands.waitSeconds(1),
+                            superstructureCommands.doGrabberAction()
                         )
                     )
                 )
@@ -633,8 +628,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        // return Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))));
         return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }

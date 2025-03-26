@@ -1,0 +1,77 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 3.2806534090909087,
+        "y": 4.209474431818181
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.0291183774834436,
+        "y": 4.402731788079469
+      },
+      "isLocked": false,
+      "linkedName": "A"
+    },
+    {
+      "anchor": {
+        "x": 0.5956539735049948,
+        "y": 6.807139900660789
+      },
+      "prevControl": {
+        "x": 0.8789528145596582,
+        "y": 6.48025662251363
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Grabber LIN"
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.43825665859563917,
+      "rotationDegrees": 0.0
+    },
+    {
+      "waypointRelativePos": 0.6598062953995162,
+      "rotationDegrees": 125.00000000000001
+    }
+  ],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.8526434195725665,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 4.0,
+        "maxAcceleration": 1.6,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 540.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 125.00000000000001
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": false
+}
