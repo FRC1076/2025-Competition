@@ -24,6 +24,7 @@ public class RobotSuperState {
 
     private SwerveDriveState driveState;
     private WristevatorState wristevatorState;
+    private WristevatorState wristevatorGoal;
     private double elevatorHeightMeters;
     private Rotation2d wristAngle;
     private IndexState indexState;
@@ -64,6 +65,10 @@ public class RobotSuperState {
 
     public void updateWristevatorState(WristevatorState wristevatorState){
         this.wristevatorState = wristevatorState;
+    }
+
+    public void updateWristevatorGoal(WristevatorState goal){
+        this.wristevatorGoal = goal;
     }
 
     public void updateIndexState(IndexState indexState){
@@ -141,6 +146,7 @@ public class RobotSuperState {
     //NOTE: Only logs superstructure states, since subsystems are already logged
     public void logSuperstructureToAkit() {
         Logger.recordOutput("Superstructure/WristevatorState",wristevatorState.name());
+        Logger.recordOutput("Superstructure/WristevatorGoal",wristevatorGoal.name());
         Logger.recordOutput("Superstructure/GrabberState",grabberState.name());
         Logger.recordOutput("Superstructure/IndexState",indexState.name());
     }

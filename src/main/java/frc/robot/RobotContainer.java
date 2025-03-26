@@ -390,7 +390,7 @@ public class RobotContainer {
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
                 .onTrue(superstructureCommands.doGrabberAction())
-                    .whileFalse(superstructureCommands.stopAndRetract());
+                .whileFalse(superstructureCommands.goToAlgaeIntake());
     }
 
     private void configureDriverBindings() {
@@ -408,7 +408,6 @@ public class RobotContainer {
             // Point to reef
             // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
-            // Apply single clutch
             m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
                 .onTrue(superstructureCommands.doGrabberAction())
             .onFalse(superstructureCommands.stopGrabber());
@@ -453,7 +452,7 @@ public class RobotContainer {
                         m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
                         superstructureCommands.scoreNet()
                     )
-                ).until(() -> driverInterrupt.getAsBoolean())
+                ).until(driverInterrupt)
             );
 
             driverInterrupt.onTrue(teleopDriveCommand);

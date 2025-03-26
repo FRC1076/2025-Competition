@@ -4,6 +4,9 @@
 
 package lib.utils;
 
+
+import java.math.BigInteger;
+
 public final class MathHelpers {
 
     /**
@@ -20,4 +23,22 @@ public final class MathHelpers {
 
         return Math.max(min, Math.min(max, value));
     }
+
+    /** returns the factorial of n */
+    public static long Factorial(long n) {
+        return n == 0 ? 1 : n * Factorial(n - 1);
+    }
+
+    public static long Factorial(int n) {
+        return Factorial((long) n);
+    }
+
+    public static BigInteger BigFactorial(BigInteger n) {
+        if (n.equals(BigInteger.valueOf(0))) {
+            return BigInteger.valueOf(1);
+        } else {
+            return n.multiply(BigFactorial(n.subtract(BigInteger.valueOf(1))));
+        }
+    }
 }
+

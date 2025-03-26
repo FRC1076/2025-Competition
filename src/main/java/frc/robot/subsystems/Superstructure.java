@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightMeters;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
+import static frc.robot.Constants.SuperstructureConstants.coralStateSet;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.RobotSuperState;
@@ -23,10 +24,13 @@ import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 import lib.functional.FunctionalUtils;
 import lib.functional.NegatableBooleanSupplier;
+import lib.utils.Combinatorics;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -46,6 +50,15 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Superstructure extends VirtualSubsystem {
 
+    private static record WristevatorEdge(WristevatorState begin, WristevatorState end) {}
+    
+    private static Set<WristevatorEdge> coralEdgeSet = new HashSet<>();
+    static {
+        for (List<WristevatorState> edgeList : Combinatorics.permuteTwo(coralStateSet)){
+            coralEdgeSet.add(new WristevatorEdge(edgeList.get(0), edgeList.get(1)));
+        }
+    }
+
     private final ElevatorSubsystem m_elevator;
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
@@ -55,9 +68,9 @@ public class Superstructure extends VirtualSubsystem {
     private final Trigger elevatorClutchTrigger;
 
     public final SuperstructureCommandFactory CommandBuilder;
+    private final NegatableBooleanSupplier possessAlgae = () -> m_state.getPossession() == GrabberPossession.ALGAE;
+    private final Map<WristevatorEdge,Command> edgeCommandMap = new HashMap<>();
 
-
-    private final NegatableBooleanSupplier possessAlgae = () -> m_state.getPossession() == GrabberPossession.ALGAE;;
 
     private Boolean safeToFeedCoral;
     private Boolean safeToMoveElevator;
@@ -140,10 +153,23 @@ public class Superstructure extends VirtualSubsystem {
 
     public Trigger elevatorClutchTrigger() {
         return elevatorClutchTrigger;
-    }   
+    }
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
+    // Constructs a new wristevator edge command
+    /*
+    private Command buildEdgeCommand(WristevatorEdge edge){
+        if (edge.end() == WristevatorState.OVERRIDE) {
+            edgeCommandMap.put(edge,Commands.none());
+            return Commands.none();
+        }
+        if (edge.begin() == edge.end()) {
+            edgeCommandMap.put(edge,Commands.none());
+            return Commands.none();
+        }
+    }
+    */
     /**
      * Folds back wrist, moves elevator, then deploys wrist
      * <p> If the robot is already in the chosen state, it will skip the premoves
@@ -174,6 +200,7 @@ public class Superstructure extends VirtualSubsystem {
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
         
         return Commands.sequence(
+            Commands.runOnce(() -> m_state.updateWristevatorGoal(position)),
             wristPreMoveCommand.asProxy(),
             Commands.deadline(
                 m_elevator.applyPosition(position.elevatorHeightMeters),
@@ -181,9 +208,9 @@ public class Superstructure extends VirtualSubsystem {
             ).asProxy(),
             CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
             m_wrist.applyAngle(position.wristAngle).asProxy(),
-            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
+            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle)),
+            Commands.runOnce(() -> m_state.updateWristevatorState(position))
         ).alongWith(
-            Commands.runOnce(() -> m_state.updateWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
     }
@@ -202,7 +229,7 @@ public class Superstructure extends VirtualSubsystem {
         };
         
         return Commands.parallel(
-            Commands.runOnce(() -> m_state.updateWristevatorState(position)),
+            Commands.runOnce(() -> m_state.updateWristevatorGoal(position)),
             Commands.runOnce(ledSignal),
             Commands.sequence(
                 m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
@@ -212,7 +239,7 @@ public class Superstructure extends VirtualSubsystem {
                 m_wrist.applyAngle(position.wristAngle).asProxy(),
                 CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
             )
-        );
+        ).andThen(Commands.runOnce(() -> m_state.updateWristevatorState(position)));
     }
 
     private Command applyWristevatorStateGrabberDown(WristevatorState position) {
@@ -229,6 +256,7 @@ public class Superstructure extends VirtualSubsystem {
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
         
         return Commands.sequence(
+            Commands.runOnce(() -> m_state.updateWristevatorGoal(position)),
             wristPreMoveCommand.asProxy(),
             Commands.deadline(
                 m_elevator.applyPosition(position.elevatorHeightMeters),
@@ -236,9 +264,9 @@ public class Superstructure extends VirtualSubsystem {
             ).asProxy(),
             CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
             m_wrist.applyAngle(position.wristAngle).asProxy(),
-            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
+            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle)),
+            Commands.runOnce(() -> m_state.updateWristevatorState(position))
         ).alongWith(
-            Commands.runOnce(() -> m_state.updateWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
     }

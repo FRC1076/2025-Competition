@@ -319,7 +319,9 @@ public final class Constants {
 
             PROCESSOR(0.2536, 0),
             NET(2.109649 + 3 * 0.00635, 65),
-            PRE_NET(1.4,65);
+            PRE_NET(1.4,65),
+
+            OVERRIDE(0,0);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
@@ -328,6 +330,14 @@ public final class Constants {
                 this.elevatorHeightMeters = elevatorHeightMeters;
                 this.wristAngle = Rotation2d.fromDegrees(wristAngleDegrees);
             }
+        }
+
+        public static final Set<WristevatorState> coralStateSet = new HashSet<>();
+        static {
+            coralStateSet.add(WristevatorState.L1);
+            coralStateSet.add(WristevatorState.L2);
+            coralStateSet.add(WristevatorState.L3);
+            coralStateSet.add(WristevatorState.L4);
         }
     }
 
