@@ -141,6 +141,7 @@ public class WristSubsystem extends SubsystemBase {
         //System.out.println("Wrist Angle: " + this.getAngleRadians());
         io.updateInputs(inputs);
         Logger.recordOutput("Wrist/Setpoint", m_profiledPIDController.getSetpoint().position);
+        Logger.recordOutput("Wrist/VelocitySetpoint", m_profiledPIDController.getSetpoint().velocity);
         Logger.processInputs("Wrist", inputs);
     }
 

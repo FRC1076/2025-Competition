@@ -453,15 +453,15 @@ public final class Constants {
             // PID constants
             public static final double kP = 30; //30;
             public static final double kI = 0.0;
-            public static final double kD = 0.0;
+            public static final double kD = 0;//1;
 
             // Feedforward constant
-            public static final double kS = 0.082814;  // 0.059004; //Static gain (voltage)
-            public static final double kG = 0.74003;  // 0.77763; //Gravity gain (voltage)
-            public static final double kV = 3.1265;  // 2.8829; // velocity game
-            public static final double kA = 0.0; // Acceleration Gain
+            public static final double kS = 0.17213;  // 0.059004; //Static gain (voltage)
+            public static final double kG = 0.77965;  // 0.77763; //Gravity gain (voltage)
+            public static final double kV = 3.0126;  // 2.8829; // velocity game
+            public static final double kA = 0.73282; // Acceleration Gain
 
-            public static final Constraints kProfileConstraints = new Constraints(4, 5.25);
+            public static final Constraints kProfileConstraints = new Constraints(3, 5.25);//7);//5.25);
         }
     }
 

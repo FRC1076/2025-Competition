@@ -87,6 +87,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     public void periodic(){
         io.updateInputs(inputs);
         Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
+        Logger.recordOutput("Elevator/VelocitySetpoint", m_profiledPIDController.getSetpoint().velocity);
         Logger.processInputs("Elevator", inputs);
     }
 
