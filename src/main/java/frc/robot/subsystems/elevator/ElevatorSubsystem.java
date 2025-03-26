@@ -167,22 +167,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command holdPosition(double positionMeters) {
         return run(() -> setPosition(positionMeters));
     }
-
-
-    /** THIS COMMAND DOES NOT REQUIRE THE SUBSYSTEM! USE WITH CAUTION! */
-    public Command applyPositionNoRequire(double positionMeters){
-        return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getPositionMeters());},
-            () -> setPosition(positionMeters),
-            (interrupted) -> {},
-            () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters
-        );
-    }
-    
-    /** THIS COMMAND DOES NOT REQUIRE THE SUBSYSTEM! USE WITH CAUTION! */
-    public Command holdPositionNoRequire(double positionMeters) {
-        return Commands.run(() -> setPosition(positionMeters));
-    }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.
      * @param controlSupplier Supplier that returns the desired voltage of the elevator

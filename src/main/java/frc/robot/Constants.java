@@ -118,8 +118,8 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Right;
+        public static final Alliance teamColor = Alliance.Red;
+        public static final AutonSides autonSide = AutonSides.Right;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -215,10 +215,10 @@ public final class Constants {
 
     public static class SuperstructureConstants {
 
-        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
-        public static Rotation2d highTravelAngle = Rotation2d.kCCW_90deg;
-        public static Rotation2d coralTravelAngle = Rotation2d.kCW_90deg;
-        public static double algaeNetReleaseHeightMeters = 2.109;
+        public static final Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
+        public static final Rotation2d highTravelAngle = Rotation2d.kCCW_90deg;
+        public static final Rotation2d coralTravelAngle = Rotation2d.kCW_90deg;
+        public static final double algaeNetReleaseHeightMeters = 2.109;
 
         // Grabber Possession State
         public enum GrabberPossession {
@@ -334,10 +334,15 @@ public final class Constants {
         }
 
         public static final Set<WristevatorState> coralBranchStateSet = new HashSet<>();
+        public static final Set<WristevatorState> algaeIntakeStateSet = new HashSet<>();
         static {
             coralBranchStateSet.add(WristevatorState.L2);
             coralBranchStateSet.add(WristevatorState.L3);
             coralBranchStateSet.add(WristevatorState.L4);
+
+            algaeIntakeStateSet.add(WristevatorState.GROUND_INTAKE);
+            algaeIntakeStateSet.add(WristevatorState.LOW_INTAKE);
+            algaeIntakeStateSet.add(WristevatorState.HIGH_INTAKE);
         }
     }
 

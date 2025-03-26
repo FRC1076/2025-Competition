@@ -119,6 +119,10 @@ public class RobotSuperState {
         return wristevatorState;
     }
 
+    public WristevatorState getWristevatorGoal() {
+        return wristevatorGoal;
+    }
+
     public IndexState getIndexState() {
         return indexState;
     }
