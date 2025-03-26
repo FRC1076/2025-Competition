@@ -311,7 +311,7 @@ public final class Constants {
             L1(0.42019, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),
-            L4(2.109649 + 3 * 0.00635, -38),//-40.4130051, true), //1.8161, -45),
+            L4(2.11455, -38),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0, 0),
             LOW_INTAKE(0.98407,-27.02),
@@ -427,7 +427,7 @@ public final class Constants {
         
         public static final double elevatorPositionToleranceMeters = Units.inchesToMeters(0.5);
         public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0);
-        public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(83.25);//81.15);
+        public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(83.25); // 83.25 //81.15);
         // TODO: change max operator control voltages based on Andrew's opinion
         public static final double defaultMaxOperatorControlVolts = 1.5;
         public static final double fasterMaxOperatorControlVolts = 4;
