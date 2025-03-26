@@ -345,20 +345,20 @@ public final class Constants {
             // IMPORTANT: Fudge factors are always positive and should be in meters (use the Units.inchesToMeters() method)
 
             // Blue Reef
-            BLU_REEF_AB(18, 3.657600, 4.025900, 180.0, null, null),
-            BLU_REEF_CD(17, 4.073906, 3.306318, 240.0, null, null),
-            BLU_REEF_EF(22, 4.904740, 3.306318, 300.0, null, null),
-            BLU_REEF_GH(21, 5.321046, 4.025900, 0.0, null, null),
-            BLU_REEF_IJ(20, 4.904740, 4.745482, 60.0, null, null),
-            BLU_REEF_KL(19, 4.073906, 4.745482, 120.0, null, null),
+            BLU_REEF_AB(18, 3.657600, 4.025900, 180.0, null, null, true),
+            BLU_REEF_CD(17, 4.073906, 3.306318, 240.0, null, null, false),
+            BLU_REEF_EF(22, 4.904740, 3.306318, 300.0, null, null, true),
+            BLU_REEF_GH(21, 5.321046, 4.025900, 0.0, null, null, false),
+            BLU_REEF_IJ(20, 4.904740, 4.745482, 60.0, null, null, true),
+            BLU_REEF_KL(19, 4.073906, 4.745482, 120.0, null, null, false),
 
             // Red Reef
-            RED_REEF_AB(7, 13.890498, 4.025900, 0.0, null, null),
-            RED_REEF_CD(8, 13.474446, 4.745482, 60., null, null),
-            RED_REEF_EF(9, 12.643358, 4.745482, 120.0, null, null),
-            RED_REEF_GH(10, 12.227306, 4.025900, 180.0, null, null),
-            RED_REEF_IJ(11, 12.643358, 3.306318, 240.0, null, null),
-            RED_REEF_KL(6, 13.474446, 3.306318, 300.0, null, null);
+            RED_REEF_AB(7, 13.890498, 4.025900, 0.0, null, null, true),
+            RED_REEF_CD(8, 13.474446, 4.745482, 60., null, null, false),
+            RED_REEF_EF(9, 12.643358, 4.745482, 120.0, null, null, true),
+            RED_REEF_GH(10, 12.227306, 4.025900, 180.0, null, null, false),
+            RED_REEF_IJ(11, 12.643358, 3.306318, 240.0, null, null, true),
+            RED_REEF_KL(6, 13.474446, 3.306318, 300.0, null, null, false);
 
 
             public final Double leftBranchFudgeTransform;
@@ -367,13 +367,15 @@ public final class Constants {
             public final Pose2d rightBranch;
             public final Pose2d AprilTag;
             public final int aprilTagID;
+            public final boolean algaeHigh;
 
             //AT stands for AprilTag
-            private ReefFace(int aprilTagID, double aprilTagX, double aprilTagY, double aprilTagTheta, Double leftBranchFudgeTransform, Double rightBranchFudgeTransform) {
+            private ReefFace(int aprilTagID, double aprilTagX, double aprilTagY, double aprilTagTheta, Double leftBranchFudgeTransform, Double rightBranchFudgeTransform, boolean algaeHigh) {
                 this.aprilTagID = aprilTagID;
                 this.AprilTag = new Pose2d(aprilTagX, aprilTagY, Rotation2d.fromDegrees(aprilTagTheta));
                 this.leftBranchFudgeTransform = leftBranchFudgeTransform;
                 this.rightBranchFudgeTransform = rightBranchFudgeTransform;
+                this.algaeHigh = algaeHigh;
 
                 if (this.leftBranchFudgeTransform == null) {
                     this.leftBranch = AprilTag.transformBy(leftBranchTransform);
@@ -444,7 +446,7 @@ public final class Constants {
         public static final double kPositionConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635; //Gear ratio & chain pitch
 
         public static class Electrical {
-            public static final double kVoltageCompensation = 10.5;
+            public static final double kVoltageCompensation = 11.5;
             public static final double kCurrentLimit = 60;
         }
 

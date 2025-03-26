@@ -235,6 +235,7 @@ public class RobotContainer {
             m_grabber,
             m_index, 
             m_wrist, 
+            m_drive,
             m_elastic,
             m_transferBeamBreak
         );
@@ -407,7 +408,7 @@ public class RobotContainer {
         // Apply single clutch
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
             .onTrue(superstructureCommands.doGrabberAction())
-            .onFalse(superstructureCommands.stopGrabber());
+            .onFalse(superstructureCommands.stopAndAlgaeIntake());
 
         // Apply double clutch
         m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
@@ -607,7 +608,7 @@ public class RobotContainer {
         
         m_operatorController.rightBumper()
             .onTrue(superstructureCommands.doGrabberAction())
-            .onFalse(superstructureCommands.stopGrabber());
+            .onFalse(superstructureCommands.stopAndAlgaeIntake());
 
         m_operatorController.start().whileTrue(
             Commands.parallel(

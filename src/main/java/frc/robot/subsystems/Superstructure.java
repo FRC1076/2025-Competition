@@ -10,11 +10,12 @@ import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
+import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
-
+import frc.robot.utils.Localization;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 
@@ -105,6 +106,7 @@ public class Superstructure {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final WristSubsystem m_wrist;
+    private final DriveSubsystem m_drive;
     private final Elastic m_elastic;
     private final Trigger elevatorClutchTrigger;
 
@@ -125,6 +127,7 @@ public class Superstructure {
         GrabberSubsystem grabber,
         IndexSubsystem index,
         WristSubsystem wrist,
+        DriveSubsystem drive,
         Elastic elastic,
         Trigger transferBeamBreak //returns true when beam broken
     ) {
@@ -132,6 +135,7 @@ public class Superstructure {
         m_grabber = grabber;
         m_index = index;
         m_wrist = wrist;
+        m_drive = drive;
         m_elastic = elastic;
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
@@ -437,6 +441,17 @@ public class Superstructure {
             return Commands.parallel(
                 stopGrabber(),
                 retractMechanisms()
+            );
+        }
+
+        public Command stopAndAlgaeIntake(){
+            return Commands.parallel(
+                stopGrabber(),
+                Commands.either(
+                    superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE),
+                    superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE),
+                    () -> Localization.getClosestReefFace(m_drive.getPose()).algaeHigh == true
+                )
             );
         }
 
