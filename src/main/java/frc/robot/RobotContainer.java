@@ -462,15 +462,10 @@ public class RobotContainer {
                     m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
                     Commands.parallel(
                         superstructureCommands.preNet(),
-                        Commands.parallel(
-                            Commands.sequence(
-                                Commands.waitSeconds(0.4),
-                                m_drive.CommandBuilder.directDriveToNearestScoreNetLocation()
-                            ),
-                            Commands.sequence(
-                                Commands.waitSeconds(1),
-                                superstructureCommands.doGrabberAction()
-                            )
+                        m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                        Commands.sequence(
+                            Commands.waitSeconds(1),
+                            superstructureCommands.doGrabberAction()
                         )
                     )
                 )

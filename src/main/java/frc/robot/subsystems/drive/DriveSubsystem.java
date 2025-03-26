@@ -242,7 +242,8 @@ public class DriveSubsystem extends SubsystemBase {
         private final Map<ReefFace, Command> leftBranchAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
-        private final PPDriveToPose driveToNetCommand;
+        private final PPDriveToPose driveToPreNetCommand;
+        private final PPDriveToPose driveToScoreNetCommand;
         private DriveCommandFactory(DriveSubsystem drive) {
             this.drive = drive;
             for (ReefFace face : ReefFace.values()) {
@@ -250,7 +251,8 @@ public class DriveSubsystem extends SubsystemBase {
                 reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
                 rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
             }
-            driveToNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
+            driveToPreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
+            driveToScoreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
         }
 
         public Command pathfindToPose(Pose2d targetPose) {
@@ -302,7 +304,7 @@ public class DriveSubsystem extends SubsystemBase {
         public Command directDriveToNearestPreNetLocation() {
             return new FunctionalCommand(
                 () -> {
-                    driveToNetCommand.setTargetPose(
+                    driveToPreNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
                             ? 7.618 - 2 * 0.3048
@@ -313,18 +315,19 @@ public class DriveSubsystem extends SubsystemBase {
                             : Rotation2d.k180deg
                         )
                     );
-                    driveToNetCommand.schedule();
+                    driveToPreNetCommand.setEndVelocity(2);
+                    driveToPreNetCommand.schedule();
                 },
                 () -> {},
-                (interrupted) -> driveToNetCommand.cancel(),
-                () -> driveToNetCommand.isFinished()
+                (interrupted) -> driveToPreNetCommand.cancel(),
+                () -> driveToPreNetCommand.isFinished()
             );
         }
 
         public Command directDriveToNearestScoreNetLocation() {
             return new FunctionalCommand(
                 () -> {
-                    driveToNetCommand.setTargetPose(
+                    driveToScoreNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
                             ? 7.618 - 0.1
@@ -335,11 +338,12 @@ public class DriveSubsystem extends SubsystemBase {
                             : Rotation2d.k180deg
                         )
                     );
-                    driveToNetCommand.schedule();
+                    driveToScoreNetCommand.setEndVelocity(0);
+                    driveToScoreNetCommand.schedule();
                 },
                 () -> {},
-                (interrupted) -> driveToNetCommand.cancel(),
-                () -> driveToNetCommand.isFinished()
+                (interrupted) -> driveToScoreNetCommand.cancel(),
+                () -> driveToScoreNetCommand.isFinished()
             );
         }
         
