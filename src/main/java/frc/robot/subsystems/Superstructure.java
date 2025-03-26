@@ -7,7 +7,9 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightMeters;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralStateSet;
+import static frc.robot.Constants.SuperstructureConstants.emptyTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
+
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.RobotSuperState;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
@@ -51,11 +53,12 @@ import org.littletonrobotics.junction.Logger;
 public class Superstructure extends VirtualSubsystem {
 
     private static record WristevatorEdge(WristevatorState begin, WristevatorState end) {}
+    private static double branchSafeDeployOffsetMeters = 0.2; // The height above a branch where it is safe to deploy wrist
     
-    private static Set<WristevatorEdge> coralEdgeSet = new HashSet<>();
+    private static Set<WristevatorEdge> coralBranchEdgeSet = new HashSet<>();
     static {
         for (List<WristevatorState> edgeList : Combinatorics.permuteTwo(coralStateSet)){
-            coralEdgeSet.add(new WristevatorEdge(edgeList.get(0), edgeList.get(1)));
+            coralBranchEdgeSet.add(new WristevatorEdge(edgeList.get(0), edgeList.get(1)));
         }
     }
 
@@ -155,10 +158,25 @@ public class Superstructure extends VirtualSubsystem {
         return elevatorClutchTrigger;
     }
 
+    private Command updateWristevatorGoal(WristevatorState goal){
+        return Commands.runOnce(() -> m_state.updateWristevatorGoal(goal));
+    }
+
+    private Command updateWristevatorState(WristevatorState state){
+        return Commands.runOnce(() -> m_state.updateWristevatorState(state));
+    }
+
+    // Returns a daemon command that will hold the wristevator in its current state in the background
+    private Command holdWristevatorState(WristevatorState state){
+        return Commands.parallel(
+            CommandUtils.makeDaemon(m_wrist.holdAngle(state.wristAngle)),
+            CommandUtils.makeDaemon(m_elevator.holdPosition(state.elevatorHeightMeters))
+        );
+    }
+
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
-    // Constructs a new wristevator edge command
-    /*
+    // Constructs a new wristevator edge command, and stores it in the edgeCommandMap
     private Command buildEdgeCommand(WristevatorEdge edge){
         if (edge.end() == WristevatorState.OVERRIDE) {
             edgeCommandMap.put(edge,Commands.none());
@@ -168,8 +186,34 @@ public class Superstructure extends VirtualSubsystem {
             edgeCommandMap.put(edge,Commands.none());
             return Commands.none();
         }
+        if (coralBranchEdgeSet.contains(edge)){
+            if (edge.begin().elevatorHeightMeters > edge.end().elevatorHeightMeters){
+                // If the wristevator is moving down between two coral states, begin deploying wrist early
+                double safeDeployHeight = edge.end().elevatorHeightMeters + branchSafeDeployOffsetMeters;
+                Command coralBranchEdgeCommand = Commands.sequence(
+                    updateWristevatorGoal(edge.end()),
+                    m_wrist.applyAngle(coralTravelAngle),
+                    Commands.deadline(
+                        Commands.sequence(
+                            m_wrist.holdAngle(coralTravelAngle).until(() -> m_elevator.getPositionMeters() <= safeDeployHeight),
+                            m_wrist.applyAngle(edge.end().wristAngle)
+                        ),
+                        Commands.sequence(
+                            m_elevator.applyPosition(edge.end().elevatorHeightMeters),
+                            m_elevator.holdPosition(edge.end().elevatorHeightMeters)
+                        )
+                    ),
+                    updateWristevatorState(edge.end())
+                ).andThen(
+                    holdWristevatorState(edge.end())
+                );
+                edgeCommandMap.put(edge,coralBranchEdgeCommand);
+                return coralBranchEdgeCommand;  
+            }
+        }
+        return Commands.none();
     }
-    */
+
     /**
      * Folds back wrist, moves elevator, then deploys wrist
      * <p> If the robot is already in the chosen state, it will skip the premoves
@@ -324,11 +368,13 @@ public class Superstructure extends VirtualSubsystem {
 
     /** Contains all the command factories for the superstructure */
     public class SuperstructureCommandFactory { 
+        
+        private final static Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
+
         private final Superstructure superstructure;
         private final BooleanSupplier m_transferBeamBreak;
         private final Map<WristevatorState, Supplier<Command>> grabberActionCommands = new HashMap<WristevatorState, Supplier<Command>>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
         private final SelectWithFallbackCommandFactory<WristevatorState> grabberActionCommandFactory;
-        private final Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
 
         private SuperstructureCommandFactory (
             Superstructure superstructure,
@@ -402,7 +448,7 @@ public class Superstructure extends VirtualSubsystem {
         }
 
         public Command wristFlickUp() {
-            return m_wrist.applyAngle(coralTravelAngle);
+            return m_wrist.applyAngle(emptyTravelAngle);
         }
 
         public Command removeAlgae(){
