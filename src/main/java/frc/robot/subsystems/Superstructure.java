@@ -121,9 +121,7 @@ public class Superstructure extends VirtualSubsystem {
                 m_wrist.setAngle(stickyControlAngle);
             },
             m_wrist,m_elevator
-        )
-        .beforeStarting(() -> stickyControl = true)
-        .finallyDo(() -> stickyControl = false);
+        );
     }
 
     @Override
@@ -190,8 +188,15 @@ public class Superstructure extends VirtualSubsystem {
         return Commands.runOnce(() -> {},m_wrist,m_elevator);
     }
 
-    private void enableStickyControl(){
-        stickyControlCommand.schedule();
+    private Command enableStickyControl(){
+        return Commands.runOnce(() -> {
+            if (!stickyControlCommand.isScheduled()){
+                stickyControlHeight = m_elevator.getPositionMeters();
+                stickyControlAngle = m_wrist.getAngle(); 
+                // The angle and height are set to their current measurements to ensure a smooth transition into sticky control
+                stickyControlCommand.schedule();
+            }
+        });
     }
 
     // Holds a certain angle on the wrist in the background
@@ -278,7 +283,7 @@ public class Superstructure extends VirtualSubsystem {
 
     private Command coralBranchEdgeCommand(WristevatorEdge edge, BooleanSupplier safeToDeployWrist){
         return Commands.sequence(
-            Commands.runOnce(() -> enableStickyControl()),
+            enableStickyControl(),
             updateWristevatorGoal(edge.end()),
             Commands.either(
                 applyStickyAngle(coralTravelAngle),
@@ -298,7 +303,7 @@ public class Superstructure extends VirtualSubsystem {
 
     private Command branchToL1EdgeCommand(WristevatorEdge edge){
         return Commands.sequence(
-            Commands.runOnce(() -> enableStickyControl()),
+            enableStickyControl(),
             updateWristevatorGoal(edge.end()),
             Commands.either(
                 applyStickyAngle(coralTravelAngle),
