@@ -41,6 +41,7 @@ public class RobotSuperState {
 
     private RobotSuperState() {
         driveState = new SwerveDriveState();
+        wristevatorGoal = WristevatorState.TRAVEL;
         wristevatorState = WristevatorState.TRAVEL;
         elevatorHeightMeters = 0;
         wristAngle = Rotation2d.kZero;

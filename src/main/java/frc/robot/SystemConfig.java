@@ -33,10 +33,10 @@ public final class SystemConfig {
     * 
     * VERIFY THAT THE SYSTEM CONFIGURATION MATCHES WHAT IS SHOWN ABOVE BEFORE DEPLOYING CODE FOR A MATCH
     */
-    public static final int systemMode = SystemModes.kReal;
+    public static final int systemMode = SystemModes.kSim;
     public static final int sysIDMode = SysIDModes.kNone;
     public static final boolean weldedField = true;
     public static final boolean logOdometry = false;
     public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
-    public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
+    public static final boolean raiseThreadPriority = false; // Whether the main thread should have its priority raised
 }

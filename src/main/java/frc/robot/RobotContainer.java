@@ -706,6 +706,7 @@ public class RobotContainer {
     }
 
     public void checkPhotonVision() {
+        if (!(SystemConfig.systemMode == SystemModes.kReal)) return;
         if (!m_vision.isCameraConnected("FRONT_LEFT_CAM")) DriverStation.reportWarning("Front Left Camera is disconnected",false);
         if (!m_vision.isCameraConnected("FRONT_RIGHT_CAM")) DriverStation.reportWarning("Front Right Camera is disconnected",false);
     }
