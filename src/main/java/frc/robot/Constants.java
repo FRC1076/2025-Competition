@@ -272,6 +272,7 @@ public final class Constants {
             REVERSE_CORAL_INTAKE(-12, -12),
             GRABBER_CORAL_INTAKE(-12, -12),
 
+            DIFFERENTIAL_OUTTAKE(12,12), // TODO: Tune this to be differential
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
             DEFAULT_OUTTAKE(12, 12);
@@ -320,9 +321,8 @@ public final class Constants {
 
             PROCESSOR(0.2536, 0),
             NET(2.109649 + 3 * 0.00635, 65),
-            PRE_NET(1.4,65),
+            PRE_NET(1.4,65);
 
-            OVERRIDE(0,0);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;

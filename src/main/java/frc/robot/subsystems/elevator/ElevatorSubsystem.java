@@ -20,7 +20,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.units.Units.Volts;
 import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+
 import java.util.Optional;
+import java.util.OptionalDouble;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -97,6 +100,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     
     /** Set desired position of the elevator
+     * @deprecated use setGoal() and runClosedLoop() instead. Using this MAY LEAD TO UNEXPECTED BEHAVIOR, AND WILL INTERFERE WITH setGoal() and runClosedLoop()
      * @param positionMeters Desired position of the elevator in meters
      */
     public void setPosition(double positionMeters) {
@@ -104,6 +108,37 @@ public class ElevatorSubsystem extends SubsystemBase {
             m_profiledPIDController.calculate(getPositionMeters(), MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters))
             + m_feedforwardController.calculate(m_profiledPIDController.getSetpoint().velocity)
         );
+    }
+
+    /** Runs the closed loop controller. WARNING: MUST BE CALLED PERIODICALLY AFTER setGoal() */
+    public void runClosedLoop() {
+        io.setVoltage(
+            m_profiledPIDController.calculate(getPositionMeters())
+            + m_feedforwardController.calculate(m_profiledPIDController.getSetpoint().velocity)
+        );
+    }
+
+    /**
+     * Sets a new goal for the closed loop control algorithm
+     * HAS NO EFFECT UNLESS runClosedLoop() IS CALLED PERIODICALLY
+     * @param goal The trapezoid profile state to go to
+     */
+    public void setGoal(TrapezoidProfile.State goal) {
+        resetController();
+        m_profiledPIDController.setGoal(goal);
+    }
+
+    /**
+     * Sets a new goal for the closed loop control algorithm
+     * HAS NO EFFECT UNLESS runClosedLoop() IS CALLED PERIODICALLY
+     * @param goal The height to travel to, in meters
+     */
+    public void setGoal(double goal) {
+        setGoal(new TrapezoidProfile.State(goal,0));
+    }
+
+    public TrapezoidProfile.State getGoal() {
+        return m_profiledPIDController.getGoal();
     }
 
     /** 
@@ -143,7 +178,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public void resetController() {
-        m_profiledPIDController.reset(getPositionMeters());
+        m_profiledPIDController.reset(getPositionMeters(),inputs.velocityMetersPerSecond);
     }
 
     
@@ -156,8 +191,11 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public Command applyPosition(double positionMeters) {
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getPositionMeters());},
-            () -> setPosition(positionMeters),
+            () -> {
+                resetController();
+                setGoal(positionMeters);
+            },
+            () -> runClosedLoop(),
             (interrupted) -> {},
             () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters,
             this
@@ -165,7 +203,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command holdPosition(double positionMeters) {
-        return run(() -> setPosition(positionMeters));
+        return new FunctionalCommand(
+            () -> {
+                resetController();
+                setGoal(positionMeters);
+            },
+            () -> runClosedLoop(),
+            (interrupted) -> {},
+            () -> false,
+            this
+        );
     }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.
