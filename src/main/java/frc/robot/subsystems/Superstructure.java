@@ -57,14 +57,6 @@ import org.littletonrobotics.junction.Logger;
  */
 public class Superstructure extends SubsystemBase {
 
-    public enum WristevatorControlStatus {
-        OVERRIDE,
-        IDLE,
-        TRAVERSING_DIRECT,
-        TRAVERSING_GRABBER_UP,
-        TRAVERSING_GRABBER_DOWN
-    }
-
     private static record WristevatorEdge(WristevatorState begin, WristevatorState end) {}
     private static final double branchUpSafeDeployOffsetMeters = 0.03; // The height above a branch where it is safe to deploy wrist TODO: TUNE THIS
     private static final double branchDownSafeDeployOffsetMeters = 0.03; // The height below a branch where it is safe to deploy wrist, TODO: TUNE THIS
@@ -101,7 +93,7 @@ public class Superstructure extends SubsystemBase {
     private Boolean safeToMoveElevator;
 
     private boolean elevatorClutch = false;
-    
+
     private Command edgeCommand = Commands.none();
 
     public Superstructure (

@@ -32,23 +32,16 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
         public boolean cameraConnected = false;
         public boolean estimatePresent = false;
         public int tagsDetected = 0;
-        public Integer[] fiducialIDs = new Integer[]{};
-        public Pose3d pose = new Pose3d();
-        public Matrix<N3,N1> stddevs = VecBuilder.fill(0, 0, 0);
-        public String strategy = "NULL";
+        public double[] stddevs = new double[]{};
 
         public void log(String key) {
             Logger.recordOutput(key, cameraConnected);
             Logger.recordOutput(key, estimatePresent);
             Logger.recordOutput(key, tagsDetected);
-            Logger.recordOutput(key, fiducialIDs.toString());
-            Logger.recordOutput(key, pose);
             Logger.recordOutput(key, stddevs);
-            Logger.recordOutput(key, strategy);
         }
     }
         
-
     private static final Matrix<N3, N1> maxStdDevs = VecBuilder.fill(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
     private final PhotonCamera camera;
     private final PhotonPoseEstimator poseEstimator;
@@ -137,10 +130,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
             (EstimatedRobotPose estimate) -> {
                 var stddevs = calculateStdDevs(estimate);
                 inputs.tagsDetected = estimate.targetsUsed.size();
-                inputs.fiducialIDs = estimate.targetsUsed.stream().map((tgt) -> tgt.getFiducialId()).toArray((size) -> new Integer[size]);
-                inputs.pose = estimate.estimatedPose;
-                inputs.stddevs = stddevs;
-                inputs.strategy = estimate.strategy.name();
+                inputs.stddevs = stddevs.getData();
                 return new CommonPoseEstimate(
                     estimate.estimatedPose.toPose2d(),
                     estimate.timestampSeconds,
@@ -152,6 +142,10 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
         // inputs.log("PhotonVision/" + getName());
 
         return result;
+    }
+
+    public void log() {
+        inputs.log("PhotonVision/" + getName());
     }
 
     public String getName() {
