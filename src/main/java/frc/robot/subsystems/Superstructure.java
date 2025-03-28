@@ -12,10 +12,11 @@ import static frc.robot.Constants.SuperstructureConstants.highTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
+import frc.robot.SystemConfig.PrebuildModes;
 import frc.robot.Constants.WristConstants;
 import frc.robot.RobotSuperState;
+import frc.robot.SystemConfig;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
@@ -24,7 +25,6 @@ import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
 import frc.robot.utils.Localization;
-import frc.robot.utils.VirtualSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 import lib.functional.FunctionalUtils;
@@ -33,7 +33,6 @@ import lib.utils.Combinatorics;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
-import java.security.Policy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +70,38 @@ public class Superstructure extends SubsystemBase {
         WristevatorState.NET
     ); // Any edges leading to these states will be traversed with a direct command
 
+    private static final Set<WristevatorEdge> prebuildEdges = new HashSet<>(); // A set of edges to prebuild commands for on initialization
+
+    static {
+        for (var statePair : Combinatorics.permuteTwo(coralBranchStateSet)){
+            prebuildEdges.add(new WristevatorEdge(statePair.get(0), statePair.get(1)));
+        }
+        for (var branchState : coralBranchStateSet){
+
+            prebuildEdges.add(new WristevatorEdge(WristevatorState.HIGH_TRAVEL,branchState));
+            prebuildEdges.add(new WristevatorEdge(branchState,WristevatorState.HIGH_TRAVEL));
+
+            prebuildEdges.add(new WristevatorEdge(WristevatorState.TRAVEL,branchState));
+            prebuildEdges.add(new WristevatorEdge(branchState,WristevatorState.TRAVEL));
+
+            prebuildEdges.add(new WristevatorEdge(branchState,WristevatorState.HIGH_INTAKE));
+            prebuildEdges.add(new WristevatorEdge(branchState,WristevatorState.LOW_INTAKE));
+
+            prebuildEdges.add(new WristevatorEdge(branchState,WristevatorState.L1));
+            prebuildEdges.add(new WristevatorEdge(WristevatorState.L1,branchState));
+        }
+        for (var algaeIntakeState : algaeIntakeStateSet){
+            prebuildEdges.add(new WristevatorEdge(algaeIntakeState,WristevatorState.ALGAE_TRAVEL));
+            prebuildEdges.add(new WristevatorEdge(WristevatorState.TRAVEL,algaeIntakeState));
+        }
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.ALGAE_TRAVEL,WristevatorState.PRE_NET));
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.ALGAE_TRAVEL,WristevatorState.PROCESSOR));
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.PRE_NET,WristevatorState.NET));
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.TRAVEL,WristevatorState.CORAL_TRANSFER));
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.CORAL_TRANSFER,WristevatorState.HIGH_TRAVEL));
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.CORAL_TRANSFER,WristevatorState.TRAVEL));
+        prebuildEdges.add(new WristevatorEdge(WristevatorState.GRABBER_CORAL_INTAKE,WristevatorState.TRAVEL));
+    }
     private final ElevatorSubsystem m_elevator;
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
@@ -128,6 +159,30 @@ public class Superstructure extends SubsystemBase {
             edgeCommand.cancel();
             this.getCurrentCommand().cancel();
         }); // When the stickyControlCommand is cancelled, cancel any state-based superstructure commands
+        if (SystemConfig.prebuildMode == PrebuildModes.kAll) {
+            prebuildAllEdgeCommands();
+        }
+        if (SystemConfig.prebuildMode == PrebuildModes.kDefined) {
+            prebuildDefinedEdgeCommands();
+        }
+        
+    }
+
+    // Prebuilds all possible edge commands, instead of lazily constructing them, may be computationally expensive
+    private void prebuildAllEdgeCommands() {
+        for (List<WristevatorState> statePair : Combinatorics.permuteTwo(Set.of(WristevatorState.values()))) {
+            var edge = new WristevatorEdge(statePair.get(0),statePair.get(1));
+            buildEdgeCommand(edge);
+            buildDirectEdgeCommand(edge);
+        }
+    }
+
+    // Prebuilds a small number of predefined edges, rather than lazily constructing them during a match
+    private void prebuildDefinedEdgeCommands(){
+        for (var edge : prebuildEdges) {
+            buildEdgeCommand(edge);
+            buildDirectEdgeCommand(edge);
+        }
     }
 
     @Override
@@ -185,11 +240,6 @@ public class Superstructure extends SubsystemBase {
         return elevatorClutchTrigger;
     }
 
-    // Returns a command whose sole purpose is to require the elevator and wrist
-    private Command requireWristevator() {
-        return Commands.runOnce(() -> {},m_wrist,m_elevator);
-    }
-
     private Command enableStickyControl(){
         return Commands.runOnce(() -> {
             if (!stickyControlCommand.isScheduled()){
@@ -227,6 +277,7 @@ public class Superstructure extends SubsystemBase {
         return Commands.sequence(
             enableStickyControl(),   
             runOnce(() -> {
+                edgeCommand.cancel();
                 m_elevator.resetController();
                 m_elevator.setGoal(heightMeters);
             }),
@@ -241,6 +292,7 @@ public class Superstructure extends SubsystemBase {
         return Commands.sequence(
             enableStickyControl(),
             runOnce(() -> {
+                edgeCommand.cancel();
                 m_wrist.resetController();
                 m_wrist.setGoal(angle);
             }),
@@ -584,7 +636,7 @@ public class Superstructure extends SubsystemBase {
         ) {
             this.superstructure = superstructure;
             m_transferBeamBreak = transferBeamBreak;
-            grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.DIFFERENTIAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
             grabberActionCommands.put(WristevatorState.L4, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));

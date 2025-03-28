@@ -21,11 +21,18 @@ public final class SystemConfig {
         public static final int kWrist = 5;
     }
 
+    public static class PrebuildModes {
+        public static final int kDefined = 0; // Only prebuilds edges that are explicitly defined in prebuildEdges
+        public static final int kNone = 1; // Prebuilds no edges at all
+        public static final int kAll = 2; // Prebuilds all possible edges
+    }
+
     /*
     * COMPETITION SYSTEM CONFIGURATION
     * 
     * systemMode: SystemModes.kReal
     * sysIDMode: SysIDModes.kNone
+    * prebuildMode = Prebuild.kDefined
     * weldedField = true if welded, false if AndyMark (All official FiM fields are welded, The AADL field is AndyMark)
     * logOdometry: false
     * logCTRE: false
@@ -35,6 +42,7 @@ public final class SystemConfig {
     */
     public static final int systemMode = SystemModes.kSim;
     public static final int sysIDMode = SysIDModes.kNone;
+    public static final int prebuildMode = PrebuildModes.kDefined;
     public static final boolean weldedField = true;
     public static final boolean logOdometry = false;
     public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
