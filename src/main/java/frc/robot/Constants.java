@@ -110,7 +110,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Right;
+        public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -217,7 +217,7 @@ public final class Constants {
 
     public static class SuperstructureConstants {
 
-        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
+        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(75);
         public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(80);
 
         // Grabber Possession State
@@ -273,6 +273,7 @@ public final class Constants {
 
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
+            L1_OUTTAKE(12, 6),
             DEFAULT_OUTTAKE(12, 12);
 
             public final double leftVoltage;
@@ -302,7 +303,7 @@ public final class Constants {
         public enum WristevatorState {
             
             TRAVEL(0.1349839121 + 0.00635, 90),
-            ALGAE_TRAVEL(0.134983912 + 0.00635, 65),
+            ALGAE_TRAVEL(0.134983912 + 0.00635, 75),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
             GRABBER_CORAL_INTAKE(0.784, 36.956),
@@ -318,7 +319,7 @@ public final class Constants {
             HIGH_INTAKE(1.44998, -27.02),
 
             PROCESSOR(0.2536, 0),
-            NET(2.109649 + 3 * 0.00635, 65);
+            NET(2.109649 + 3 * 0.00635, 75);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
@@ -455,7 +456,7 @@ public final class Constants {
             // PID constants
             public static final double kP = 30; //30;
             public static final double kI = 0.0;
-            public static final double kD = 0;//1;
+            public static final double kD = 0;//2.5;//1;
 
             // Feedforward constant
             public static final double kS = 0.17213;  // 0.059004; //Static gain (voltage)
@@ -463,7 +464,7 @@ public final class Constants {
             public static final double kV = 3.0126;  // 2.8829; // velocity game
             public static final double kA = 0.73282; // Acceleration Gain
 
-            public static final Constraints kProfileConstraints = new Constraints(3, 5.25);//7);//5.25);
+            public static final Constraints kProfileConstraints = new Constraints(3.5, 5.25);//7);//5.25);//7);//5.25);
         }
     }
 
@@ -603,6 +604,7 @@ public final class Constants {
             HUMAN_PLAYER_SIGNAL(false, true, false),
             ALGAE(true, true, false),
             AUTO_ALIGNED(false, false, true),
+            AUTO_ALIGNING(false, false, false),
             OFF(true, false, true),
             ELEVATOR_ZEROED(false, true, true);
 

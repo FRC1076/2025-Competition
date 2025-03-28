@@ -260,8 +260,8 @@ public class RobotContainer {
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
         m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
-        // m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
-        m_isAutoAligned = new Trigger(() -> teleopDriveCommand.isAutoAligned());
+        m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+        // m_isAutoAligned = new Trigger(() -> teleopDriveCommand.isAutoAligned());
         m_elevatorZeroed = new Trigger(() -> m_elevator.isZeroed());
 
         m_drive.setDefaultCommand(
@@ -390,14 +390,14 @@ public class RobotContainer {
 
         m_driverController.a().whileTrue(
             Commands.parallel(
-                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
                 m_drive.CommandBuilder.directDriveToNearestLeftBranch()
             )
         );
 
         m_driverController.b().whileTrue(
             Commands.parallel(
-                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
                 m_drive.CommandBuilder.directDriveToNearestRightBranch()
             )
         );
@@ -458,14 +458,14 @@ public class RobotContainer {
         
         m_driverController.y().whileTrue(
             Commands.parallel(
-                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNED), m_LEDs),
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
                 Commands.sequence(    
                     m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
                     Commands.parallel(
                         superstructureCommands.preNet(),
                         m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
                         Commands.sequence(
-                            Commands.waitSeconds(1),
+                            Commands.waitSeconds(0.8),
                             superstructureCommands.doGrabberAction()
                         )
                     )
@@ -628,8 +628,8 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
     public Command getAutonomousCommand() {
-        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
-        //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
+        // return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
         // return m_autoChooser.getSelected();
     }

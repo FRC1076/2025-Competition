@@ -272,7 +272,13 @@ public class DriveSubsystem extends SubsystemBase {
         }
 
         public Command directDriveToPose(Pose2d targetPose) {
-            return new PPDriveToPose(drive, targetPose);
+            return Commands.parallel(
+                new PPDriveToPose(drive, targetPose),
+                Commands.sequence(
+                    Commands.runOnce(() -> {isAutoAligned = false;}),
+                    Commands.waitUntil(() -> {return targetPose.getTranslation().getDistance(drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;}),
+                    Commands.runOnce(() -> {isAutoAligned = true;})
+                ));
             /*
             DirectDriveToPoseCommand directDriveToPoseCommand = new DirectDriveToPoseCommand(drive, targetPose);
 
@@ -307,16 +313,17 @@ public class DriveSubsystem extends SubsystemBase {
                     driveToPreNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
-                            ? 7.618 - 2 * 0.3048
-                            : 9.922 + 2 * 0.3048,
+                            ? 7.618 - 5 * 0.3048
+                            : 9.922 + 5 * 0.3048,
                             getPose().getY(),
                             getPose().getX() < 8.785
                             ? Rotation2d.kZero
                             : Rotation2d.k180deg
                         )
                     );
-                    driveToPreNetCommand.setEndVelocity(2);
+                    driveToPreNetCommand.setEndVelocity(0.5);
                     driveToPreNetCommand.schedule();
+
                 },
                 () -> {},
                 (interrupted) -> driveToPreNetCommand.cancel(),

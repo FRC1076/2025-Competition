@@ -306,7 +306,7 @@ public class Superstructure {
 
     
 
-    private Command applyWristevatorStateGrabberDown(WristevatorState position) {
+    private Command applyWristevatorStateGrabberDown(WristevatorState position, BooleanSupplier tolerance) {
 
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
@@ -322,7 +322,7 @@ public class Superstructure {
         return Commands.sequence(
             wristPreMoveCommand.asProxy(),
             Commands.deadline(
-                m_elevator.applyPosition(position.elevatorHeightMeters),
+                m_elevator.applyPosition(position.elevatorHeightMeters).until(tolerance),
                 wristHoldCommand
             ).asProxy(),
             CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
@@ -332,6 +332,14 @@ public class Superstructure {
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
+    }
+
+    private Command applyWristevatorStateGrabberDown(WristevatorState position) {
+        return applyWristevatorStateGrabberDown(position, () -> false);
+    }
+
+    private Command applyWristevatorStateGrabberDown(WristevatorState position, double tolerance) {
+        return applyWristevatorStateGrabberDown(position, () -> m_elevator.withinTolerance(tolerance));
     }
 
     /**
@@ -397,7 +405,7 @@ public class Superstructure {
         ) {
             this.superstructure = superstructure;
             m_transferBeamBreak = transferBeamBreak;
-            grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.L1_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
             grabberActionCommands.put(WristevatorState.L4, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
@@ -515,8 +523,8 @@ public class Superstructure {
         public Command preL2(){
             return 
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2),
-                    superstructure.applyWristevatorState(WristevatorState.L2),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2), //2 * 0.181368595),
+                    superstructure.applyWristevatorState(WristevatorState.L2), //2 * 0.181368595),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -527,8 +535,8 @@ public class Superstructure {
         public Command preL3(){
             return 
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3),
-                    superstructure.applyWristevatorState(WristevatorState.L3),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3),//, 2 * 0.181368595),
+                    superstructure.applyWristevatorState(WristevatorState.L3),//, 2 * 0.181368595),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -539,8 +547,8 @@ public class Superstructure {
         public Command preL4(){
             return 
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4),
-                    superstructure.applyWristevatorState(WristevatorState.L4),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4),//, 2 * 0.181368595),
+                    superstructure.applyWristevatorState(WristevatorState.L4), //2 * 0.181368595),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
