@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -209,7 +210,7 @@ public class Superstructure {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position, BooleanSupplier inTolerance, boolean grabberDown) {
+    private Command applyWristevatorState(WristevatorState position, double tolerance, boolean grabberDown) {
 
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
@@ -226,14 +227,14 @@ public class Superstructure {
         return Commands.sequence(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             CommandUtils.makeDaemon(wristPreMoveCommand),
-            Commands.parallel(
-                Commands.sequence(
-                    Commands.waitUntil(inTolerance),
-                    CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
-                    Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians))
-                ),
-                CommandUtils.makeDaemon(m_elevator.applyPositionPersistent(position.elevatorHeightMeters))
-            ),
+            Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
+            //Commands.print("AT PREMOVE"),
+            CommandUtils.makeDaemon(m_elevator.applyPositionPersistent(position.elevatorHeightMeters)),
+            Commands.waitUntil(() -> m_elevator.withinTolerance(tolerance)),
+            //Commands.print("AT ELEVATOR HEIGHT"),
+            CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
+            Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
+            //Commands.print("AT WRIST FINAL"),
             Commands.runOnce(ledSignal)
         );
     }
@@ -247,11 +248,11 @@ public class Superstructure {
      * @return generic transition command from one state to another 
      */
     private Command applyWristevatorState(WristevatorState position) {
-        return applyWristevatorState(position,() -> m_elevator.withinTolerance(0.5),false);
+        return applyWristevatorState(position,Units.inchesToMeters(0.5),false);
     }
 
     private Command applyWristevatorState(WristevatorState position, double tolerance) {
-        return applyWristevatorState(position,() -> m_elevator.withinTolerance(tolerance),false);
+        return applyWristevatorState(position, tolerance,false);
     }
 
     /**
@@ -262,9 +263,10 @@ public class Superstructure {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
+    /*
     private Command applyWristevatorState(WristevatorState position, BooleanSupplier inTolerance) {
         return applyWristevatorState(position, inTolerance, false);
-    }
+    }*/
 
     /**
      * Applies a wristevator state directly without any premoves. Potentially dangerous if used when right up against the
@@ -273,7 +275,6 @@ public class Superstructure {
      * @return
      */
     private Command applyWristevatorStateDirect(WristevatorState position, BooleanSupplier override) {
-
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
             safeToMoveElevator = false;
@@ -282,8 +283,14 @@ public class Superstructure {
         return Commands.parallel(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal),
-            m_elevator.applyPositionPersistent(position.elevatorHeightMeters),
-            m_wrist.applyAnglePersistent(position.wristAngle)
+            Commands.sequence(
+                m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
+                CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters), override)
+            ),
+            Commands.sequence(
+                m_wrist.applyAngle(position.wristAngle).asProxy(),
+                CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
+            )
         ).until(override);
     }
 
@@ -298,18 +305,14 @@ public class Superstructure {
     }
 
     
+    
+    private Command applyWristevatorStateGrabberDown(WristevatorState position, double tolerance) {
 
-    private Command applyWristevatorStateGrabberDown(WristevatorState position, BooleanSupplier inTolerance) {
-
-        return applyWristevatorState(position,inTolerance,true);
+        return applyWristevatorState(position,tolerance,true);
     }
 
     private Command applyWristevatorStateGrabberDown(WristevatorState position) {
-        return applyWristevatorStateGrabberDown(position, () -> false);
-    }
-
-    private Command applyWristevatorStateGrabberDown(WristevatorState position, double tolerance) {
-        return applyWristevatorStateGrabberDown(position, () -> m_elevator.withinTolerance(tolerance));
+        return applyWristevatorStateGrabberDown(position, Units.inchesToMeters(0.5));
     }
 
     /**
@@ -496,8 +499,8 @@ public class Superstructure {
         public Command preL2(){
             return 
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2), //2 * 0.181368595),
-                    superstructure.applyWristevatorState(WristevatorState.L2), //2 * 0.181368595),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L2, Units.inchesToMeters(6)), //2 * 0.181368595),
+                    superstructure.applyWristevatorState(WristevatorState.L2, Units.inchesToMeters(6)), //2 * 0.181368595),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -508,8 +511,8 @@ public class Superstructure {
         public Command preL3(){
             return 
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3),//, 2 * 0.181368595),
-                    superstructure.applyWristevatorState(WristevatorState.L3),//, 2 * 0.181368595),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L3, Units.inchesToMeters(6)),//, 2 * 0.181368595),
+                    superstructure.applyWristevatorState(WristevatorState.L3, Units.inchesToMeters(6)),//, 2 * 0.181368595),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
@@ -520,8 +523,8 @@ public class Superstructure {
         public Command preL4(){
             return 
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4),//, 2 * 0.181368595),
-                    superstructure.applyWristevatorState(WristevatorState.L4), //2 * 0.181368595),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L4, Units.inchesToMeters(12)),//, 2 * 0.181368595),
+                    superstructure.applyWristevatorState(WristevatorState.L4, Units.inchesToMeters(12)), //2 * 0.181368595),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }

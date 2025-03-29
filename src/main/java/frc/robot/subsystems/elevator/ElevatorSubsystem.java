@@ -169,7 +169,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command applyPositionPersistent(double positionMeters){
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);},
+            () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);
+                    m_profiledPIDController.setGoal(positionMeters);},
             () -> setPosition(positionMeters),
             (interrupted) -> {},
             () -> false,

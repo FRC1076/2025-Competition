@@ -31,6 +31,10 @@ public class LEDOnRIO implements LEDBase {
     private final LEDPattern solidOrange = LEDPattern
         .solid(Color.kOrange)
         .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
+    
+    private final LEDPattern solidRed = LEDPattern
+        .solid(Color.kRed)
+        .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
 
     private final LEDPattern flashingPurple = LEDPattern
         .solid(Color.kPurple)
@@ -79,7 +83,7 @@ public class LEDOnRIO implements LEDBase {
             solidPurple.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.CORAL_INDEXED) {
-            flashingPurple.applyTo(m_buffer);
+            solidRed.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.AUTO_ALIGNING) {
             solidGreen.applyTo(m_buffer);

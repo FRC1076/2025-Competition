@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.9059161847071544,
-        "y": 4.4101745660767815
+        "x": 2.064119318181818,
+        "y": 6.94169034090909
       },
       "isLocked": false,
       "linkedName": "Grabber LOUT"
@@ -20,8 +20,8 @@
         "y": 5.007201704545454
       },
       "prevControl": {
-        "x": 3.7889648113871113,
-        "y": 5.252228299421591
+        "x": 3.5831728290204845,
+        "y": 5.202418906906212
       },
       "nextControl": null,
       "isLocked": false,
@@ -30,14 +30,14 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 0.31261101243339356,
+      "waypointRelativePos": 0.5968028419182968,
       "rotationDegrees": -59.99999999999999
     }
   ],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.31,
+      "minWaypointRelativePos": 0.8458942632171004,
       "maxWaypointRelativePos": 1.0,
       "constraints": {
         "maxVelocity": 4.0,
@@ -54,8 +54,8 @@
   "globalConstraints": {
     "maxVelocity": 4.0,
     "maxAcceleration": 4.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 540.0,
+    "maxAngularVelocity": 720.0,
+    "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
@@ -69,5 +69,5 @@
     "velocity": 0,
     "rotation": 126.0
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
