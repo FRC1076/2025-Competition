@@ -208,7 +208,7 @@ public class Superstructure {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position, BooleanSupplier tolerance) {
+    private Command applyWristevatorState(WristevatorState position, BooleanSupplier inTolerance, boolean grabberDown) {
 
         Runnable ledSignal = () -> {
             safeToFeedCoral = false;
@@ -216,29 +216,21 @@ public class Superstructure {
         };
 
         Command wristPreMoveCommand = Commands.either(
-            m_wrist.applyAngle(algaeTravelAngle),
-            m_wrist.applyAngle(coralTravelAngle),
-            possessAlgae
-        );
-
-        Command wristHoldCommand = Commands.either(
-            m_wrist.holdAngle(algaeTravelAngle), 
-            m_wrist.holdAngle(coralTravelAngle),
+            m_wrist.applyAnglePersistent(algaeTravelAngle),
+            m_wrist.applyAnglePersistent(grabberDown ? Rotation2d.kCW_90deg : coralTravelAngle),
             possessAlgae
         );
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        
         return Commands.sequence(
-            wristPreMoveCommand.asProxy(),
-            Commands.deadline(
-                m_elevator.applyPosition(position.elevatorHeightMeters).until(tolerance),
-                wristHoldCommand
-            ).asProxy(),
-            CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
-            m_wrist.applyAngle(position.wristAngle).asProxy(),
-            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
-        ).alongWith(
+            CommandUtils.makeDaemon(wristPreMoveCommand),
+            Commands.parallel(
+                Commands.sequence(
+                    Commands.waitUntil(inTolerance),
+                    m_wrist.applyAnglePersistent(position.wristAngle)
+                ),
+                m_elevator.applyPositionPersistent(position.elevatorHeightMeters)
+            ),
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
@@ -253,7 +245,11 @@ public class Superstructure {
      * @return generic transition command from one state to another 
      */
     private Command applyWristevatorState(WristevatorState position) {
-        return applyWristevatorState(position, () -> false);
+        return applyWristevatorState(position,() -> m_elevator.withinTolerance(0.5),false);
+    }
+
+    private Command applyWristevatorState(WristevatorState position, double tolerance) {
+        return applyWristevatorState(position,() -> m_elevator.withinTolerance(tolerance),false);
     }
 
     /**
@@ -264,8 +260,8 @@ public class Superstructure {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position, double tolerance) {
-        return applyWristevatorState(position, () -> m_elevator.withinTolerance(tolerance));
+    private Command applyWristevatorState(WristevatorState position, BooleanSupplier inTolerance) {
+        return applyWristevatorState(position, inTolerance, false);
     }
 
     /**
@@ -284,14 +280,8 @@ public class Superstructure {
         return Commands.parallel(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal),
-            Commands.sequence(
-                m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
-                CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters), override)
-            ),
-            Commands.sequence(
-                m_wrist.applyAngle(position.wristAngle).asProxy(),
-                CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
-            )
+            m_elevator.applyPositionPersistent(position.elevatorHeightMeters),
+            m_wrist.applyAnglePersistent(position.wristAngle)
         ).until(override);
     }
 
@@ -307,32 +297,9 @@ public class Superstructure {
 
     
 
-    private Command applyWristevatorStateGrabberDown(WristevatorState position, BooleanSupplier tolerance) {
+    private Command applyWristevatorStateGrabberDown(WristevatorState position, BooleanSupplier inTolerance) {
 
-        Runnable ledSignal = () -> {
-            safeToFeedCoral = false;
-            safeToMoveElevator = false;
-        };
-
-        Command wristPreMoveCommand = m_wrist.applyAngle(Rotation2d.fromDegrees(-90));
-
-        Command wristHoldCommand = m_wrist.holdAngle(Rotation2d.fromDegrees(-90));
-
-        // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        
-        return Commands.sequence(
-            wristPreMoveCommand.asProxy(),
-            Commands.deadline(
-                m_elevator.applyPosition(position.elevatorHeightMeters).until(tolerance),
-                wristHoldCommand
-            ).asProxy(),
-            CommandUtils.makeDaemon(m_elevator.holdPosition(position.elevatorHeightMeters)),
-            m_wrist.applyAngle(position.wristAngle).asProxy(),
-            CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle))
-        ).alongWith(
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
-            Commands.runOnce(ledSignal)
-        );
+        return applyWristevatorState(position,inTolerance,true);
     }
 
     private Command applyWristevatorStateGrabberDown(WristevatorState position) {
