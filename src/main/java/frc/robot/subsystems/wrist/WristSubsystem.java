@@ -116,10 +116,25 @@ public class WristSubsystem extends SubsystemBase {
     */
     public Command applyAngle(Rotation2d angle) {
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getAngleRadians());},
+            () -> {m_profiledPIDController.reset(getAngleRadians(),inputs.velocityRadiansPerSecond);},
             () -> setAngle(angle), 
             (interrupted) -> {},
             () -> Math.abs(angle.minus(getAngle()).getRadians()) < WristConstants.wristAngleToleranceRadians,
+            this
+        );
+    }
+
+    
+    /** Returns a command that sets the wrist at the desired angle 
+     * DOES NOT END UNTIL INTERRUPTED EXTERNALLY
+     * @param angle The desired angle of the wrist
+    */
+    public Command applyAnglePersistent(Rotation2d angle) {
+        return new FunctionalCommand(
+            () -> {m_profiledPIDController.reset(getAngleRadians(),inputs.velocityRadiansPerSecond);},
+            () -> setAngle(angle), 
+            (interrupted) -> {},
+            () -> false,
             this
         );
     }

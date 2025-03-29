@@ -166,6 +166,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     public Command holdPosition(double positionMeters) {
         return run(() -> setPosition(positionMeters));
     }
+
+    public Command applyPositionPersistent(double positionMeters){
+        return new FunctionalCommand(
+            () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);},
+            () -> setPosition(positionMeters),
+            (interrupted) -> {},
+            () -> false,
+            this
+        );
+    }
     
     /** Returns a command that sets the voltage of the elevator manually and adds kG.
      * @param controlSupplier Supplier that returns the desired voltage of the elevator
