@@ -581,6 +581,11 @@ public final class Constants {
         public static final int transferBeamBreakPort = 0;
     }
 
+    public static class CANRangeConstants {
+        public static final int grabberCANRangeId = 6;
+        public static final double grabberCANRangeTriggerDistanceMeters = 0.0762; // 3 inches
+    }
+
     public static class LEDConstants {
         /// Digital input-output pins on the RIO
         public static class LEDDIOConstants {

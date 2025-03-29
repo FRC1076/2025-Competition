@@ -44,12 +44,14 @@ import frc.robot.Constants.SuperstructureConstants.IndexState;
 import frc.robot.Constants.OIConstants;
 import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
+import frc.robot.Constants.CANRangeConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.LEDConstants.LEDStates;
 import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultMultiTagStdDevs;
+import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.elevatorAccelerationTable;
@@ -89,6 +91,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
+import com.ctre.phoenix6.hardware.CANrange;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
@@ -107,6 +110,7 @@ public class RobotContainer {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final Trigger m_transferBeamBreak;
+    private final Trigger m_grabberCANRange;
     private final Trigger m_interruptElevator;
     private final Trigger m_interruptWrist;
     // private final Trigger m_isDisabled;
@@ -163,6 +167,8 @@ public class RobotContainer {
     */
     
         DigitalInput transferDIO = new DigitalInput(BeamBreakConstants.transferBeamBreakPort);
+        CANrange grabberCANRange = new CANrange(CANRangeConstants.grabberCANRangeId);
+        m_grabberCANRange = new Trigger(() -> (grabberCANRange.getDistance().getValue().in(Meters) < CANRangeConstants.grabberCANRangeTriggerDistanceMeters));
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
         m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
         m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
@@ -237,7 +243,8 @@ public class RobotContainer {
             m_wrist, 
             m_drive,
             m_elastic,
-            m_transferBeamBreak
+            m_transferBeamBreak,
+            m_grabberCANRange
         );
 
         superVis = new SuperstructureVisualizer(m_superstructure);

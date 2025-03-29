@@ -129,7 +129,8 @@ public class Superstructure {
         WristSubsystem wrist,
         DriveSubsystem drive,
         Elastic elastic,
-        Trigger transferBeamBreak //returns true when beam broken
+        Trigger transferBeamBreak,
+        Trigger grabberCANRange //returns true when beam broken
     ) {
         m_elevator = elevator;
         m_grabber = grabber;
@@ -143,7 +144,7 @@ public class Superstructure {
         
         CommandUtils.makePeriodic(() -> Logger.processInputs("Superstructure", superState));
         
-        CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak);
+        CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak, grabberCANRange);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);
 
         this.safeToFeedCoral = false;
@@ -395,16 +396,19 @@ public class Superstructure {
     public class SuperstructureCommandFactory { 
         private final Superstructure superstructure;
         private final Trigger m_transferBeamBreak;
+        private final Trigger m_grabberCANRange;
         private final Map<WristevatorState, Supplier<Command>> grabberActionCommands = new HashMap<WristevatorState, Supplier<Command>>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
         private final SelectWithFallbackCommandFactory<WristevatorState> grabberActionCommandFactory;
         private final Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
 
         private SuperstructureCommandFactory (
             Superstructure superstructure,
-            Trigger transferBeamBreak
+            Trigger transferBeamBreak,
+            Trigger grabberCANRange
         ) {
             this.superstructure = superstructure;
             m_transferBeamBreak = transferBeamBreak;
+            m_grabberCANRange = grabberCANRange;
             grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.L1_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
@@ -596,10 +600,10 @@ public class Superstructure {
                 Commands.sequence(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
-                ).until(m_transferBeamBreak.debounce(0.2)), // Wait until the coral starts to exit the funnel
-                //Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
-                Commands.waitUntil(m_transferBeamBreak.negate().debounce(0.06)), // W ait until the coral fully exits the funnel
-                superstructure.m_grabber.applyRotationsBangBang(6, 1.25), // Adjust rotations
+                ).until(m_grabberCANRange), // Wait until the coral starts to exit the funnel
+                // Commands.waitUntil(m_grabber::hasFunnelCurrentSpike),
+                // Commands.waitUntil(m_transferBeamBreak.negate().debounce(0.06)), // W ait until the coral fully exits the funnel
+                superstructure.m_grabber.applyRotationsBangBang(6, 1.6), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
@@ -758,6 +762,11 @@ public class Superstructure {
         @AutoLogOutput()
         public boolean getTransferBeambreak(){
             return m_transferBeamBreak.getAsBoolean();
+        }
+
+        @AutoLogOutput()
+        public boolean getGrabberCANRange() {
+            return m_grabberCANRange.getAsBoolean();
         }
     }
 }
