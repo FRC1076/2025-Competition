@@ -123,6 +123,9 @@ public class WristSubsystem extends SubsystemBase {
             this
         );
     }
+    public boolean withinTolerance(double tolerance){
+        return Math.abs(m_profiledPIDController.getGoal().position - getAngleRadians()) < tolerance;
+    }
 
     
     /** Returns a command that sets the wrist at the desired angle 

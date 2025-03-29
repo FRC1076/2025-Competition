@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
+import frc.robot.Constants.WristConstants;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
@@ -223,15 +224,16 @@ public class Superstructure {
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
         return Commands.sequence(
+            Commands.runOnce(() -> superState.setWristevatorState(position)),
             CommandUtils.makeDaemon(wristPreMoveCommand),
             Commands.parallel(
                 Commands.sequence(
                     Commands.waitUntil(inTolerance),
-                    m_wrist.applyAnglePersistent(position.wristAngle)
+                    CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
+                    Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians))
                 ),
-                m_elevator.applyPositionPersistent(position.elevatorHeightMeters)
+                CommandUtils.makeDaemon(m_elevator.applyPositionPersistent(position.elevatorHeightMeters))
             ),
-            Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
     }
