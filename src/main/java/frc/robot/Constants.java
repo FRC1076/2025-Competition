@@ -199,7 +199,7 @@ public final class Constants {
         }
 
         public static class PathPlannerConstants {
-            public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
+            public static final PathConstraints pathConstraints = new PathConstraints(5, 2.5, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.508, 0, Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
             public static final double LEDpathToleranceMeters = 0.03;
@@ -272,7 +272,7 @@ public final class Constants {
             REVERSE_CORAL_INTAKE(-12, -12),
             GRABBER_CORAL_INTAKE(-12, -12),
 
-            DIFFERENTIAL_OUTTAKE(12,12), // TODO: Tune this to be differential
+            DIFFERENTIAL_OUTTAKE(12,6),
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
             DEFAULT_OUTTAKE(12, 12);
@@ -349,6 +349,7 @@ public final class Constants {
     /** Contains data about the field */
     public static class FieldConstants {
         public static final double fieldWidthMeters = Units.inchesToMeters(316.63); // Distance from one processor side to the other. From AprilTag coordinates in https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings.pdf
+        public static final double reefSafetyRadiusMeters = 2;
 
         private static final double branchOffset = Units.inchesToMeters(6.469);
         private static final Transform2d leftBranchTransform = new Transform2d(0.0, -branchOffset, Rotation2d.kZero);
@@ -537,10 +538,12 @@ public final class Constants {
     public static final class GrabberConstants {
         public static final int kLeftMotorPort = 41;
         public static final int kRightMotorPort = 42;
+        public static final int kCoralSensorPort = 6;
         
         public static final double kCurrentLimit = 20; 
         public static final double kGearRatio = 20;
         public static final double kPositionConversionFactor = Math.PI * 2 * (1/kGearRatio);
+        public static final double kCoralDistanceThreshold = Units.inchesToMeters(3);
 
         public static final boolean kLeftMotorInverted = true;
         public static final boolean kRightMotorInverted = false;

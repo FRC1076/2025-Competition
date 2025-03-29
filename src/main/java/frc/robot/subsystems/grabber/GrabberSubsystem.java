@@ -18,6 +18,7 @@ import static frc.robot.Constants.ElevatorConstants.Electrical.kCurrentLimit;
 import org.littletonrobotics.junction.Logger;
 
 public class GrabberSubsystem extends SubsystemBase{
+    
     private final GrabberIO io;
     private final GrabberIOInputsAutoLogged inputs = new GrabberIOInputsAutoLogged();
     private final LinearFilter currentFilter;
@@ -52,7 +53,7 @@ public class GrabberSubsystem extends SubsystemBase{
     }
 
     public boolean hasCoral() {
-        return filteredCurrent > kCoralCurrentThreshold;
+        return inputs.hasCoral;
     }
 
     /**

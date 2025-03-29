@@ -30,6 +30,8 @@ public class GrabberIOSim implements GrabberIO {
     public void updateInputs(GrabberIOInputs inputs) {
         inputs.leftMotorAppliedVoltage = leftAppliedVolts;
         inputs.rightMotorAppliedVoltage = rightAppliedVolts;
+        inputs.motorPositionRadians += leftAppliedVolts;
+        inputs.hasCoral = true;
     }
     
 }

@@ -787,8 +787,7 @@ public class Superstructure extends SubsystemBase {
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
-                ).until(FunctionalUtils.debounce(m_transferBeamBreak,0.25)),
-                Commands.waitUntil(() -> !m_transferBeamBreak.getAsBoolean()),
+                ).until(m_grabber::hasCoral),
                 superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),

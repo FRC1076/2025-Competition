@@ -14,18 +14,26 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.units.measure.Distance;
+
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.hardware.CANrange;
+
 public class GrabberIOHardware implements GrabberIO{
     private final SparkMax m_leftMotor;
     private final SparkMax m_rightMotor;
+    private final CANrange m_coralSensor;
 
     private final RelativeEncoder m_encoder;
 
     private final SparkMaxConfig m_leftMotorConfig;
     private final SparkMaxConfig m_rightMotorConfig;
+    private final StatusSignal<Distance> coralSensorSignal;
 
     public GrabberIOHardware() {
         m_leftMotor = new SparkMax(GrabberConstants.kLeftMotorPort, MotorType.kBrushless);
         m_rightMotor = new SparkMax(GrabberConstants.kRightMotorPort, MotorType.kBrushless);
+        m_coralSensor = new CANrange(6);
 
         m_encoder = m_leftMotor.getEncoder();
 
@@ -44,6 +52,7 @@ public class GrabberIOHardware implements GrabberIO{
 
         m_leftMotor.configure(m_leftMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         m_rightMotor.configure(m_rightMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+        coralSensorSignal = m_coralSensor.getDistance(true);
     }
 
     /** Sets both motors to the same voltage */
@@ -76,5 +85,6 @@ public class GrabberIOHardware implements GrabberIO{
         inputs.rightMotorCurrent = m_rightMotor.getOutputCurrent();
 
         inputs.motorPositionRadians = m_encoder.getPosition(); //This is used for bang-bang control
+        inputs.hasCoral = coralSensorSignal.getValueAsDouble() < GrabberConstants.kCoralDistanceThreshold;
     }
 }

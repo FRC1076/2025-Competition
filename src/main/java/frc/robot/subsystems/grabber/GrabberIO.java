@@ -20,6 +20,8 @@ public interface GrabberIO {
         public double rightMotorCurrent = 0;
 
         public double motorPositionRadians = 0;
+
+        public boolean hasCoral;
     }
 
     /** Update values for logging */
