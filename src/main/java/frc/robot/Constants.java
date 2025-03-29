@@ -217,7 +217,7 @@ public final class Constants {
 
     public static class SuperstructureConstants {
 
-        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(75);
+        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(80);
         public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(80);
 
         // Grabber Possession State
@@ -303,7 +303,7 @@ public final class Constants {
         public enum WristevatorState {
             
             TRAVEL(0.1349839121 + 0.00635, 90),
-            ALGAE_TRAVEL(0.134983912 + 0.00635, 75),
+            ALGAE_TRAVEL(0.134983912 + 0.00635, 80),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
             GRABBER_CORAL_INTAKE(0.784, 36.956),
@@ -319,7 +319,7 @@ public final class Constants {
             HIGH_INTAKE(1.44998, -27.02),
 
             PROCESSOR(0.2536, 0),
-            NET(2.109649 + 3 * 0.00635, 75);
+            NET(2.109649 + 3 * 0.00635, 80);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
@@ -447,7 +447,7 @@ public final class Constants {
         public static final double kPositionConversionFactor = (24.0/22.0) * kElevatorStages * (1/kGearRatio) * 24 * 0.00635; //Gear ratio & chain pitch
 
         public static class Electrical {
-            public static final double kVoltageCompensation = 11.5;
+            public static final double kVoltageCompensation = 10.5; 
             public static final double kCurrentLimit = 60;
         }
 
@@ -464,7 +464,7 @@ public final class Constants {
             public static final double kV = 3.0126;  // 2.8829; // velocity game
             public static final double kA = 0.73282; // Acceleration Gain
 
-            public static final Constraints kProfileConstraints = new Constraints(3.5, 5.25);//7);//5.25);//7);//5.25);
+            public static final Constraints kProfileConstraints = new Constraints(3, 5.25);//7);//5.25);//7);//5.25);
         }
     }
 
