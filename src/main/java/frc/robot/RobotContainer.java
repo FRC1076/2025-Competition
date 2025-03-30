@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.Autopilot;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -40,6 +41,7 @@ import frc.robot.subsystems.SuperstructureVisualizer;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.Constants.SystemConstants;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
+import frc.robot.Constants.FieldConstants.ReefLevel;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 import frc.robot.Constants.SuperstructureConstants.IndexState;
@@ -111,6 +113,7 @@ public class RobotContainer {
     private final WristSubsystem m_wrist;
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
+    private final Autopilot m_autopilot;
     private final Trigger driverInterrupt;
     private final Trigger m_transferBeamBreak;
     private final Trigger m_interruptElevator;
@@ -247,6 +250,8 @@ public class RobotContainer {
             m_elastic,
             m_transferBeamBreak
         );
+
+        m_autopilot = new Autopilot(m_drive, m_superstructure);
 
         superVis = new SuperstructureVisualizer(m_superstructure);
 
@@ -457,6 +462,10 @@ public class RobotContainer {
 
             driverInterrupt.onTrue(teleopDriveCommand);
 
+            // Autopilot coral cycle commands
+            // m_driverController.a().onTrue(m_autopilot.executeAutoCoralCycleLeft());
+            // m_driverController.b().onTrue(m_autopilot.executeAutoCoralCycleRight());
+
         } else if (SystemConfig.sysIDMode == SysIDModes.kDriveTranslation) {
             // Quasistatic and Dynamic control scheme for Translational Sysid
             m_driverController.rightBumper().and(
@@ -575,6 +584,29 @@ public class RobotContainer {
         m_operatorController.y()
         .and(m_operatorController.leftBumper().negate())
             .onTrue(superstructureCommands.preL4());
+
+        // Autopilot bindings
+        /* 
+        //L1
+        m_operatorController.x()
+        .and(m_operatorController.leftBumper().negate())
+            .onTrue(m_autopilot.setTargetLevel(ReefLevel.L1));
+
+        // L2
+        m_operatorController.a()
+        .and(m_operatorController.leftBumper().negate())
+            .onTrue(m_autopilot.setTargetLevel(ReefLevel.L2));
+
+        // L3
+        m_operatorController.b()
+            .and(m_operatorController.leftBumper().negate())
+            .onTrue(m_autopilot.setTargetLevel(ReefLevel.L3));
+
+        // L4
+        m_operatorController.y()
+        .and(m_operatorController.leftBumper().negate())
+            .onTrue(m_autopilot.setTargetLevel(ReefLevel.L4));
+        */
 
         // Processor
         m_operatorController.x()

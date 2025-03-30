@@ -32,7 +32,7 @@ public final class SystemConfig {
     * 
     * systemMode: SystemModes.kReal
     * sysIDMode: SysIDModes.kNone
-    * prebuildMode = Prebuild.kDefined
+    * prebuildMode = PrebuildModes.kDefined
     * weldedField = true if welded, false if AndyMark (All official FiM fields are welded, The AADL field is AndyMark)
     * logOdometry: false
     * logCTRE: false
@@ -40,11 +40,11 @@ public final class SystemConfig {
     * 
     * VERIFY THAT THE SYSTEM CONFIGURATION MATCHES WHAT IS SHOWN ABOVE BEFORE DEPLOYING CODE FOR A MATCH
     */
-    public static final int systemMode = SystemModes.kSim;
+    public static final int systemMode = SystemModes.kReal;
     public static final int sysIDMode = SysIDModes.kNone;
     public static final int prebuildMode = PrebuildModes.kDefined;
     public static final boolean weldedField = true;
     public static final boolean logOdometry = false;
     public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
-    public static final boolean raiseThreadPriority = false; // Whether the main thread should have its priority raised
+    public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
 }
