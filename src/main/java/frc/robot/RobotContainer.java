@@ -472,7 +472,7 @@ public class RobotContainer {
                         superstructureCommands.preNet(),
                         m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
                         Commands.sequence(
-                            Commands.waitSeconds(0.8),
+                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}),
                             superstructureCommands.doGrabberAction()
                         )
                     )
