@@ -632,11 +632,12 @@ public class Superstructure {
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
                         Commands.waitUntil(m_grabberCANRange),
-                        m_grabber.applyRotationsBangBang(8, -0.2)
+                        m_grabber.applyRotationsBangBang(8, -0.2),
+                        Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(GrabberPossession.CORAL))
                     )
                 ),
                 Commands.parallel(
-                    superstructure.applyWristevatorStateDirect(WristevatorState.TRAVEL),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.GRABBER_CORAL_INTAKE_TRAVEL),
                     Commands.run(() -> safeToMoveElevator = true)
                 )
             );

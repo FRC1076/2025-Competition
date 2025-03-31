@@ -307,7 +307,8 @@ public final class Constants {
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
             GRABBER_CORAL_INTAKE(0.784, 36.956),
-            HIGH_TRAVEL(0.3, -90),
+            GRABBER_CORAL_INTAKE_TRAVEL(0.784, 90),
+            HIGH_TRAVEL(0.3, -90), //with grabber down state
 
             L1(0.42019, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
