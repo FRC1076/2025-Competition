@@ -302,12 +302,12 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.1349839121 + 0.00635, 90),
+            TRAVEL(0.1349839121 + 0.00635, 80),//90),
             ALGAE_TRAVEL(0.134983912 + 0.00635, 80),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
             GRABBER_CORAL_INTAKE(0.784, 36.956),
-            GRABBER_CORAL_INTAKE_TRAVEL(0.784, 90),
+            GRABBER_CORAL_INTAKE_TRAVEL(0.784, 80),//90),
             HIGH_TRAVEL(0.3, -90), //with grabber down state
 
             L1(0.42019, 23.9365), // Placeholder
