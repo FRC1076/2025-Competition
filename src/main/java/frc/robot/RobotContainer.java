@@ -576,6 +576,9 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.grabberIntakeCoral())
             .onFalse(superstructureCommands.stopGrabber());
 
+        m_operatorController.povRight()
+            .onTrue(superstructureCommands.lollipopAlgaeIntake());
+
         // Manual coral intake and transfer
         m_operatorController.povUp()
             .onTrue(
@@ -596,11 +599,12 @@ public class RobotContainer {
         // Ground Algae Intake
         m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
 
+        /*
         m_operatorController.povRight().onTrue(
             superstructureCommands.holdAlgae()
         ).onFalse(
             superstructureCommands.stopGrabber()
-        );
+        );*/
 
         // Interrupts any elevator command when the the left joystick is moved
         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());

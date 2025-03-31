@@ -371,7 +371,7 @@ public class Superstructure {
         private final Trigger m_grabberCANRange;
         private final Map<WristevatorState, Supplier<Command>> grabberActionCommands = new HashMap<WristevatorState, Supplier<Command>>(); // We use a map of grabber action commands so that we can use the SelectWithFallBackCommand factory
         private final SelectWithFallbackCommandFactory<WristevatorState> grabberActionCommandFactory;
-        private final Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
+        private final Set<WristevatorState> algaeIntakeWristevatorStates = Set.of(WristevatorState.GROUND_INTAKE, WristevatorState.LOLLIPOP_INTAKE, WristevatorState.LOW_INTAKE, WristevatorState.HIGH_INTAKE); // Wristevator states that lead to intaking algae
 
         private SuperstructureCommandFactory (
             Superstructure superstructure,
@@ -386,6 +386,9 @@ public class Superstructure {
             grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
             grabberActionCommands.put(WristevatorState.L4, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.GROUND_INTAKE,
+                                        () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
+                                        /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
+            grabberActionCommands.put(WristevatorState.LOLLIPOP_INTAKE,
                                         () -> superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
                                         /* .unless(() -> superState.getGrabberPossession() == GrabberPossession.ALGAE)*/);
             grabberActionCommands.put(WristevatorState.PROCESSOR, () -> superstructure.applyGrabberState(GrabberState.ALGAE_OUTTAKE));
@@ -548,6 +551,13 @@ public class Superstructure {
          */
         public Command groundAlgaeIntake(){
             return superstructure.applyWristevatorState(WristevatorState.GROUND_INTAKE);
+        }
+
+        /**
+         * Set elevator and wrist to ground algae preset
+         */
+        public Command lollipopAlgaeIntake(){
+            return superstructure.applyWristevatorState(WristevatorState.LOLLIPOP_INTAKE);
         }
 
         /**

@@ -316,6 +316,7 @@ public final class Constants {
             L4(2.11455, -38),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0, 0),
+            LOLLIPOP_INTAKE(0.1349839121 + 0.00635, 60),
             LOW_INTAKE(0.98407,-27.02),
             HIGH_INTAKE(1.44998, -27.02),
 
