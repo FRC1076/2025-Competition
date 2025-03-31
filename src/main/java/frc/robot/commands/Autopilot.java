@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants.FieldConstants.ReefLevel;
+import frc.robot.RobotSuperState;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -27,7 +28,6 @@ public class Autopilot {
     private ReefLevel targetLevel = ReefLevel.L1;
     private ReefLevel commandGoalLevel = ReefLevel.L1;
     private Command reefCommand = Commands.none();
-    private BooleanSupplier isFollowCoralLevelFinished;
     
     
     public Autopilot(DriveSubsystem drive, Superstructure superstructure){
@@ -100,7 +100,6 @@ public class Autopilot {
             () -> {
                 commandGoalLevel = targetLevel;
                 reefCommand = reefCommandMap.get(commandGoalLevel).get();
-                isFollowCoralLevelFinished = reefCommand::isFinished;
                 reefCommand.schedule();
             }, 
             () -> {
@@ -108,19 +107,17 @@ public class Autopilot {
                     commandGoalLevel = targetLevel;
                     reefCommand.cancel();
                     reefCommand = reefCommandMap.get(commandGoalLevel).get();
-                    isFollowCoralLevelFinished = reefCommand::isFinished;
                     reefCommand.schedule();
                 }
             }, 
-            (interrupted) -> {reefCommand.cancel();}, 
-            isFollowCoralLevelFinished, 
-            m_superstructure
+            (interrupted) -> reefCommand.cancel(), 
+            () -> RobotSuperState.getInstance().getWristevatorState() == RobotSuperState.getInstance().getWristevatorGoal(),
         );
     }
 
     private Command alignForCoralCycle(boolean leftSide,ReefLevel level){
         return Commands.parallel(
-            reefCommandMap.get(level).get(),
+            followReefLevelTarget(),
             leftSide ? m_driveCommands.directDriveToNearestLeftBranch() : m_driveCommands.directDriveToNearestRightBranch(),
             Commands.run(() -> {})
         );
