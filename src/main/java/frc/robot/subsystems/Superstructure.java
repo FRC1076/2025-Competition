@@ -456,8 +456,8 @@ public class Superstructure {
             return Commands.parallel(
                 stopGrabber(),
                 Commands.either(
-                    superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE),
-                    superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.HIGH_INTAKE),
+                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.LOW_INTAKE),
                     () -> Localization.getClosestReefFace(m_drive.getPose()).algaeHigh == true
                 )
             );
