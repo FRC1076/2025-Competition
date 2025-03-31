@@ -273,7 +273,7 @@ public final class Constants {
 
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
-            L1_OUTTAKE(12, 6),
+            L1_OUTTAKE(8, 5),
             DEFAULT_OUTTAKE(12, 12);
 
             public final double leftVoltage;
