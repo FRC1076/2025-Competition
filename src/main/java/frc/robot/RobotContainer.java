@@ -572,7 +572,7 @@ public class RobotContainer {
             .whileTrue(superstructureCommands.intakeCoral())
             .whileFalse(superstructureCommands.stopIntake());
 
-        m_operatorController.povLeft()
+        m_operatorController.rightBumper()
             .whileTrue(superstructureCommands.grabberIntakeCoral())
             .onFalse(superstructureCommands.stopGrabber());
 
@@ -608,7 +608,7 @@ public class RobotContainer {
         // Interrupts any wrist command when the right joystick is moved
         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
         
-        m_operatorController.rightBumper()
+        m_operatorController.povLeft()
             .onTrue(superstructureCommands.doGrabberAction())
             .onFalse(superstructureCommands.stopAndAlgaeIntake());
 
