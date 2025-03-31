@@ -631,6 +631,23 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
+                        Commands.waitUntil(m_grabberCANRange),
+                        m_grabber.applyRotationsBangBang(8, -0.2)
+                    )
+                ),
+                Commands.parallel(
+                    superstructure.applyWristevatorStateDirect(WristevatorState.TRAVEL),
+                    Commands.run(() -> safeToMoveElevator = true)
+                )
+            );
+            
+            /* Current sensing
+            return Commands.sequence(
+                superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE),
+                Commands.parallel(
+                    Commands.runOnce(() -> safeToFeedCoral = true),
+                    Commands.sequence(
+                        applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
                         Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral),
                         m_grabber.applyRotationsBangBang(8, 0.2)
@@ -641,6 +658,7 @@ public class Superstructure {
                     Commands.run(() -> safeToMoveElevator = true)
                 )
             );
+            */
         }
 
         /**
@@ -658,8 +676,9 @@ public class Superstructure {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.2),
-                        Commands.waitUntil(m_grabber::hasCoral)
+                        Commands.waitUntil(m_grabberCANRange)
+                        // Commands.waitSeconds(0.2),
+                        // Commands.waitUntil(m_grabber::hasCoral)
                         // m_grabber.applyRotationsBangBang(8, 0.2) moved to autonGrabberAdjustCoral instead to save time
                     )
                 )   
@@ -673,7 +692,7 @@ public class Superstructure {
          */
         public Command autonGrabberAdjustCoral() {
             return Commands.sequence(
-                m_grabber.applyRotationsBangBang(8, 0.2),
+                m_grabber.applyRotationsBangBang(8,  -0.2), // (8, 0.2)
                 Commands.runOnce(() -> safeToMoveElevator = true)
             );
         }
