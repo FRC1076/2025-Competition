@@ -459,9 +459,17 @@ public class Superstructure {
             return Commands.parallel(
                 stopGrabber(),
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.HIGH_INTAKE),
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.LOW_INTAKE),
-                    () -> Localization.getClosestReefFace(m_drive.getPose()).algaeHigh == true
+                    Commands.either(
+                        superstructure.applyWristevatorStateGrabberDown(WristevatorState.HIGH_INTAKE),
+                        superstructure.applyWristevatorStateGrabberDown(WristevatorState.LOW_INTAKE),
+                        () -> Localization.getClosestReefFace(m_drive.getPose()).algaeHigh == true
+                    ),
+                    Commands.either(
+                        superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE),
+                        superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE),
+                        () -> Localization.getClosestReefFace(m_drive.getPose()).algaeHigh == true
+                    ),
+                    () -> m_elevator.getPositionMeters() > 0.25 //HIGH TRAVEL is 0.3m
                 )
             );
         }
