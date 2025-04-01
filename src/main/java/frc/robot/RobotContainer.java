@@ -363,6 +363,19 @@ public class RobotContainer {
 
     private void configureNamedCommands(){
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
+        final Command scoreNet = 
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                Commands.parallel(
+                    superstructureCommands.preNet(),
+                    m_drive.CommandBuilder.autonDriveToScoreNetLocation(),
+                    Commands.sequence(
+                        Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}),
+                        superstructureCommands.doGrabberAction()
+                    )
+                )
+            );
         
         NamedCommands.registerCommand("preL1", superstructureCommands.preL1());
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
@@ -372,13 +385,14 @@ public class RobotContainer {
         NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
-        NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
+        NamedCommands.registerCommand("autonAlgaeIntake", superstructureCommands.autonAlgaeIntake());
+        NamedCommands.registerCommand("scoreNet", scoreNet);
+        // NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
         NamedCommands.registerCommand("autonIntakeCoral", superstructureCommands.autonIntakeCoral());
         NamedCommands.registerCommand("autonGrabberIntakeCoral", superstructureCommands.autonGrabberIntakeCoral());
         NamedCommands.registerCommand("autonGrabberAdjustCoral", superstructureCommands.autonGrabberAdjustCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
-        NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
         // NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp()); didn't work before
     }

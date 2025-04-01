@@ -353,6 +353,25 @@ public class DriveSubsystem extends SubsystemBase {
                 () -> driveToScoreNetCommand.isFinished()
             );
         }
+
+        public Command autonDriveToScoreNetLocation() {
+            return new FunctionalCommand(
+                () -> {
+                    driveToScoreNetCommand.setTargetPose(
+                        new Pose2d(          
+                            7.518,
+                            5.037,
+                            Rotation2d.kZero
+                        )
+                    );
+                    driveToScoreNetCommand.setEndVelocity(0);
+                    driveToScoreNetCommand.schedule();
+                },
+                () -> {},
+                (interrupted) -> driveToScoreNetCommand.cancel(),
+                () -> driveToScoreNetCommand.isFinished()
+            );
+        }
         
         public Command applySwerveRequest(Supplier<SwerveRequest> requestSupplier) {
             return run(() -> acceptRequest(requestSupplier.get()));

@@ -754,10 +754,10 @@ public class Superstructure {
             return m_grabber.applyRotationsBangBang(12, 2);
         }
 
-        public Command autonAlgaeIntakeAndHold() {
-            return Commands.sequence(
-                m_grabber.applyRotationsBangBang(-12, 3),
-                holdAlgae()
+        public Command autonAlgaeIntake() {
+            return Commands.parallel(
+                Commands.runOnce(() -> superstructure.getSuperState().setGrabberPossession(GrabberPossession.ALGAE)),
+                superstructure.applyGrabberState(GrabberState.ALGAE_INTAKE)
             );
         }
 
