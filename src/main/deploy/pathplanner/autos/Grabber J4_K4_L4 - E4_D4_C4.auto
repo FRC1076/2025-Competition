@@ -50,9 +50,22 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
+                      "type": "deadline",
                       "data": {
-                        "waitTime": 0.6
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.6
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "preL4"
+                            }
+                          }
+                        ]
                       }
                     },
                     {
@@ -126,9 +139,22 @@
                 "data": {
                   "commands": [
                     {
-                      "type": "wait",
+                      "type": "deadline",
                       "data": {
-                        "waitTime": 0.6
+                        "commands": [
+                          {
+                            "type": "wait",
+                            "data": {
+                              "waitTime": 0.6
+                            }
+                          },
+                          {
+                            "type": "named",
+                            "data": {
+                              "name": "preL4"
+                            }
+                          }
+                        ]
                       }
                     },
                     {

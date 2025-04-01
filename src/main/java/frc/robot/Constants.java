@@ -218,7 +218,7 @@ public final class Constants {
     public static class SuperstructureConstants {
 
         public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(80);
-        public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(80);
+        public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(90);
 
         // Grabber Possession State
         public enum GrabberPossession {
@@ -302,26 +302,26 @@ public final class Constants {
         // Should we have an eject state with an optional elevator height? just to immediately eject if a game piece is stuck
         public enum WristevatorState {
             
-            TRAVEL(0.1349839121 + 0.00635, 80),//90),
+            TRAVEL(0.1349839121 + 0.00635, 90),//90),
             ALGAE_TRAVEL(0.134983912 + 0.00635, 80),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
             GRABBER_CORAL_INTAKE(0.784, 36.956),
-            GRABBER_CORAL_INTAKE_TRAVEL(0.784, 80),//90),
+            GRABBER_CORAL_INTAKE_TRAVEL(0.784, 90),//90),
             HIGH_TRAVEL(0.3, -90), //with grabber down state
 
-            L1(0.42019, 23.9365), // Placeholder
+            L1(0.3048, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),
             L4(2.11455, -38),//-40.4130051, true), //1.8161, -45),
 
             GROUND_INTAKE(0, 0),
-            LOLLIPOP_INTAKE(0.1349839121 + 0.00635, 60),
+            LOLLIPOP_INTAKE(0.1349839121 + 0.00635, 26.7),
             LOW_INTAKE(0.98407,-27.02),
             HIGH_INTAKE(1.44998, -27.02),
 
             PROCESSOR(0.2536, 0),
-            NET(2.109649 + 3 * 0.00635, 80);
+            NET(2.109649 + 3 * 0.00635, 90);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
