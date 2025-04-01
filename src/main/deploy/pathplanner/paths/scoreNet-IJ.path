@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.926659496479894,
-        "y": 5.003378222741235
+        "x": 6.800625,
+        "y": 5.685269886363637
       },
       "isLocked": false,
       "linkedName": "scoreNet"
@@ -20,8 +20,8 @@
         "y": 5.1
       },
       "prevControl": {
-        "x": 5.48514302643378,
-        "y": 5.0773329368632885
+        "x": 5.853323863636364,
+        "y": 6.143963068181818
       },
       "nextControl": null,
       "isLocked": false,
