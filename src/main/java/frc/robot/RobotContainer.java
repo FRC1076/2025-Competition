@@ -366,14 +366,11 @@ public class RobotContainer {
 
         final Command scoreNet = 
             Commands.parallel(
-                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
-                Commands.parallel(
-                    superstructureCommands.preNet(),
-                    m_drive.CommandBuilder.autonDriveToScoreNetLocation(),
-                    Commands.sequence(
-                        Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}),
-                        superstructureCommands.doGrabberAction()
-                    )
+                superstructureCommands.preNet(),
+                m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                Commands.sequence(
+                    Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}),
+                    superstructureCommands.doGrabberAction()
                 )
             );
         
