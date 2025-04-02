@@ -287,7 +287,7 @@ public final class Constants {
 
         // Index State
         public enum IndexState {
-            TRANSFER(4.5),
+            TRANSFER(6),
             IDLE(0), // Never implemented, just an option
             BACKWARDS(-1);
             
@@ -303,6 +303,7 @@ public final class Constants {
         public enum WristevatorState {
             
             TRAVEL(0.1349839121 + 0.00635, 90),//90),
+            //POST_SCORE_TRAVEL(0.5, 90),
             ALGAE_TRAVEL(0.134983912 + 0.00635, 80),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE

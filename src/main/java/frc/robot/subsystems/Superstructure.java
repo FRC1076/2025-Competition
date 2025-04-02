@@ -496,9 +496,9 @@ public class Superstructure {
          * Set elevator and wrist to L1 preset
          */
         public Command preL1(){
-            return 
+            return  
                 Commands.either(
-                    superstructure.applyWristevatorStateGrabberDown(WristevatorState.L1),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.L1),
                     superstructure.applyWristevatorState(WristevatorState.L1),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
@@ -612,7 +612,7 @@ public class Superstructure {
          */
         public Command intakeCoral() { // (BooleanSupplier safeSignal)
             return Commands.sequence(
-                superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
+                superstructure.applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     transferCoral()
@@ -644,7 +644,7 @@ public class Superstructure {
          */
         public Command grabberIntakeCoral() {
             return Commands.sequence(
-                superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE),
+                superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE, Units.inchesToMeters(8)),
                 Commands.parallel(
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
