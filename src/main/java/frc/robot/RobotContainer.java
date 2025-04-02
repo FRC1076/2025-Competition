@@ -390,6 +390,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autonFunnelIntake",superstructureCommands.autonFunnelIntake());
         NamedCommands.registerCommand("autonFunnelIndex",superstructureCommands.autonFunnelIndex());
         NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
+        NamedCommands.registerCommand("waitForBeambreak", superstructureCommands.waitForBeambreak());
     }
 
     private void configureSharedBindings() {

@@ -112,6 +112,7 @@ public class Superstructure extends SubsystemBase {
     private final Elastic m_elastic;
     private final RobotSuperState m_state = RobotSuperState.getInstance();
     private final Trigger elevatorClutchTrigger;
+    private final BooleanSupplier transferBeambreak;
 
     public final SuperstructureCommandFactory CommandBuilder;
     private final NegatableBooleanSupplier possessAlgae = () -> m_state.getPossession() == GrabberPossession.ALGAE;
@@ -143,6 +144,7 @@ public class Superstructure extends SubsystemBase {
         m_index = index;
         m_wrist = wrist;
         m_elastic = elastic;
+        this.transferBeambreak = transferBeamBreak;
         
         m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
@@ -466,7 +468,8 @@ public class Superstructure extends SubsystemBase {
         return runOnce(() -> setGoal(state))
             .andThen(run(() -> {})
             .alongWith(Commands.runOnce(ledSignal))
-            .until(() -> m_state.getWristevatorState() == m_state.getWristevatorGoal()));
+            .until(() -> m_state.getWristevatorState() == m_state.getWristevatorGoal()))
+            .unless(transferBeambreak);
     }
 
     private Command applyWristevatorStateDirect(WristevatorState state){
@@ -806,9 +809,7 @@ public class Superstructure extends SubsystemBase {
                 superstructure.applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER),
                 superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                 superstructure.holdIndexState(IndexState.TRANSFER),
-                Commands.runOnce(() -> safeToFeedCoral = true),
-                Commands.waitUntil(m_transferBeamBreak),
-                superstructure.applyIndexState(IndexState.BACKWARDS)
+                Commands.runOnce(() -> safeToFeedCoral = true)
             );
         }
 
@@ -816,7 +817,8 @@ public class Superstructure extends SubsystemBase {
         public Command autonFunnelIndex() {
             return Commands.sequence(
                 Commands.waitUntil(m_grabber::hasCoral),
-                m_grabber.applyRotationsBangBang(bangBangVoltage,funnelIntakeBangBangRotations)
+                m_grabber.applyRotationsBangBang(bangBangVoltage,funnelIntakeBangBangRotations),
+                superstructure.applyIndexState(IndexState.BACKWARDS)
             );
         }
 
@@ -926,14 +928,6 @@ public class Superstructure extends SubsystemBase {
             return superstructure.applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER);
         }
 
-        public Command autonPreIntakeFlick() {
-            return Commands.sequence(
-                wristFlickUp(),
-                applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER),
-                transferCoral()
-            );
-        }
-
         public Command autonIntakeCoral() {
             return Commands.sequence(
                 // superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
@@ -944,6 +938,10 @@ public class Superstructure extends SubsystemBase {
 
         public Command preL4Direct() {
             return superstructure.applyWristevatorStateDirect(WristevatorState.L4);
+        }
+
+        public Command waitForBeambreak() {
+            return Commands.waitUntil(m_transferBeamBreak);
         }
 
         public Command preL3Direct() {
