@@ -1,0 +1,43 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1-J4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "J4_LOUT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LOUT-K4"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "K4-LOUT"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LOUT-L4"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": false,
+  "folder": null,
+  "choreoAuto": false
+}

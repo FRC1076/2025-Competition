@@ -37,7 +37,7 @@ public class ApplyRadians extends Command {
   public void initialize() {
     setpoint = m_grabber.getPosition() + radians;
     positiveDirection = setpoint > m_grabber.getPosition();
-    m_grabber.runVolts(volts);
+    m_grabber.runVolts(volts * (positiveDirection ? 1 : -1));
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -54,7 +54,7 @@ public class ApplyRadians extends Command {
   @Override
   public boolean isFinished() {
     return positiveDirection 
-                ? m_grabber.getPosition() >= setpoint
-                : m_grabber.getPosition() <= setpoint;
+        ? m_grabber.getPosition() >= setpoint
+        : m_grabber.getPosition() <= setpoint;
   }
 }

@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.units.measure.Distance;
 
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
 public class GrabberIOHardware implements GrabberIO{
@@ -28,7 +29,7 @@ public class GrabberIOHardware implements GrabberIO{
 
     private final SparkMaxConfig m_leftMotorConfig;
     private final SparkMaxConfig m_rightMotorConfig;
-    private final StatusSignal<Distance> coralSensorSignal;
+    private final StatusSignal<Boolean> coralSensorSignal;
 
     public GrabberIOHardware() {
         m_leftMotor = new SparkMax(GrabberConstants.kLeftMotorPort, MotorType.kBrushless);
@@ -52,7 +53,11 @@ public class GrabberIOHardware implements GrabberIO{
 
         m_leftMotor.configure(m_leftMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
         m_rightMotor.configure(m_rightMotorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
-        coralSensorSignal = m_coralSensor.getDistance(true);
+        coralSensorSignal = m_coralSensor.getIsDetected(true);
+        m_coralSensor.getConfigurator().apply(
+            new ProximityParamsConfigs()
+                .withProximityThreshold(GrabberConstants.kCoralDistanceThreshold)
+        );
     }
 
     /** Sets both motors to the same voltage */
@@ -85,6 +90,6 @@ public class GrabberIOHardware implements GrabberIO{
         inputs.rightMotorCurrent = m_rightMotor.getOutputCurrent();
 
         inputs.motorPositionRadians = m_encoder.getPosition(); //This is used for bang-bang control
-        inputs.hasCoral = coralSensorSignal.getValueAsDouble() < GrabberConstants.kCoralDistanceThreshold;
+        inputs.hasCoral = coralSensorSignal.getValue();
     }
 }

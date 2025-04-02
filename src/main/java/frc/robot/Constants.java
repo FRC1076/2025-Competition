@@ -217,8 +217,13 @@ public final class Constants {
 
         public static final Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(65);
         public static final Rotation2d highTravelAngle = Rotation2d.kCCW_90deg;
-        public static final Rotation2d coralTravelAngle = Rotation2d.kCW_90deg;
+        public static final Rotation2d coralTravelAngle = Rotation2d.fromDegrees(80);
         public static final double algaeNetReleaseHeightMeters = 2.109;
+
+        
+        public static final double grabberIntakeBangBangRotations = -0.37;
+        public static final double funnelIntakeBangBangRotations = 1.6;
+        public static final double bangBangVoltage = 8;
 
         // Grabber Possession State
         public enum GrabberPossession {

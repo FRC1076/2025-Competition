@@ -7,9 +7,12 @@ package frc.robot.subsystems;
 import static frc.robot.Constants.SuperstructureConstants.algaeIntakeStateSet;
 import static frc.robot.Constants.SuperstructureConstants.algaeNetReleaseHeightMeters;
 import static frc.robot.Constants.SuperstructureConstants.algaeTravelAngle;
+import static frc.robot.Constants.SuperstructureConstants.bangBangVoltage;
 import static frc.robot.Constants.SuperstructureConstants.coralBranchStateSet;
 import static frc.robot.Constants.SuperstructureConstants.highTravelAngle;
 import static frc.robot.Constants.SuperstructureConstants.coralTravelAngle;
+import static frc.robot.Constants.SuperstructureConstants.funnelIntakeBangBangRotations;
+import static frc.robot.Constants.SuperstructureConstants.grabberIntakeBangBangRotations;
 
 import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 import frc.robot.SystemConfig.PrebuildModes;
@@ -788,13 +791,33 @@ public class Superstructure extends SubsystemBase {
                     superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
                     superstructure.holdIndexState(IndexState.TRANSFER)
                 ).until(m_grabber::hasCoral),
-                superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // Adjust rotations
+                superstructure.m_grabber.applyRotationsBangBang(bangBangVoltage, funnelIntakeBangBangRotations), // Adjust rotations
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)
                 )
             );
 
+        }
+
+        /** Optimized funnel intake. Waits for the funnel beambreak to be broken before leaving*/
+        public Command autonFunnelIntake() {
+            return Commands.sequence(
+                superstructure.applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER),
+                superstructure.applyGrabberState(GrabberState.CORAL_INTAKE),
+                superstructure.holdIndexState(IndexState.TRANSFER),
+                Commands.runOnce(() -> safeToFeedCoral = true),
+                Commands.waitUntil(m_transferBeamBreak),
+                superstructure.applyIndexState(IndexState.BACKWARDS)
+            );
+        }
+
+        // Should be run immediately after autonPreFunnelIntake()
+        public Command autonFunnelIndex() {
+            return Commands.sequence(
+                Commands.waitUntil(m_grabber::hasCoral),
+                m_grabber.applyRotationsBangBang(bangBangVoltage,funnelIntakeBangBangRotations)
+            );
         }
 
         /**
@@ -833,9 +856,8 @@ public class Superstructure extends SubsystemBase {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral),
-                        m_grabber.applyRotationsBangBang(8, 0.2)
+                        m_grabber.applyRotationsBangBang(bangBangVoltage, grabberIntakeBangBangRotations)
                     )
                 ),
                 Commands.parallel(
@@ -860,7 +882,7 @@ public class Superstructure extends SubsystemBase {
                     Commands.runOnce(() -> safeToFeedCoral = true),
                     Commands.sequence(
                         applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.2),
+                        //Commands.waitSeconds(0.2),
                         Commands.waitUntil(m_grabber::hasCoral)
                         // m_grabber.applyRotationsBangBang(8, 0.2) moved to autonGrabberAdjustCoral instead to save time
                     )
@@ -875,7 +897,7 @@ public class Superstructure extends SubsystemBase {
          */
         public Command autonGrabberAdjustCoral() {
             return Commands.sequence(
-                m_grabber.applyRotationsBangBang(8, 0.2),
+                m_grabber.applyRotationsBangBang(bangBangVoltage, grabberIntakeBangBangRotations),
                 Commands.runOnce(() -> safeToMoveElevator = true)
             );
         }
@@ -904,6 +926,14 @@ public class Superstructure extends SubsystemBase {
             return superstructure.applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER);
         }
 
+        public Command autonPreIntakeFlick() {
+            return Commands.sequence(
+                wristFlickUp(),
+                applyWristevatorStateDirect(WristevatorState.CORAL_TRANSFER),
+                transferCoral()
+            );
+        }
+
         public Command autonIntakeCoral() {
             return Commands.sequence(
                 // superstructure.applyWristevatorState(WristevatorState.CORAL_TRANSFER),
@@ -914,6 +944,10 @@ public class Superstructure extends SubsystemBase {
 
         public Command preL4Direct() {
             return superstructure.applyWristevatorStateDirect(WristevatorState.L4);
+        }
+
+        public Command preL3Direct() {
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L3);
         }
 
         public Command holdAlgae() {

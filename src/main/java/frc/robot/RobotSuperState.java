@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.Optional;
+
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
@@ -31,6 +33,7 @@ public class RobotSuperState {
     private GrabberState grabberState;
     private GrabberPossession possession;
     private boolean transferBeambreak;
+    private Optional<Pose2d> targetPose; // Autoalign target pose
 
     public static RobotSuperState getInstance() {
         if (inst == null) {
@@ -49,6 +52,14 @@ public class RobotSuperState {
         grabberState = GrabberState.IDLE;
         possession = GrabberPossession.EMPTY;
         transferBeambreak = false;
+    }
+
+    public void updateTargetPose(Pose2d pose){
+        targetPose = Optional.of(pose);
+    }
+
+    public Optional<Pose2d> getTargetPose(){
+        return targetPose;
     }
 
     public void updateDriveState(SwerveDriveState driveState){

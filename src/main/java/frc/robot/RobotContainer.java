@@ -375,6 +375,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("preL3", superstructureCommands.preL3());
         NamedCommands.registerCommand("preL4", superstructureCommands.preL4());
         NamedCommands.registerCommand("preL4Direct", superstructureCommands.preL4Direct());
+        NamedCommands.registerCommand("preL3Direct",superstructureCommands.preL3Direct());
         NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
@@ -386,7 +387,9 @@ public class RobotContainer {
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("autonAlgaeIntakeAndHold", superstructureCommands.autonAlgaeIntakeAndHold());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
-        // NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp()); didn't work before
+        NamedCommands.registerCommand("autonFunnelIntake",superstructureCommands.autonFunnelIntake());
+        NamedCommands.registerCommand("autonFunnelIndex",superstructureCommands.autonFunnelIndex());
+        NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp());
     }
 
     private void configureSharedBindings() {
