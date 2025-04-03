@@ -619,7 +619,7 @@ public class Superstructure {
                 ),
                 Commands.parallel(
                     //superstructure.applyWristevatorState(WristevatorState.TRAVEL),
-                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL, m_transferBeamBreak.debounce(0.06)),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_TRAVEL),
                     Commands.run(() -> safeToMoveElevator = true)
                 ).unless(elevatorClutchTrigger)
             );

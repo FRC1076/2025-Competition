@@ -100,6 +100,9 @@ public class VisionLocalizationSystem {
      */
     public void update() {
         for (var camStruct : cameras.values()) {
+
+            camStruct.camera.log();
+
             if (camStruct.cameraActive) {
                 camStruct.camera.getPoseEstimate().ifPresent(
                     (estimate) -> {

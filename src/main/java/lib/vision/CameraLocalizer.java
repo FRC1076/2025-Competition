@@ -33,4 +33,6 @@ public interface CameraLocalizer {
     public default void setPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy) {}
 
     public default void setFallbackPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy) {}
+
+    public default void log() {}
 }
