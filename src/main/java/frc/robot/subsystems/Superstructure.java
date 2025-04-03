@@ -109,7 +109,6 @@ public class Superstructure extends SubsystemBase {
     private final GrabberSubsystem m_grabber;
     private final IndexSubsystem m_index;
     private final WristSubsystem m_wrist;
-    private final Elastic m_elastic;
     private final RobotSuperState m_state = RobotSuperState.getInstance();
     private final Trigger elevatorClutchTrigger;
     private final BooleanSupplier transferBeambreak;
@@ -136,17 +135,13 @@ public class Superstructure extends SubsystemBase {
         GrabberSubsystem grabber,
         IndexSubsystem index,
         WristSubsystem wrist,
-        Elastic elastic,
         BooleanSupplier transferBeamBreak //returns true when beam broken
     ) {
         m_elevator = elevator;
         m_grabber = grabber;
         m_index = index;
         m_wrist = wrist;
-        m_elastic = elastic;
         this.transferBeambreak = transferBeamBreak;
-        
-        m_elastic.updateTransferBeamBreak(transferBeamBreak.getAsBoolean());
 
         CommandBuilder = new SuperstructureCommandFactory(this, transferBeamBreak);
         elevatorClutchTrigger = new Trigger(this::elevatorClutchSignal);

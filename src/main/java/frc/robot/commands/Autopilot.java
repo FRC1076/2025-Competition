@@ -5,6 +5,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import frc.robot.Constants.FieldConstants.ReefLevel;
 import frc.robot.RobotSuperState;
+import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.subsystems.drive.DriveSubsystem;
@@ -83,7 +84,7 @@ public class Autopilot {
     public Command setTargetLevel(ReefLevel level){
         return Commands.runOnce(() -> {
             targetLevel = level;
-            System.out.println("LOADED TARGET REEF LEVEL: " + targetLevel.name());
+            Elastic.getInstance().putAutopilotTargetLevel(level);
         });
     }
 
@@ -118,8 +119,7 @@ public class Autopilot {
     private Command alignForCoralCycle(boolean leftSide,ReefLevel level){
         return Commands.parallel(
             followReefLevelTarget(),
-            leftSide ? m_driveCommands.directDriveToNearestLeftBranch() : m_driveCommands.directDriveToNearestRightBranch(),
-            Commands.run(() -> {})
+            leftSide ? m_driveCommands.directDriveToNearestLeftBranch() : m_driveCommands.directDriveToNearestRightBranch()
         );
     }
 }

@@ -14,20 +14,20 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.Constants.GameConstants;
+import frc.robot.Constants.FieldConstants.ReefLevel;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
 import frc.robot.RobotContainer;
 
 public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
+    private static Elastic inst;
     private Field2d field;
     private SendableChooser<AutonSides> autonSideChooser;
     private HashMap<Alliance, String> AllianceNames; 
     private Alliance currentAllianceName;
-    private final RobotContainer m_robotContainer;
 
-    public Elastic(RobotContainer robotContainer) {
-        m_robotContainer = robotContainer;
+    private Elastic() {
         /* This is a dropdown menu on the SmartDashboard that allows the user to select whether 
         the auton is on the left (default) or the right side of the field.
         */
@@ -50,6 +50,13 @@ public class Elastic {
         this.putBoolean("safeToFeedCoral", false);
         this.putBoolean("safeToMoveElevator", false);
         this.putBoolean("isAutoAligned", false);
+    }
+
+    public static Elastic getInstance() {
+        if (inst == null) {
+            inst = new Elastic();
+        }
+        return inst;
     }
 
     public void putNumber(String key, double value) {
@@ -85,6 +92,14 @@ public class Elastic {
         this.currentAllianceName = alliance;
     }
 
+    public void putAutopilotTargetLevel(ReefLevel target){
+        SmartDashboard.putString("AutopilotQueuedLevel",target.name());
+    }
+
+    public void clearAutopilotTargetLevel(){
+        SmartDashboard.putString("AutopilotQueuedLevel","NULL");
+    }
+
     /** Sends the selected team color to the dashboard if it has changed */
     public void updateTeamColor() {
         if (this.getSelectedTeamColor() != this.currentAllianceName) {
@@ -111,6 +126,6 @@ public class Elastic {
     /** Returns true to mirror the auton from the left side to the right side
      * when in autonomous mode and the auton is selected as mirrored to the right side */
     public boolean getPathPlannerMirrored() {
-        return m_robotContainer.getAutonState() && autonSideChooser.getSelected().isRightSide;
+        return DriverStation.isAutonomous() && autonSideChooser.getSelected().isRightSide;
     }
 }

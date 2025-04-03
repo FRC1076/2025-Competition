@@ -78,7 +78,6 @@ public class DriveSubsystem extends SubsystemBase {
     private boolean isAutoAligned = false;
     public final DriveCommandFactory CommandBuilder;
     private final VisionLocalizationSystem vision;
-    private final Elastic elastic;
     
     /* Swerve requests to apply during SysId characterization */
     private final SwerveRequest.SysIdSwerveTranslation m_translationCharacterization = new SwerveRequest.SysIdSwerveTranslation();
@@ -146,10 +145,9 @@ public class DriveSubsystem extends SubsystemBase {
 
     private final Map<DrivetrainSysIDRoutine,SysIdRoutine> sysIDMap = new EnumMap<>(DrivetrainSysIDRoutine.class);
 
-    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision, Elastic elastic) {
+    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision) {
         this.io = io;
         this.vision = vision;
-        this.elastic = elastic;
         vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
 
         if (GameConstants.teamColor == Alliance.Red) {
@@ -160,11 +158,11 @@ public class DriveSubsystem extends SubsystemBase {
         
         try {
             AutoBuilder.configure(
-                () -> elastic.getPathPlannerMirrored() 
+                () -> Elastic.getInstance().getPathPlannerMirrored() 
                     ? this.getMirroredPose() 
                     : this.getPose(),
                 (pose) -> {
-                    if (elastic.getPathPlannerMirrored()) {
+                    if (Elastic.getInstance().getPathPlannerMirrored()) {
                         this.resetPoseMirrored(pose);
                     } else {
                         this.resetPose(pose);
@@ -172,7 +170,7 @@ public class DriveSubsystem extends SubsystemBase {
                 },
                 () -> driveInputs.Speeds,
                 (speeds, feedforwards) -> {
-                    if (elastic.getPathPlannerMirrored()) {
+                    if (Elastic.getInstance().getPathPlannerMirrored()) {
                         driveCoMirrored(speeds);
                     } else {
                         driveCO(speeds);

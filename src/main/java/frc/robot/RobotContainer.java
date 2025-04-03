@@ -125,7 +125,6 @@ public class RobotContainer {
     private final Trigger m_elevatorZeroed;
     private final Superstructure m_superstructure;
     private final SuperstructureVisualizer superVis;
-    private final Elastic m_elastic;
     private final LEDSubsystem m_LEDs;
 
     private boolean m_autonState = false;
@@ -182,8 +181,7 @@ public class RobotContainer {
         
         if (SystemConfig.systemMode == SystemModes.kReal) {
             m_visionSim = null;
-            m_elastic = new Elastic(this);
-            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
+            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision);
 
             // BLUE
             /* 
@@ -215,8 +213,7 @@ public class RobotContainer {
                 );
             }
         } else {//if (SystemConstants.currentMode == SystemMode.SIM || SystemConstants.currentMode == SystemMode.REPLAY) {
-            m_elastic = new Elastic(this);
-            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
+            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOSim(), this::getLoopTime);
             m_grabber = new GrabberSubsystem(new GrabberIOSim());
@@ -247,7 +244,6 @@ public class RobotContainer {
             m_grabber,
             m_index, 
             m_wrist, 
-            m_elastic,
             m_transferBeamBreak
         );
 
@@ -329,7 +325,7 @@ public class RobotContainer {
         );
         SmartDashboard.putData(m_autoChooser);
 
-        CommandUtils.makePeriodic(() -> m_elastic.updateTeamColor(), true);
+        CommandUtils.makePeriodic(() -> Elastic.getInstance().updateTeamColor(), true);
 
 
     }
@@ -349,14 +345,14 @@ public class RobotContainer {
                 m_LEDs.setStateTimed(LEDStates.AUTO_ALIGNED))
             .onChange(
                 Commands.runOnce(
-                    () -> m_elastic.updateIsAutoAligned(m_drive::isAutoAligned)));
+                    () -> Elastic.getInstance().updateIsAutoAligned(m_drive::isAutoAligned)));
         
         m_safeToMoveElevator
             .onTrue(
                 m_LEDs.setStateTimed(LEDStates.CORAL_INDEXED))
             .onChange(
                 Commands.runOnce(
-                    () -> m_elastic.updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator)));
+                    () -> Elastic.getInstance().updateSafeToMoveElevator(m_superstructure::getSafeToMoveElevator)));
 
         m_elevatorZeroed
             .onTrue(
@@ -364,7 +360,7 @@ public class RobotContainer {
 
         m_safeToFeedCoral.onChange(
             Commands.runOnce(
-                () -> m_elastic.updateSafeToFeedCoral(m_superstructure::getSafeToFeedCoral)));
+                () -> Elastic.getInstance().updateSafeToFeedCoral(m_superstructure::getSafeToFeedCoral)));
     }
 
     private void configureNamedCommands(){
