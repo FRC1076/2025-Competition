@@ -110,7 +110,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Left;
+        public static AutonSides autonSide = AutonSides.Right;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -217,7 +217,7 @@ public final class Constants {
 
     public static class SuperstructureConstants {
 
-        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(80);
+        public static Rotation2d algaeTravelAngle = Rotation2d.fromDegrees(70);
         public static Rotation2d coralTravelAngle = Rotation2d.fromDegrees(90);
 
         // Grabber Possession State
@@ -322,7 +322,7 @@ public final class Constants {
             HIGH_INTAKE(1.44998, -27.02),
 
             PROCESSOR(0.2536, 0),
-            NET(2.109649 + 3 * 0.00635, 90);
+            NET(2.109649 + 3 * 0.00635, 80);
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;
