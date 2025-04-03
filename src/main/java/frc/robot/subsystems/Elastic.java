@@ -17,7 +17,6 @@ import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefLevel;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
-import frc.robot.RobotContainer;
 
 public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
@@ -105,10 +104,6 @@ public class Elastic {
         if (this.getSelectedTeamColor() != this.currentAllianceName) {
             this.putSelectedTeamColor();
         }
-    }
-
-    public void updateTransferBeamBreak(boolean beamBroken) {
-        this.putBoolean("transferBB", beamBroken);
     }
 
     public void updateSafeToFeedCoral(BooleanSupplier safeToFeedCoral) {

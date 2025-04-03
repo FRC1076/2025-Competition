@@ -32,8 +32,10 @@ public class RobotSuperState {
     private IndexState indexState;
     private GrabberState grabberState;
     private GrabberPossession possession;
-    private boolean transferBeambreak;
     private Optional<Pose2d> targetPose; // Autoalign target pose
+    private boolean safeToMoveElevator = false;
+    private boolean safeToFeedCoral = false;
+    private boolean isAutoaligned = false;
 
     public static RobotSuperState getInstance() {
         if (inst == null) {
@@ -51,7 +53,6 @@ public class RobotSuperState {
         indexState = IndexState.BACKWARDS;
         grabberState = GrabberState.IDLE;
         possession = GrabberPossession.EMPTY;
-        transferBeambreak = false;
     }
 
     public void updateTargetPose(Pose2d pose){
@@ -73,6 +74,32 @@ public class RobotSuperState {
         this.driveState.RawHeading = driveState.RawHeading;
         this.driveState.Pose = driveState.Pose;
         this.driveState.OdometryPeriod = driveState.OdometryPeriod;
+    }
+
+    public boolean isSafeToMoveElevator() {
+        return safeToMoveElevator;
+    }
+
+    public void setSafeToMoveElevator(boolean safeToMoveElevator) {
+        this.safeToMoveElevator = safeToMoveElevator;
+    }
+
+    // Getter and Setter for safeToFeedCoral
+    public boolean isSafeToFeedCoral() {
+        return safeToFeedCoral;
+    }
+
+    public void setSafeToFeedCoral(boolean safeToFeedCoral) {
+        this.safeToFeedCoral = safeToFeedCoral;
+    }
+
+    // Getter and Setter for isAutoaligned
+    public boolean isAutoaligned() {
+        return isAutoaligned;
+    }
+
+    public void setAutoaligned(boolean isAutoaligned) {
+        this.isAutoaligned = isAutoaligned;
     }
 
     public void updateWristevatorState(WristevatorState wristevatorState){
@@ -101,10 +128,6 @@ public class RobotSuperState {
 
     public void updatePossession(GrabberPossession possession){
         this.possession = possession;
-    }
-
-    public void updateTransferBeambreak(boolean transferBeambreak){
-        this.transferBeambreak = transferBeambreak;
     }
 
     public SwerveDriveState getDriveState() {
@@ -153,10 +176,6 @@ public class RobotSuperState {
 
     public GrabberPossession getPossession() {
         return possession;
-    }
-
-    public boolean getTransferBeambreak() {
-        return transferBeambreak;
     }
 
     //NOTE: Only logs superstructure states, since subsystems are already logged
