@@ -269,8 +269,8 @@ public class RobotContainer {
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
         m_safeToMoveElevator = new Trigger(() -> m_superstructure.getSafeToMoveElevator());
-        // m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
-        m_isAutoAligned = new Trigger(() -> teleopDriveCommand.isAutoAligned());
+        m_isAutoAligned = new Trigger(() -> m_drive.isAutoAligned());
+        // m_isAutoAligned = new Trigger(() -> teleopDriveCommand.isAutoAligned());
         m_elevatorZeroed = new Trigger(() -> m_elevator.isZeroed());
 
         m_drive.setDefaultCommand(

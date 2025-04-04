@@ -21,7 +21,7 @@ import frc.robot.Constants.LEDConstants.LEDStates;
  * <p>
  * All of the methods in this file will call the corresponding method in the chosen IO layer.
  */
-public class LEDSubsystem extends SubsystemBase{
+public class LEDSubsystem extends SubsystemBase {
     private final LEDBase io;
     private LEDStates previousState = LEDStates.IDLE;
 
@@ -78,5 +78,9 @@ public class LEDSubsystem extends SubsystemBase{
             () -> setState(this.previousState),
             this
         ).withTimeout(seconds);
+    }
+
+    private void calculateAndSetState(){
+        
     }
 }

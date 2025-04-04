@@ -11,6 +11,7 @@ import java.util.Set;
 import edu.wpi.first.math.geometry.Pose2d;
 import frc.robot.RobotSuperState;
 import frc.robot.Constants.FieldConstants;
+import frc.robot.Constants.FieldConstants.PointOfInterest;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.FieldConstants.ReefFace;
 
@@ -60,6 +61,21 @@ public final class Localization {
         }
 
         return closestPose;
+    }
+
+    private static PointOfInterest getClosestPointOfInterest(Set<PointOfInterest> POIs,Pose2d robotPose){
+        double closestDistance = Double.MAX_VALUE;
+        PointOfInterest closestPOI = null;
+
+        for (PointOfInterest POI : POIs) {
+            double distance = robotPose.getTranslation().getDistance(POI.position);
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestPOI = POI;
+            }
+        }
+
+        return closestPOI;
     }
 
     /**
@@ -133,5 +149,10 @@ public final class Localization {
 
     public static boolean isClosestReefAlgaeHigh(){
         return getClosestReefFace(RobotSuperState.getInstance().getPose()).aprilTagID % 2 == 0;
+    }
+
+    public static double distanceFromReefCenter(){
+        PointOfInterest closestReefCenter = getClosestPointOfInterest(FieldConstants.reefCenters,RobotSuperState.getInstance().getPose());
+        return RobotSuperState.getInstance().getPose().getTranslation().getDistance(closestReefCenter.position);
     }
 }

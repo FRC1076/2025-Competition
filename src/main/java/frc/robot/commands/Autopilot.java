@@ -14,7 +14,6 @@ import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 /**
@@ -30,7 +29,6 @@ public class Autopilot {
     private ReefLevel targetLevel = ReefLevel.L1;
     private ReefLevel commandGoalLevel = ReefLevel.L1;
     private Command reefCommand = Commands.none();
-    
     
     public Autopilot(DriveSubsystem drive, Superstructure superstructure){
         m_driveCommands = drive.CommandBuilder;

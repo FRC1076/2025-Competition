@@ -55,7 +55,6 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ForwardPerspectiveValue;
 
 public class TeleopDriveCommand extends Command {
-    private static final LQRHolonomicDriveControllerTolerances tolerances = new LQRHolonomicDriveControllerTolerances(0.1, 0.5, 0.1, 0.5);
 
     // The raw speed suppliers, unaffected by the clutches. A reference to these is maintained in order to make applying and unapplying clutches easier
     private final DoubleSupplier rawXSupplier;
@@ -73,15 +72,6 @@ public class TeleopDriveCommand extends Command {
     private DoubleSupplier xSupplier;
     private DoubleSupplier ySupplier;
     private DoubleSupplier omegaSupplier;
-
-    private final ProfiledPIDController translationPIDController = new ProfiledPIDController(0.5, 0, 0, translationConstraints); // PathPlanner uses 5, 0, 0
-    private final ProfiledPIDController rotationPIDController = new ProfiledPIDController(0.5, 0, 0, headingConstraints); // 5, 0, 0
-
-    private final ProfiledPIDHolonomicController m_DriveController = 
-        new ProfiledPIDHolonomicController(
-            translationPIDController,
-            rotationPIDController
-        );
 
     private Pose2d goalPose = new Pose2d();
 
@@ -231,63 +221,6 @@ public class TeleopDriveCommand extends Command {
             () -> clearRequestGeneratorOverride()
         );
     }
-
-    public Command applyLeftBranchAlign() {
-        return applyRequestGenerator(
-            (vx, vy, omega) -> {
-                goalPose = GeometryUtils.rotatePose(
-                    Localization.getClosestReefFace(m_drive.getPose()).leftBranch.transformBy(robotOffset),
-                    Rotation2d.k180deg
-                );
-
-                translationPIDController.reset(
-                    m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
-                    m_drive.getVelocityMPS()
-                );
-
-                rotationPIDController.reset(
-                    m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
-                    m_drive.getAngularVelocityRadPerSec()
-                );
-
-                return new ApplyRobotSpeeds().withSpeeds(
-                    m_DriveController.calculate(
-                        m_drive.getPose(),
-                        goalPose
-                    )
-                );
-            }
-        );
-    }
-
-    public Command applyRightBranchAlign() {
-        return applyRequestGenerator(
-            (vx, vy, omega) -> {
-                goalPose = GeometryUtils.rotatePose(
-                    Localization.getClosestReefFace(m_drive.getPose()).rightBranch.transformBy(robotOffset),
-                    Rotation2d.k180deg);
-
-                translationPIDController.reset(
-                    m_drive.getPose().getTranslation().getDistance(goalPose.getTranslation()),
-                    m_drive.getVelocityMPS());
-
-                rotationPIDController.reset(
-                    m_drive.getPose().getRotation().minus(goalPose.getRotation()).getRadians(),
-                    m_drive.getAngularVelocityRadPerSec());
-
-                return new ApplyRobotSpeeds().withSpeeds(
-                    m_DriveController.calculate(
-                        m_drive.getPose(),
-                        goalPose
-                    )
-                );
-            }
-        );
-    }
-
-    public boolean isAutoAligned() {
-        return m_DriveController.atReference();
-    }   
 
     /** Returns a command that makes the drive train drive in chassis-oriented mode, with a clutch applied, for FPV branch alignment */
     public Command applyFPVDrive(){

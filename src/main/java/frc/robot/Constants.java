@@ -426,6 +426,11 @@ public final class Constants {
             }
         }
 
+        public static Set<PointOfInterest> reefCenters = Set.of(
+            PointOfInterest.BLU_REEF,
+            PointOfInterest.RED_REEF
+        );
+
         // Poses of interest
         public enum PoseOfInterest {
             BLU_PROCESSOR(5.973318, -0.00381, 90), //Taken from April Tag coordinates
