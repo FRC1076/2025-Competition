@@ -4,6 +4,7 @@
 
 package lib.vision;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -21,6 +22,7 @@ public interface CameraLocalizer {
     public static record CommonPoseEstimate(
         Pose2d pose,
         double timestampSeconds,
+        List<Integer> fiducialIDs,
         Matrix<N3, N1> stdDevs
     ) {}
 

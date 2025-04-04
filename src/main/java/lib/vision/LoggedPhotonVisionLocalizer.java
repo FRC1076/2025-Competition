@@ -134,6 +134,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
                 return new CommonPoseEstimate(
                     estimate.estimatedPose.toPose2d(),
                     estimate.timestampSeconds,
+                    estimate.targetsUsed.stream().map((tgt) -> tgt.fiducialId).toList(),
                     stddevs
                 );
             }

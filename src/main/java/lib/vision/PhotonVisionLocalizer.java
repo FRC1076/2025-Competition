@@ -35,8 +35,6 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
     private final Supplier<Rotation2d> headingSupplier;
     private final Matrix<N3, N1> defaultSingleStdDevs;
     private final Matrix<N3, N1> defaultMultiStdDevs;
-    private final AtomicBoolean isValid = new AtomicBoolean(true);
-    private Optional<Set<Integer>> validAprilTags;
 
     public PhotonVisionLocalizer(
         PhotonCamera camera, 
@@ -107,10 +105,7 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
         for (var res : results) {
-            List<Integer> detectedIDs = res.targets.stream().map((PhotonTrackedTarget tgt) -> tgt.fiducialId).toList();
-            isValid.set(true);
-            validAprilTags.ifPresentOrElse((validIDs) -> isValid.set(validIDs.containsAll(detectedIDs)),() -> {});
-            if (isValid.get()) visionEst = poseEstimator.update(res);
+            visionEst = poseEstimator.update(res);
         }
 
         return visionEst.map(
@@ -118,6 +113,7 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
                 return new CommonPoseEstimate(
                     estimate.estimatedPose.toPose2d(),
                     estimate.timestampSeconds,
+                    estimate.targetsUsed.stream().map((tgt) -> tgt.fiducialId).toList(),
                     calculateStdDevs(estimate)
                 );
             }
