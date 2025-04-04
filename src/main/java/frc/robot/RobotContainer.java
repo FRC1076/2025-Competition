@@ -477,13 +477,16 @@ public class RobotContainer {
         m_driverController.y().whileTrue(
             Commands.parallel(
                 Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
-                Commands.sequence(    
-                    m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                Commands.sequence(
                     Commands.parallel(
-                        superstructureCommands.preNet(),
+                        superstructureCommands.preAutomaticNet().asProxy(),
+                        m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
+                    ),
+                    Commands.parallel(
                         m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                        superstructureCommands.preNet(),
                         Commands.sequence(
-                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}),
+                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
                             superstructureCommands.doGrabberAction()
                         )
                     )

@@ -110,7 +110,7 @@ public final class Constants {
     public static class GameConstants {
 
         public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Right;
+        public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -305,6 +305,7 @@ public final class Constants {
             TRAVEL(0.1349839121 + 0.00635, 90),//90),
             //POST_SCORE_TRAVEL(0.5, 90),
             ALGAE_TRAVEL(0.134983912 + 0.00635, 80),
+            PRE_AUTOMATIC_NET(0.1349839121 + 0.00635, 45),
 
             CORAL_TRANSFER(0.1349839121 + 0.00635, -15.57789 + 2), // Same as CORAL_DIRECT_INTAKE
             GRABBER_CORAL_INTAKE(0.784, 36.956),
@@ -322,7 +323,7 @@ public final class Constants {
             HIGH_INTAKE(1.44998, -27.02),
 
             PROCESSOR(0.2536, 0),
-            NET(2.109649 + 3 * 0.00635, 80);
+            NET(2.109649 + 3 * 0.00635, 67.5); // 80
 
             public final double elevatorHeightMeters;
             public final Rotation2d wristAngle;

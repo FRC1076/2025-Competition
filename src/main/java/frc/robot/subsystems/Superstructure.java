@@ -239,6 +239,35 @@ public class Superstructure {
         );
     }
 
+    private Command applyWristevatorStateNoPremove(WristevatorState position, double tolerance, boolean grabberDown) {
+
+        Runnable ledSignal = () -> {
+            safeToFeedCoral = false;
+            safeToMoveElevator = false;
+        };
+
+        Command wristPreMoveCommand = Commands.either(
+            m_wrist.applyAnglePersistent(algaeTravelAngle),
+            m_wrist.applyAnglePersistent(grabberDown ? Rotation2d.kCW_90deg : coralTravelAngle),
+            possessAlgae
+        );
+
+        // Due to command composition semantics, the command composition itself cannot require the subsystems directly
+        return Commands.sequence(
+            Commands.runOnce(() -> superState.setWristevatorState(position)),
+            //CommandUtils.makeDaemon(wristPreMoveCommand),
+            //Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
+            //Commands.print("AT PREMOVE"),
+            CommandUtils.makeDaemon(m_elevator.applyPositionPersistent(position.elevatorHeightMeters)),
+            Commands.waitUntil(() -> m_elevator.withinTolerance(tolerance)),
+            //Commands.print("AT ELEVATOR HEIGHT"),
+            CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
+            Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
+            //Commands.print("AT WRIST FINAL"),
+            Commands.runOnce(ledSignal)
+        );
+    }
+
     /**
      * Folds back wrist, moves elevator, then deploys wrist
      * <p> If the robot is already in the chosen state, it will skip the premoves
@@ -460,8 +489,8 @@ public class Superstructure {
                 stopGrabber(),
                 Commands.either(
                     Commands.either(
-                        superstructure.applyWristevatorStateGrabberDown(WristevatorState.HIGH_INTAKE),
-                        superstructure.applyWristevatorStateGrabberDown(WristevatorState.LOW_INTAKE),
+                        superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE, Units.inchesToMeters(6)),
+                        superstructure.applyWristevatorState(WristevatorState.LOW_INTAKE, Units.inchesToMeters(6)),
                         () -> Localization.getClosestReefFace(m_drive.getPose()).algaeHigh == true
                     ),
                     Commands.either(
@@ -544,7 +573,11 @@ public class Superstructure {
          * Set elevator and wrist to net preset
          */
         public Command preNet(){
-            return superstructure.applyWristevatorState(WristevatorState.NET);
+            return superstructure.applyWristevatorStateNoPremove(WristevatorState.NET, Units.inchesToMeters(0.5),false);
+        }
+
+        public Command preAutomaticNet(){
+            return superstructure.m_wrist.applyAngle(Rotation2d.fromDegrees(70));
         }
 
         /**
