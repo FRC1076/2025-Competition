@@ -6,6 +6,8 @@ package lib.vision;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import org.photonvision.EstimatedRobotPose;
@@ -13,6 +15,7 @@ import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.proto.Photon;
 import org.photonvision.targeting.PhotonPipelineResult;
+import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.math.Matrix;
@@ -22,6 +25,7 @@ import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.wpilibj.Timer;
+import frc.robot.Constants.FieldConstants;
 
 public class PhotonVisionLocalizer implements CameraLocalizer {
 
@@ -31,6 +35,8 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
     private final Supplier<Rotation2d> headingSupplier;
     private final Matrix<N3, N1> defaultSingleStdDevs;
     private final Matrix<N3, N1> defaultMultiStdDevs;
+    private final AtomicBoolean isValid = new AtomicBoolean(true);
+    private Optional<Set<Integer>> validAprilTags;
 
     public PhotonVisionLocalizer(
         PhotonCamera camera, 
@@ -101,7 +107,10 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
         for (var res : results) {
-            visionEst = poseEstimator.update(res);
+            List<Integer> detectedIDs = res.targets.stream().map((PhotonTrackedTarget tgt) -> tgt.fiducialId).toList();
+            isValid.set(true);
+            validAprilTags.ifPresentOrElse((validIDs) -> isValid.set(validIDs.containsAll(detectedIDs)),() -> {});
+            if (isValid.get()) visionEst = poseEstimator.update(res);
         }
 
         return visionEst.map(
