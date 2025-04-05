@@ -51,6 +51,7 @@ public final class Constants {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(
             SystemConfig.weldedField ? AprilTagFields.k2025ReefscapeWelded : AprilTagFields.k2025ReefscapeAndyMark
         );
+
         public static class Photonvision {
 
             public static final String driverCamName = "DRIVER_CAM"; //PV name of the driver camera
@@ -412,6 +413,13 @@ public final class Constants {
                 } else {
                     this.rightBranch = AprilTag.transformBy(new Transform2d(0.0, this.rightBranchFudgeTransform, Rotation2d.kZero));
                 }
+            }
+        }
+
+        public static final Set<Integer> reefTagIDs = new HashSet<>();
+        static {
+            for (ReefFace face : ReefFace.values()){
+                reefTagIDs.add(face.aprilTagID);
             }
         }
 

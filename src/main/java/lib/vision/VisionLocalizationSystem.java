@@ -7,6 +7,7 @@ package lib.vision;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.photonvision.PhotonPoseEstimator;
 
@@ -42,6 +43,8 @@ public class VisionLocalizationSystem {
     private TriConsumer<Pose2d, Double, Matrix<N3, N1>> measurementConsumer = (pose, timestamp, stddevs) -> {}; //A default no-op consumer is instantiated to prevent null pointer dereferences
 
     private final Map<String, CamStruct> cameras = new HashMap<>();
+
+    private Optional<Set<Integer>> validIDs;
     
     /**
      * Registers a consumer
@@ -99,6 +102,14 @@ public class VisionLocalizationSystem {
         return cameras.get(cam).camera.isConnected();
     }
 
+    public void setFilter(Set<Integer> validIDs){
+        this.validIDs = Optional.of(validIDs);
+    }
+
+    public void clearFilter(Set<Integer> validIDs){
+        this.validIDs = Optional.empty();
+    }
+
     /**
      * Fetches pose estimate from cameras and sends them to all consumers. This function should be called exactly once every main function loop
      */
@@ -107,6 +118,7 @@ public class VisionLocalizationSystem {
             if (camStruct.cameraActive) {
                 camStruct.camera.getPoseEstimate().ifPresent(
                     (estimate) -> {
+                        if (validIDs.isPresent() && !validIDs.get().containsAll(estimate.fiducialIDs())) return;
                         measurementConsumer.accept(
                             estimate.pose(),
                             estimate.timestampSeconds(),
