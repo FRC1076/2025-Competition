@@ -4,7 +4,9 @@
 
  package lib.vision;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
@@ -19,6 +21,7 @@ public class LimelightLocalizer implements CameraLocalizer {
     private final Transform3d camToBotOffset;
     private final Matrix<N3, N1> defaultSingleStdDevs;
     private final Matrix<N3, N1> defaultMultiStdDevs;
+    private Optional<Set<Integer>> validIDs;
 
     public LimelightLocalizer(
         Limelight camera,
@@ -38,12 +41,25 @@ public class LimelightLocalizer implements CameraLocalizer {
       */
     public Optional<CommonPoseEstimate> getPoseEstimate() {
         return camera.getPoseEstimateMT2().map(
-            (poseEstimate) -> new CommonPoseEstimate(
-                poseEstimate.pose().transformBy(camToBotOffset).toPose2d(),
-                poseEstimate.timestampSeconds(),
-                calculateStdDevs(poseEstimate)
-            )
+            (poseEstimate) -> {
+                List<Integer> detectedIDs = poseEstimate.fiducials().stream().map((fiducial) -> (int)fiducial.id()).toList(); 
+                if (validIDs.isPresent() && !validIDs.get().containsAll(detectedIDs)) return null;
+                return new CommonPoseEstimate(
+                    poseEstimate.pose().transformBy(camToBotOffset).toPose2d(),
+                    poseEstimate.timestampSeconds(),
+                    detectedIDs,
+                    calculateStdDevs(poseEstimate)
+                );
+            }
         );
+    }
+
+    public void setValidIDs(Set<Integer> validIDs){
+        this.validIDs = Optional.of(validIDs);
+    }
+
+    public void clearValidIDs() {
+        this.validIDs = Optional.empty();
     }
 
     public String getName() {
@@ -75,4 +91,6 @@ public class LimelightLocalizer implements CameraLocalizer {
         }
         return stdDevs;
     }
+
+    
 }

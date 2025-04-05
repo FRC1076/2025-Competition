@@ -4,7 +4,9 @@
 
 package lib.vision;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import org.photonvision.PhotonPoseEstimator;
@@ -21,6 +23,7 @@ public interface CameraLocalizer {
     public static record CommonPoseEstimate(
         Pose2d pose,
         double timestampSeconds,
+        List<Integer> fiducialIDs,
         Matrix<N3, N1> stdDevs
     ) {}
 
@@ -37,4 +40,8 @@ public interface CameraLocalizer {
     public default void setPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy) {}
 
     public default void setFallbackPoseStrategy(PhotonPoseEstimator.PoseStrategy strategy) {}
+
+    public abstract void setValidIDs(Set<Integer> validIDs);
+
+    public abstract void clearValidIDs();
 }

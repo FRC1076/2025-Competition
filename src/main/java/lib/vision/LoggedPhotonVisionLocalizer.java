@@ -2,6 +2,7 @@ package lib.vision;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -49,6 +50,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
     private final Matrix<N3, N1> defaultSingleStdDevs;
     private final Matrix<N3, N1> defaultMultiStdDevs;
     private final PhotonVisionInputs inputs = new PhotonVisionInputs();
+    private Optional<Set<Integer>> validIDs;
 
     public LoggedPhotonVisionLocalizer(
         PhotonCamera camera, 
@@ -128,12 +130,15 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
 
         Optional<CommonPoseEstimate> result = visionEst.map(
             (EstimatedRobotPose estimate) -> {
+                List<Integer> detectedIDs = estimate.targetsUsed.stream().map((fiducial) -> fiducial.fiducialId).toList();
+                if (validIDs.isPresent() && !validIDs.get().containsAll(detectedIDs)) return null;
                 var stddevs = calculateStdDevs(estimate);
                 inputs.tagsDetected = estimate.targetsUsed.size();
                 inputs.stddevs = stddevs.getData();
                 return new CommonPoseEstimate(
                     estimate.estimatedPose.toPose2d(),
                     estimate.timestampSeconds,
+                    detectedIDs,
                     stddevs
                 );
             }
@@ -151,4 +156,13 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
     public String getName() {
         return camera.getName();
     }
+
+    public void setValidIDs(Set<Integer> validIDs){
+        this.validIDs = Optional.of(validIDs);
+    }
+
+    public void clearValidIDs() {
+        this.validIDs = Optional.empty();
+    }
+
 }
