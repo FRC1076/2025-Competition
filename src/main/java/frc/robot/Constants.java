@@ -342,6 +342,13 @@ public final class Constants {
         private static final double branchOffset = Units.inchesToMeters(6.469);
         private static final Transform2d leftBranchTransform = new Transform2d(0.0, -branchOffset, Rotation2d.kZero);
         private static final Transform2d rightBranchTransform = new Transform2d(0.0, branchOffset, Rotation2d.kZero);
+
+        // Trough width is 37.04 inches
+        // Coral is 11.875 inches long
+        private static final Transform2d leftL1Transform = new Transform2d(0.0, Units.inchesToMeters(-19), Rotation2d.kZero);
+        private static final Transform2d middleL1Transform = new Transform2d(0.0, Units.inchesToMeters(-7), Rotation2d.kZero);
+        private static final Transform2d rightL1Transform = new Transform2d(0.0, Units.inchesToMeters(5), Rotation2d.kZero);
+
         /**
          * @description Provides coordinates for april tags
          * @description See https://docs.google.com/spreadsheets/d/1mz5djBDrFm8Ro_M04Yq4eea92x4Xyj_pqlt54wsXnxA/edit?usp=sharing
@@ -370,6 +377,9 @@ public final class Constants {
             public final Double rightBranchFudgeTransform;
             public final Pose2d leftBranch;
             public final Pose2d rightBranch;
+            public final Pose2d leftL1;
+            public final Pose2d middleL1;
+            public final Pose2d rightL1;
             public final Pose2d AprilTag;
             public final int aprilTagID;
             public final boolean algaeHigh;
@@ -380,6 +390,9 @@ public final class Constants {
                 this.AprilTag = new Pose2d(aprilTagX, aprilTagY, Rotation2d.fromDegrees(aprilTagTheta));
                 this.leftBranchFudgeTransform = leftBranchFudgeTransform;
                 this.rightBranchFudgeTransform = rightBranchFudgeTransform;
+                this.leftL1 = AprilTag.transformBy(leftL1Transform);
+                this.middleL1 = AprilTag.transformBy(middleL1Transform);
+                this.rightL1 = AprilTag.transformBy(rightL1Transform);
                 this.algaeHigh = algaeHigh;
 
                 if (this.leftBranchFudgeTransform == null) {
