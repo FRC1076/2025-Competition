@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import frc.robot.commands.auto.AutomatedL1Score;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -432,7 +433,7 @@ public class RobotContainer {
         m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
             .whileTrue(teleopDriveCommand.applyDoubleClutch());
 
-        // Apply FPV Driving TODO: Finalize bindings and FPV clutch with drive team
+        // Apply FPV Driving
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
             .whileTrue(
                 Commands.parallel(
@@ -492,6 +493,10 @@ public class RobotContainer {
                     )
                 )
             )
+        );
+
+        m_driverController.povLeft().whileTrue(
+            new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)
         );
     }
 

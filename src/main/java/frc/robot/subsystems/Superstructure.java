@@ -661,7 +661,7 @@ public class Superstructure {
         private Command completeTransfer() {
             return Commands.sequence(
                 superstructure.holdIndexState(IndexState.TRANSFER).until(m_transferBeamBreak.negate().debounce(0.06)),
-                superstructure.m_grabber.applyRotationsBangBang(12, 1.4), // TODO: Adjust rotations
+                superstructure.m_grabber.applyRotationsBangBang(12, 1.4),
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.IDLE),
                     superstructure.applyIndexState(IndexState.BACKWARDS)

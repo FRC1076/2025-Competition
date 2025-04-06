@@ -377,9 +377,12 @@ public final class Constants {
             public final Double rightBranchFudgeTransform;
             public final Pose2d leftBranch;
             public final Pose2d rightBranch;
+
             public final Pose2d leftL1;
             public final Pose2d middleL1;
             public final Pose2d rightL1;
+            private int L1Index;
+
             public final Pose2d AprilTag;
             public final int aprilTagID;
             public final boolean algaeHigh;
@@ -390,9 +393,12 @@ public final class Constants {
                 this.AprilTag = new Pose2d(aprilTagX, aprilTagY, Rotation2d.fromDegrees(aprilTagTheta));
                 this.leftBranchFudgeTransform = leftBranchFudgeTransform;
                 this.rightBranchFudgeTransform = rightBranchFudgeTransform;
+
                 this.leftL1 = AprilTag.transformBy(leftL1Transform);
                 this.middleL1 = AprilTag.transformBy(middleL1Transform);
                 this.rightL1 = AprilTag.transformBy(rightL1Transform);
+                this.L1Index = 0;
+
                 this.algaeHigh = algaeHigh;
 
                 if (this.leftBranchFudgeTransform == null) {
@@ -406,6 +412,21 @@ public final class Constants {
                 } else {
                     this.rightBranch = AprilTag.transformBy(new Transform2d(0.0, this.rightBranchFudgeTransform, Rotation2d.kZero));
                 }
+            }
+
+            public Pose2d getNextL1Position() {
+                Pose2d L1Position;
+
+                if (L1Index % 3 == 0) {
+                    L1Position = rightL1;
+                } else if (L1Index % 3 == 1) {
+                    L1Position = middleL1;
+                } else {
+                    L1Position = leftL1;
+                }
+
+                L1Index++;
+                return L1Position;
             }
         }
 
@@ -446,7 +467,7 @@ public final class Constants {
         public static final double elevatorPositionToleranceMeters = Units.inchesToMeters(0.5);
         public static final double kMinElevatorHeightMeters = Units.inchesToMeters(0);
         public static final double kMaxElevatorHeightMeters = Units.inchesToMeters(83.25); // 83.25 //81.15);
-        // TODO: change max operator control voltages based on Andrew's opinion
+        
         public static final double defaultMaxOperatorControlVolts = 1.5;
         public static final double fasterMaxOperatorControlVolts = 4;
 
