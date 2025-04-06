@@ -24,13 +24,19 @@ public class AutomatedL1Score extends Command {
     private final DriveSubsystem m_drive;
     private final Superstructure superstructure;
     private final Trigger coralPossessionSupplier;
-    private Command autoScoreCommand;
+
+    private Command intakeCommand;
+    private Command scoreCommand;
+    private Command autoL1Command;
 
     public AutomatedL1Score(DriveSubsystem drive, Superstructure superstructure, Trigger coralPossessionSupplier) {
         this.m_drive = drive;
         this.superstructure = superstructure;
         this.coralPossessionSupplier = coralPossessionSupplier;
-        this.autoScoreCommand = Commands.idle();
+
+        this.intakeCommand = Commands.idle();
+        this.scoreCommand = Commands.idle(); 
+        this.autoL1Command = Commands.idle();
     }
 
     @Override
@@ -43,44 +49,42 @@ public class AutomatedL1Score extends Command {
 
         // TODO: add waypoints dependent on the closest reef face so that we don't hit the reef
 
-        autoScoreCommand =
+        // Drive to the coral station until grabber intake is finished //TODO: tune coral station poses
+        intakeCommand = 
+            Commands.deadline(
+                superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
+                m_drive.CommandBuilder.directDriveToPose(coralStationPose)
+            );
+
+            // Drive to the L1 position while doing going to L1 preset and grabber adjust //TODO: see if grabber adjust can go out more for L1
+        scoreCommand = 
             Commands.sequence(
-                // Drive to the coral station while doing grabber intake //TODO: tune coral station poses
-                Commands.parallel(
-                    m_drive.CommandBuilder.directDriveToPose(coralStationPose),
-                    superstructure.getCommandBuilder().autonGrabberIntakeCoral()
-                ),
-                // Drive to the L1 position while doing going to L1 preset and grabber adjust //TODO: see if grabber adjust can go out more for L1
                 Commands.parallel(
                     m_drive.CommandBuilder.directDriveToPose(scorePose),
-                    superstructure.getCommandBuilder().autonGrabberAdjustCoral(),
+                    // superstructure.getCommandBuilder().autonGrabberAdjustCoral(), //maybe not necessary
                     superstructure.getCommandBuilder().preL1()
                 ),
                 // Score the coral
                 Commands.parallel(
                     superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), //TODO: tune voltages (8 and 5 seem low)
-                    Commands.waitUntil(() -> !coralPossessionSupplier.getAsBoolean())
+                    Commands.waitUntil(() -> !coralPossessionSupplier.getAsBoolean()),
+                    Commands.runOnce(() -> closestReefFace.increaseL1Index()) // The coral is scored, so next time score the next L1
                     //Commands.waitSeconds(0.5) //TODO: tune time - important that CANRange doesn't see coral
                 )
+            );
+
+        autoL1Command =
+            Commands.sequence(
+                intakeCommand,
+                scoreCommand
             ).repeatedly();
 
         // If the robot already has a coral, score before starting the main command
         if (coralPossessionSupplier.getAsBoolean()) {
-            autoScoreCommand = 
-                Commands.sequence(
-                    Commands.parallel(
-                        m_drive.CommandBuilder.directDriveToPose(scorePose),
-                        superstructure.getCommandBuilder().preL1()
-                    ),
-                    Commands.parallel(
-                        superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), //TODO: tune voltages (8 and 5 seem low)
-                        Commands.waitUntil(() -> !coralPossessionSupplier.getAsBoolean())
-                        // Commands.waitSeconds(0.5) //TODO: tune time - important that CANRange doesn't see coral
-                    )
-                ).andThen(autoScoreCommand);
+            autoL1Command = scoreCommand.andThen(autoL1Command);
         }
 
-        autoScoreCommand.schedule();
+        autoL1Command.schedule();
     }
 
     @Override
@@ -88,11 +92,11 @@ public class AutomatedL1Score extends Command {
     
     @Override
     public boolean isFinished() {
-        return autoScoreCommand.isFinished();
+        return autoL1Command.isFinished();
     }
     
     @Override
     public void end(boolean interrupted) {
-        autoScoreCommand.cancel();
+        autoL1Command.cancel();
     }
 }

@@ -425,8 +425,11 @@ public final class Constants {
                     L1Position = leftL1;
                 }
 
-                L1Index++;
                 return L1Position;
+            }
+
+            public void increaseL1Index() {
+                L1Index++;
             }
         }
 
