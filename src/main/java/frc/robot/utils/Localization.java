@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.FieldConstants.PoseOfInterest;
 import frc.robot.Constants.FieldConstants.ReefFace;
 
@@ -61,25 +63,37 @@ public final class Localization {
     /** Returns a list of all coral stations */
     public static List<Pose2d> getCoralStationPoses() {
         List<Pose2d> poseList = new ArrayList<>();
-        poseList.add(PoseOfInterest.BLU_LEFT_STATION.pose);
-        poseList.add(PoseOfInterest.BLU_RIGHT_STATION.pose);
-        poseList.add(PoseOfInterest.RED_RIGHT_STATION.pose);
-        poseList.add(PoseOfInterest.RED_LEFT_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_LEFT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_LEFT_INNER_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_RIGHT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_RIGHT_INNER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_LEFT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_LEFT_INNER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_RIGHT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_RIGHT_INNER_STATION.pose);
+
+        // poseList.add(PoseOfInterest.BLU_RIGHT_STATION.pose);
+        // poseList.add(PoseOfInterest.RED_RIGHT_STATION.pose);
+        // poseList.add(PoseOfInterest.RED_LEFT_STATION.pose);
         return poseList;
     }
     /** Returns a list of red coral stations */
     public static List<Pose2d> getRedCoralStationPoses() {
         List<Pose2d> poseList = new ArrayList<>();
-        poseList.add(PoseOfInterest.RED_RIGHT_STATION.pose);
-        poseList.add(PoseOfInterest.RED_LEFT_STATION.pose);
+        poseList.add(PoseOfInterest.RED_LEFT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_LEFT_INNER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_RIGHT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.RED_RIGHT_INNER_STATION.pose);
         return poseList;
     }
 
     /** Returns a list of blue coral stations */
     public static List<Pose2d> getBlueCoralStationPoses() {
         List<Pose2d> poseList = new ArrayList<>();
-        poseList.add(PoseOfInterest.BLU_LEFT_STATION.pose);
-        poseList.add(PoseOfInterest.BLU_RIGHT_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_LEFT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_LEFT_INNER_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_RIGHT_OUTER_STATION.pose);
+        poseList.add(PoseOfInterest.BLUE_RIGHT_INNER_STATION.pose);
         return poseList;
     }
 
@@ -91,4 +105,38 @@ public final class Localization {
         }
         return null;
     }
+
+    /**
+     * Flips the pose to the other alliance's side of the field
+     * 
+     * @param pose
+     * @return
+     */
+    public static Pose2d flipPose(Pose2d pose) {
+        Pose2d flippedPose = new Pose2d(
+            FieldConstants.fieldLengthMeters - pose.getX(),
+            FieldConstants.fieldWidthMeters - pose.getY(),
+            pose.getRotation().plus(Rotation2d.fromDegrees(180))
+        );
+
+        return flippedPose;
+    }
+
+    /**
+     * Mirrors the pose across the center within the same alliance's side of the field
+     * 
+     * @param pose
+     * @return
+     */
+    public static Pose2d mirrorPose(Pose2d pose) {
+        Pose2d mirroredPose = new Pose2d(
+            pose.getX(),
+            FieldConstants.fieldWidthMeters - pose.getY(),
+            pose.getRotation().unaryMinus()
+        );
+
+        return mirroredPose;
+    }
+
+
 }

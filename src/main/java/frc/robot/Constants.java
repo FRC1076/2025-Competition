@@ -30,6 +30,9 @@ import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import org.apache.commons.lang3.NotImplementedException;
 
+import static frc.robot.utils.Localization.flipPose;
+import static frc.robot.utils.Localization.mirrorPose;
+
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean+
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -338,6 +341,7 @@ public final class Constants {
     /** Contains data about the field */
     public static class FieldConstants {
         public static final double fieldWidthMeters = Units.inchesToMeters(316.63); // Distance from one processor side to the other. From AprilTag coordinates in https://firstfrc.blob.core.windows.net/frc2025/FieldAssets/2025FieldDrawings.pdf
+        public static final double fieldLengthMeters = 17.54; // Distance in meters from one drive station to the other side
 
         private static final double branchOffset = Units.inchesToMeters(6.469);
         private static final Transform2d leftBranchTransform = new Transform2d(0.0, -branchOffset, Rotation2d.kZero);
@@ -444,14 +448,28 @@ public final class Constants {
             }
         }
 
+        // Blue left coral station poses
+        private static Pose2d defaultOuterStation = new Pose2d(1.585, 7.550, Rotation2d.fromDegrees(-49.992));
+        private static Pose2d defaultInnerStation = new Pose2d(0.596, 6.807, Rotation2d.fromDegrees(-55));
+
         // Poses of interest
         public enum PoseOfInterest {
-            BLU_PROCESSOR(5.973318, -0.00381, 90), //Taken from April Tag coordinates
-            RED_PROCESSOR(11.56081,	8.05561,	270), //Taken from April Tag coordinates
-            BLU_RIGHT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(25.80), 55),
-            BLU_LEFT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(291.20), 305),
-            RED_RIGHT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(291.20), -125),
-            RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125);
+            BLU_PROCESSOR(5.973318, -0.00381, 90), // Taken from April Tag coordinates
+            RED_PROCESSOR(11.56081,	8.05561,	270), // Taken from April Tag coordinates
+
+            BLUE_RIGHT_OUTER_STATION(mirrorPose(defaultOuterStation)), // Taken from PathPlanner coordinates
+            BLUE_RIGHT_INNER_STATION(mirrorPose(defaultInnerStation)),
+            BLUE_LEFT_OUTER_STATION(defaultOuterStation),
+            BLUE_LEFT_INNER_STATION(defaultInnerStation),
+            RED_RIGHT_OUTER_STATION(mirrorPose(flipPose(defaultOuterStation))),
+            RED_RIGHT_INNER_STATION(mirrorPose(flipPose(defaultInnerStation))),
+            RED_LEFT_OUTER_STATION(flipPose(defaultOuterStation)),
+            RED_LEFT_INNER_STATION(flipPose(defaultInnerStation));
+
+            // BLU_RIGHT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(25.80), 55),
+            // BLU_LEFT_STATION(Units.inchesToMeters(33.51), Units.inchesToMeters(291.20), 305),
+            // RED_RIGHT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(291.20), -125),
+            // RED_LEFT_STATION(Units.inchesToMeters(657.37), Units.inchesToMeters(25.80), 125);
             // 7.618 blue x for net
             // 9.922 red x for net
 
@@ -459,6 +477,10 @@ public final class Constants {
 
             private PoseOfInterest(double xMeters, double yMeters, double omegaDeg) {
                 this.pose = new Pose2d(xMeters, yMeters, Rotation2d.fromDegrees(omegaDeg));
+            }
+
+            private PoseOfInterest(Pose2d pose) {
+                this.pose = pose;
             }
         }
     }
