@@ -63,20 +63,18 @@ public class AutomatedL1Score extends Command {
                         //Commands.waitSeconds(0.5) // TODO: tune time - important that CANRange doesn't see coral
                     )
                 );
-        } else {
+        } else if (closestReefFace == ReefFace.BLU_REEF_GH || closestReefFace == ReefFace.RED_REEF_GH) {
             // If the robot is too far from the coral station and in danger of hitting the reef, do nothing
-            if (closestReefFace == ReefFace.BLU_REEF_GH || closestReefFace == ReefFace.RED_REEF_GH) {
-                autoL1Command = Commands.idle();
-            } else {
-                // If the robot does not have a coral, drive to the coral station and intake the coral
-                autoL1Command = 
-                    Commands.deadline(
-                        superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
-                        m_drive.CommandBuilder.directDriveToPose(coralStationPose)
-                    );
-            }
+            autoL1Command = Commands.idle();
+        } else {
+            // If the robot does not have a coral, drive to the coral station and intake the coral
+            autoL1Command = 
+                Commands.deadline(
+                    superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
+                    m_drive.CommandBuilder.directDriveToPose(coralStationPose)
+                );
         }
-
+        
         autoL1Command.schedule();
     }
 
