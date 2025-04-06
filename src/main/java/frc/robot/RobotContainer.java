@@ -496,7 +496,7 @@ public class RobotContainer {
         );
 
         m_driverController.povLeft().whileTrue(
-            new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)
+            new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange).repeatedly()
         );
     }
 

@@ -47,41 +47,32 @@ public class AutomatedL1Score extends Command {
         ReefFace closestReefFace = Localization.getClosestReefFace(currentPose);
         Pose2d scorePose = closestReefFace.getNextL1Position();
 
-        // TODO: add waypoints dependent on the closest reef face so that we don't hit the reef
+        // TODO: add waypoints dependent on the closest reef face so that we don't hit the reef    
 
-        // Drive to the coral station until grabber intake is finished //TODO: tune coral station poses
-        intakeCommand = 
-            Commands.deadline(
-                superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
-                m_drive.CommandBuilder.directDriveToPose(coralStationPose)
-            );
-
-            // Drive to the L1 position while doing going to L1 preset and grabber adjust //TODO: see if grabber adjust can go out more for L1
-        scoreCommand = 
-            Commands.sequence(
-                Commands.parallel(
-                    m_drive.CommandBuilder.directDriveToPose(scorePose),
-                    // superstructure.getCommandBuilder().autonGrabberAdjustCoral(), //maybe not necessary
-                    superstructure.getCommandBuilder().preL1()
-                ),
-                // Score the coral
-                Commands.parallel(
-                    superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), //TODO: tune voltages (8 and 5 seem low)
-                    Commands.waitUntil(() -> !coralPossessionSupplier.getAsBoolean()),
-                    Commands.runOnce(() -> closestReefFace.increaseL1Index()) // The coral is scored, so next time score the next L1
-                    //Commands.waitSeconds(0.5) //TODO: tune time - important that CANRange doesn't see coral
-                )
-            );
-
-        autoL1Command =
-            Commands.sequence(
-                intakeCommand,
-                scoreCommand
-            ).repeatedly();
-
-        // If the robot already has a coral, score before starting the main command
+        // If the robot already has a coral, drive to the coral station until grabber intake is finished //TODO: tune coral station poses
         if (coralPossessionSupplier.getAsBoolean()) {
-            autoL1Command = scoreCommand.andThen(autoL1Command);
+            autoL1Command = 
+                Commands.sequence(
+                    Commands.parallel(
+                        m_drive.CommandBuilder.directDriveToPose(scorePose),
+                        // superstructure.getCommandBuilder().autonGrabberAdjustCoral(), //maybe not necessary
+                        superstructure.getCommandBuilder().preL1()
+                    ),
+                    // Score the coral
+                    Commands.parallel(
+                        superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), //TODO: tune voltages (8 and 5 seem low)
+                        Commands.waitUntil(() -> !coralPossessionSupplier.getAsBoolean()),
+                        Commands.runOnce(() -> closestReefFace.increaseL1Index()) // The coral is scored, so next time score the next L1
+                        //Commands.waitSeconds(0.5) //TODO: tune time - important that CANRange doesn't see coral
+                    )
+                );
+        } else {
+            // If the robot does not have a coral, drive to the coral station and intake the coral
+            autoL1Command = 
+                Commands.deadline(
+                    superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
+                    m_drive.CommandBuilder.directDriveToPose(coralStationPose)
+                );
         }
 
         autoL1Command.schedule();
