@@ -43,40 +43,33 @@ public class AutomatedL1Score extends Command {
     public void initialize() {
         Pose2d currentPose = m_drive.getPose();
         Pose2d scorePose = Localization.getClosestReefFace(currentPose).;
+        // Localization.getNextL1Position(currentPose);
 
         if (this.hasCoral) {
             autoScoreCommand = 
                 Commands.sequence(
-                    new PPDriveToPose
+                    // Drive to score location
+                    Commands.parallel(
+                        // Set grabber state to L1
+                        // Wait 0.5 seconds
+                    )
                 )
-        }
-        Pose2d currentPose = m_drive.getPose();
-        Pose2d startingWaypoint = new Pose2d(currentPose.getTranslation(), GeometryUtils.angleToPose(currentPose, targetPose));
-        
-        List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
-            startingWaypoint,
-            targetPose
-        );
-
-        // Prevent PathPlanner from treating the start pose as identical to the end pose when they are too close to each other
-        if (targetPose.getTranslation().getDistance(startingWaypoint.getTranslation()) > PathPlannerConstants.pathGenerationToleranceMeters){
-            PathPlannerPath path = new PathPlannerPath(
-                waypoints, 
-                PathPlannerConstants.pathConstraints, 
-                //new IdealStartingState(m_drive.getVelocityMPS(), m_drive.getHeading()), 
-                null,
-                new GoalEndState(endVelocity, targetPose.getRotation())
-            );
-            path.preventFlipping = true;
-            followPathCommand = AutoBuilder.followPath(path);
         } else {
-            followPathCommand = Commands.none();
-        }
-        followPathCommand.schedule();
-    }
+            autoScoreCommand = 
+                Commands.sequence(
+                    Commands.parallel(
+                        // Drive to coral station
+                        // Grabber intake
+                    ),
+                    // Drive to score location
+                    Commands.parallel(
+                        // Set grabber state to L1
+                        // Wait 0.5 seconds
+                    )
+                );
 
-    public BooleanSupplier atGoal() {
-        return () -> targetPose.getTranslation().getDistance(m_drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;
+        autoScoreCommand.schedule();
+        }
     }
 
     @Override
@@ -86,19 +79,11 @@ public class AutomatedL1Score extends Command {
     
     @Override
     public boolean isFinished() {
-        return followPathCommand.isFinished();
+        return autoScoreCommand.isFinished();
     }
     
     @Override
     public void end(boolean interrupted) {
-        followPathCommand.cancel();
-    }
-
-    public void setTargetPose(Pose2d targetPose){
-        this.targetPose = targetPose;
-    }
-
-    public void setEndVelocity(double endVelocity){
-        this.endVelocity = endVelocity;
+        autoScoreCommand.cancel();
     }
 }
