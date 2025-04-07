@@ -171,7 +171,10 @@ public class Superstructure extends VirtualSubsystem {
             CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT WRIST FINAL"),
-            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position)),
+            Commands.runOnce(() -> {
+                RobotSuperState.getInstance().updateWristevatorState(position);
+                RobotSuperState.getInstance().setWristevatorOverride(false);
+            }),
             Commands.runOnce(ledSignal)
         );
     }
@@ -195,7 +198,10 @@ public class Superstructure extends VirtualSubsystem {
             CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT WRIST FINAL"),
-            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorGoal(position)),
+            Commands.runOnce(() -> {
+                RobotSuperState.getInstance().updateWristevatorState(position);
+                RobotSuperState.getInstance().setWristevatorOverride(false);
+            }),
             Commands.runOnce(ledSignal)
         );
     }
@@ -252,7 +258,10 @@ public class Superstructure extends VirtualSubsystem {
                 m_wrist.applyAngle(position.wristAngle).asProxy(),
                 CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
             ),
-            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position))
+            Commands.runOnce(() -> {
+                RobotSuperState.getInstance().updateWristevatorState(position);
+                RobotSuperState.getInstance().setWristevatorOverride(false);
+            })
         ).until(override);
     }
 
@@ -316,6 +325,7 @@ public class Superstructure extends VirtualSubsystem {
     private Command interruptWrist(){
         return Commands.runOnce(() -> {
             if(m_wrist.getCurrentCommand() != null) m_wrist.getCurrentCommand().cancel();
+            RobotSuperState.getInstance().setWristevatorOverride(true);
         });
         
     }
@@ -323,6 +333,7 @@ public class Superstructure extends VirtualSubsystem {
     private Command interruptElevator(){
         return Commands.runOnce(() -> {
             if(m_elevator.getCurrentCommand() != null) m_elevator.getCurrentCommand().cancel();
+            RobotSuperState.getInstance().setWristevatorOverride(true);
         });
     }
 
