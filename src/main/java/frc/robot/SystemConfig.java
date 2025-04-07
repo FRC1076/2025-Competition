@@ -38,6 +38,7 @@ public final class SystemConfig {
     * logSwerveModules: false
     * logCTRE: false
     * raiseThreadPriority: true
+    * useGoalState: true
     * 
     * VERIFY THAT THE SYSTEM CONFIGURATION MATCHES WHAT IS SHOWN ABOVE BEFORE DEPLOYING CODE FOR A MATCH
     */
@@ -49,4 +50,5 @@ public final class SystemConfig {
     public static final boolean logSwerveModules = false; // Whether swerve module logging should be enabled
     public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
     public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
+    public static final boolean useGoalState = true; // Whether to use operator intent for the wristevator state
 }

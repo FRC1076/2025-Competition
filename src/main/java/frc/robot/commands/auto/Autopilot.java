@@ -114,7 +114,7 @@ public class Autopilot {
                 }
             }, 
             (interrupted) -> reefCommand.cancel(), 
-            () -> RobotSuperState.getInstance().getWristevatorState() == RobotSuperState.getInstance().getWristevatorGoal()
+            RobotSuperState.getInstance()::WristevatorAtGoal
         );
     }
 
