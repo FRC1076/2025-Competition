@@ -14,7 +14,6 @@ import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
 import java.util.Map;
 import java.util.Set;
 import java.util.HashMap;
-import java.util.function.Supplier;
 
 /**
  * A command factory that executes autonomous teleop routines requiring multiple subsystems
@@ -39,6 +38,7 @@ public class Autopilot {
         reefCommandMap.put(ReefLevel.L2,m_superstructureCommands.preL2());
         reefCommandMap.put(ReefLevel.L3,m_superstructureCommands.preL3());
         reefCommandMap.put(ReefLevel.L4,m_superstructureCommands.preL4());
+        reefCommandMap.put(ReefLevel.NONE,m_superstructureCommands.retractMechanisms());
     }
 
 
@@ -86,7 +86,7 @@ public class Autopilot {
     public Command setTargetLevel(ReefLevel level){
         return Commands.runOnce(() -> {
             targetLevel = level;
-            // TODO: Elastic.getInstance().putAutopilotTargetLevel(level);
+            Elastic.getInstance().putAutopilotTargetLevel(level);
         });
     }
 
@@ -113,7 +113,11 @@ public class Autopilot {
                     reefCommand.schedule();
                 }
             }, 
-            (interrupted) -> reefCommand.cancel(), 
+            (interrupted) -> {
+                reefCommand.cancel();
+                commandGoalLevel = ReefLevel.NONE;
+                targetLevel = ReefLevel.NONE;
+            }, 
             RobotSuperState.getInstance()::WristevatorAtGoal
         );
     }

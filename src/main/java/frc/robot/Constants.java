@@ -347,7 +347,7 @@ public final class Constants {
         private static final Transform2d rightBranchTransform = new Transform2d(0.0, branchOffset, Rotation2d.kZero);
 
         public enum ReefLevel {
-            L1, L2, L3, L4
+            L1, L2, L3, L4, NONE
         }
         /**
          * @description Provides coordinates for april tags
