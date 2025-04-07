@@ -161,7 +161,7 @@ public class Superstructure extends VirtualSubsystem {
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
         return Commands.sequence(
-            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position)),
+            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorGoal(position)),
             CommandUtils.makeDaemon(wristPreMoveCommand),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT PREMOVE"),
@@ -171,6 +171,7 @@ public class Superstructure extends VirtualSubsystem {
             CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT WRIST FINAL"),
+            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position)),
             Commands.runOnce(ledSignal)
         );
     }
