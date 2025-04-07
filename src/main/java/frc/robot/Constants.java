@@ -342,6 +342,10 @@ public final class Constants {
         private static final double branchOffset = Units.inchesToMeters(6.469);
         private static final Transform2d leftBranchTransform = new Transform2d(0.0, -branchOffset, Rotation2d.kZero);
         private static final Transform2d rightBranchTransform = new Transform2d(0.0, branchOffset, Rotation2d.kZero);
+
+        public enum ReefLevel {
+            L1, L2, L3, L4
+        }
         /**
          * @description Provides coordinates for april tags
          * @description See https://docs.google.com/spreadsheets/d/1mz5djBDrFm8Ro_M04Yq4eea92x4Xyj_pqlt54wsXnxA/edit?usp=sharing
