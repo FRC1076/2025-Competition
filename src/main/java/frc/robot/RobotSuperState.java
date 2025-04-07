@@ -31,6 +31,7 @@ public class RobotSuperState {
     private GrabberState grabberState;
     private GrabberPossession possession;
     private Optional<Pose2d> targetPose; // Autoalign target pose
+    private boolean wristevatorOverride = false;
     private boolean safeToMoveElevator = false;
     private boolean safeToFeedCoral = false;
     private boolean isAutoaligned = false;
@@ -98,6 +99,14 @@ public class RobotSuperState {
 
     public void setAutoaligned(boolean isAutoaligned) {
         this.isAutoaligned = isAutoaligned;
+    }
+    // Getter and Setter for wristevatorOverride
+    public boolean getWristevatorOverride() {
+        return wristevatorOverride;
+    }
+
+    public void setWristevatorOverride(boolean wristevatorOverride) {
+        this.wristevatorOverride = wristevatorOverride;
     }
 
     public void updateWristevatorState(WristevatorState wristevatorState){
@@ -174,6 +183,10 @@ public class RobotSuperState {
 
     public GrabberPossession getPossession() {
         return possession;
+    }
+
+    public boolean wristevatorAtGoal() {
+        return (wristevatorState == wristevatorGoal) && !wristevatorOverride;
     }
 
     //NOTE: Only logs superstructure states, since subsystems are already logged

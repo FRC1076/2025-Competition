@@ -68,15 +68,17 @@ public class DriveIOHardware extends SwerveDrivetrain<TalonFX, TalonFX, CANcoder
                 }
             ); 
         }
-        for (int i = 0; i < 4; i++){
-            moduleSignalStruct sigStruct = new moduleSignalStruct();
-            SwerveModule<TalonFX, TalonFX, CANcoder> module = getModule(i);
-            // Combines all the signals from the modules for AdvantageKit logging
-            sigStruct.driveAppliedVolts = module.getDriveMotor().getMotorVoltage(true);
-            sigStruct.driveStatorCurrent = module.getDriveMotor().getStatorCurrent(true);
-            sigStruct.turnAppliedVolts = module.getSteerMotor().getMotorVoltage(true);
-            sigStruct.turnStatorCurrent = module.getSteerMotor().getStatorCurrent(true);
-            moduleSignals[i] = sigStruct;
+        if (SystemConfig.logSwerveModules){
+            for (int i = 0; i < 4; i++){
+                moduleSignalStruct sigStruct = new moduleSignalStruct();
+                SwerveModule<TalonFX, TalonFX, CANcoder> module = getModule(i);
+                // Combines all the signals from the modules for AdvantageKit logging
+                sigStruct.driveAppliedVolts = module.getDriveMotor().getMotorVoltage(true);
+                sigStruct.driveStatorCurrent = module.getDriveMotor().getStatorCurrent(true);
+                sigStruct.turnAppliedVolts = module.getSteerMotor().getMotorVoltage(true);
+                sigStruct.turnStatorCurrent = module.getSteerMotor().getStatorCurrent(true);
+                moduleSignals[i] = sigStruct;
+            }
         }
     }
 

@@ -158,6 +158,7 @@ public class Superstructure extends SubsystemBase {
         .finallyDo(() -> {
             edgeCommand.cancel();
             this.getCurrentCommand().cancel();
+            RobotSuperState.getInstance().setWristevatorOverride(true);
         }); // When the stickyControlCommand is cancelled, cancel any state-based superstructure commands
         if (SystemConfig.prebuildMode == PrebuildModes.kAll) {
             prebuildAllEdgeCommands();
@@ -307,7 +308,10 @@ public class Superstructure extends SubsystemBase {
     }
 
     private Command updateWristevatorState(WristevatorState state){
-        return Commands.runOnce(() -> m_state.updateWristevatorState(state));
+        return Commands.runOnce(() -> {
+            m_state.updateWristevatorState(state);
+            m_state.setWristevatorOverride(false);
+        });
     }
 
     // Returns a daemon command that will hold the wristevator in its current state in the background

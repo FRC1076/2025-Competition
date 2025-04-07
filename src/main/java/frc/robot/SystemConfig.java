@@ -35,6 +35,7 @@ public final class SystemConfig {
     * prebuildMode = PrebuildModes.kDefined
     * weldedField = true if welded, false if AndyMark (All official FiM fields are welded, The AADL field is AndyMark)
     * logOdometry: false
+    * logSwerveModules: false
     * logCTRE: false
     * raiseThreadPriority: true
     * 
@@ -45,6 +46,7 @@ public final class SystemConfig {
     public static final int prebuildMode = PrebuildModes.kDefined;
     public static final boolean weldedField = true;
     public static final boolean logOdometry = false;
+    public static final boolean logSwerveModules = false; // Whether swerve module logging should be enabled
     public static final boolean logCTRE = false; // Whether CTRE hoot logging should be enabled
     public static final boolean raiseThreadPriority = true; // Whether the main thread should have its priority raised
 }
