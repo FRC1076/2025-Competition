@@ -123,8 +123,6 @@ public class RobotContainer {
     private final Elastic m_elastic;
     private final LEDSubsystem m_LEDs;
 
-    private boolean m_autonState = false;
-
     // Replace with CommandPS4Controller or CommandJoystick if needed
     private final CommandXboxController m_driverController =
         new SamuraiXboxController(OIConstants.kDriverControllerPort)
@@ -309,8 +307,6 @@ public class RobotContainer {
     
         //configure beam break triggers
         configureBeamBreakTriggers();
-
-        CommandUtils.makePeriodic(() -> m_elastic.updateTeamColor(), true);
 
 
     }
@@ -642,7 +638,7 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
 
         // Standard 3 coral auto
-        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        // return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
 
         // Compementary 2 coral auto
         //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
@@ -652,7 +648,7 @@ public class RobotContainer {
 
         // Untested for a while 2 coral (funnel)
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
-        // return m_autoChooser.getSelected();
+        return Elastic.getInstance().getSelectedAutoCommand();
     }
 
     /**
@@ -671,14 +667,6 @@ public class RobotContainer {
 
     public double getLoopTime() {
         return lastLoopTime;
-    }
-
-    public void setAutonState(boolean inAuton) {
-        m_autonState = inAuton;
-    }
-
-    public boolean getAutonState() {
-        return m_autonState;
     }
 
     public static Command threadCommand() {

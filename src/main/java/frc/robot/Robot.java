@@ -81,12 +81,7 @@ public class Robot extends LoggedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-
-    m_robotContainer.setAutonState(true);
-
     // RobotContainer.threadCommand().schedule();
-
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     FollowPathCommand.warmupCommand().schedule();
 
@@ -134,8 +129,7 @@ public class Robot extends LoggedRobot {
      * = new MyAutoCommand(); break; case "Default Auto": default:
      * autonomousCommand = new ExampleCommand(); break; }
      */
-
-    m_robotContainer.setAutonState(true);
+    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
     // schedule the autonomous command (example)
     if (m_autonomousCommand != null) {
@@ -149,7 +143,6 @@ public class Robot extends LoggedRobot {
 
   @Override
   public void teleopInit() {
-    m_robotContainer.setAutonState(false);
 
     // This makes sure that the autonomous stops running when
     // teleop starts running. If you want the autonomous to

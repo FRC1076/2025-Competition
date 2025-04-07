@@ -11,11 +11,15 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.GameConfig;
+import frc.robot.SystemConfig;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
@@ -27,6 +31,7 @@ public class Elastic {
     // private SendableChooser<TeamColors> teamChooser;
     private Field2d field;
     private SendableChooser<AutonSides> autonSideChooser;
+    private SendableChooser<Command> autoChooser;
     private HashMap<Alliance, String> AllianceNames; 
     private Alliance currentAllianceName;
 
@@ -42,12 +47,6 @@ public class Elastic {
         autonSideChooser.addOption(AutonSides.Left.name(), AutonSides.Left);
         autonSideChooser.addOption(AutonSides.Right.name(), AutonSides.Right);
         SmartDashboard.putData(autonSideChooser);
-
-        // Maps the Alliance enum that the Driver Station returns to string names
-        AllianceNames = new HashMap<>();
-        AllianceNames.put(Alliance.Blue, "Blue");
-        AllianceNames.put(Alliance.Red, "Red");
-        this.putSelectedTeamColor();
         
         // Initialize fields, because otherwise they're only updated when teleop is enabled
         this.putBoolean("safeToFeedCoral", false);
@@ -79,29 +78,6 @@ public class Elastic {
         SmartDashboard.putString("grabberPossession", grabberPossession.name());
     }
 
-    /** Gets the selected team color from the driver station */
-    public Alliance getSelectedTeamColor() {
-        return GameConstants.teamColor;
-    }
-
-    public void putSelectedTeamColor() {
-        this.putSelectedTeamColor(this.getSelectedTeamColor());
-    }
-
-    public void putSelectedTeamColor(Alliance alliance) {
-        SmartDashboard.putString(
-            "teamColor",
-            AllianceNames.get(alliance));
-        this.currentAllianceName = alliance;
-    }
-
-    /** Sends the selected team color to the dashboard if it has changed */
-    public void updateTeamColor() {
-        if (this.getSelectedTeamColor() != this.currentAllianceName) {
-            this.putSelectedTeamColor();
-        }
-    }
-
     public void updateTransferBeamBreak(boolean beamBroken) {
         this.putBoolean("transferBB", beamBroken);
     }
@@ -120,21 +96,25 @@ public class Elastic {
 
     // This should only be called AFTER the drivetrain is constructed
     public void buildAutoChooser(DriveSubsystem drive){
-        var autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser = AutoBuilder.buildAutoChooser(GameConfig.defaultAuton);
         autoChooser.addOption(
-            "DoNothingBlue180", 
+            "SeedPoseBlue", 
             Commands.runOnce(() -> drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))))
         );
         autoChooser.addOption(
-            "DoNothingRed0", 
+            "SeedPoseRed", 
             Commands.runOnce(() -> drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0))))
         );
         SmartDashboard.putData(autoChooser);
     }
 
+    public Command getSelectedAutoCommand() {
+        return autoChooser.getSelected();
+    }
+
     /** Returns true to mirror the auton from the left side to the right side
      * when in autonomous mode and the auton is selected as mirrored to the right side */
     public boolean getPathPlannerMirrored() {
-        return autonSideChooser.getSelected().isRightSide;
+        return DriverStation.isAutonomous() && autonSideChooser.getSelected().isRightSide;
     }
 }

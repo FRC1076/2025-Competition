@@ -112,8 +112,8 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Red;
-        public static AutonSides autonSide = AutonSides.Left;
+        public static final Alliance teamColor = Alliance.Red;
+        public static final AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),

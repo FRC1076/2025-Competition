@@ -5,6 +5,7 @@
 package frc.robot.subsystems.drive;
 
 import frc.robot.Constants.DriveConstants.PathPlannerConstants;
+import frc.robot.GameConfig;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
@@ -46,7 +47,7 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathPlannerPath;
-
+import com.pathplanner.lib.util.DriveFeedforwards;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
@@ -65,6 +66,8 @@ public class DriveSubsystem extends SubsystemBase {
     public final DriveCommandFactory CommandBuilder;
     private final VisionLocalizationSystem vision;
     private final Elastic elastic;
+    private SwerveRequest.ApplyRobotSpeeds CODriveRequest = new ApplyRobotSpeeds();
+    private SwerveRequest.ApplyFieldSpeeds FODriveRequest = new ApplyFieldSpeeds();
 
     public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision, Elastic elastic) {
         this.io = io;
@@ -72,7 +75,7 @@ public class DriveSubsystem extends SubsystemBase {
         this.elastic = elastic;
         vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
 
-        if (GameConstants.teamColor == Alliance.Red) {
+        if (DriverStation.getAlliance().orElse(GameConfig.alliance) == Alliance.Red) {
             io.setAllianceRotation(Rotation2d.fromDegrees(180));
         } else {
             io.setAllianceRotation(Rotation2d.fromDegrees(0));
@@ -80,24 +83,10 @@ public class DriveSubsystem extends SubsystemBase {
         
         try {
             AutoBuilder.configure(
-                () -> elastic.getPathPlannerMirrored() 
-                    ? this.getMirroredPose() 
-                    : this.getPose(),
-                (pose) -> {
-                    if (elastic.getPathPlannerMirrored()) {
-                        this.resetPoseMirrored(pose);
-                    } else {
-                        this.resetPose(pose);
-                    }
-                },
+                this::getPoseAuton,
+                this::resetPoseAuton,
                 () -> driveInputs.Speeds,
-                (speeds, feedforwards) -> {
-                    if (elastic.getPathPlannerMirrored()) {
-                        driveCoMirrored(speeds);
-                    } else {
-                        driveCO(speeds);
-                    }
-                },
+                this::driveAuton,
                 new PPHolonomicDriveController(
                     // PID constants for translation
                     PathPlannerConstants.Control.transPID,
@@ -105,7 +94,7 @@ public class DriveSubsystem extends SubsystemBase {
                     PathPlannerConstants.Control.rotPID
                 ),
                 RobotConfig.fromGUISettings(),
-                () -> GameConstants.teamColor == Alliance.Red,//DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red,
+                () -> DriverStation.getAlliance().orElse(GameConfig.alliance) == Alliance.Red,
                 this
             );
         } catch (Exception ex) {
@@ -155,14 +144,22 @@ public class DriveSubsystem extends SubsystemBase {
 
     /** Swerve drive request with chassis-oriented chassisSpeeds */
     public void driveCO(ChassisSpeeds speeds) {
-        io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
+        io.acceptRequest(CODriveRequest.withSpeeds(speeds));
     }
 
     /** Swerve drive request with chassis-orriented chassisSpeeds, but mirrors the speeds (used for mirroring paths in auton) */
-    public void driveCoMirrored(ChassisSpeeds speeds) {
+    public void driveCOMirrored(ChassisSpeeds speeds) {
         speeds.vyMetersPerSecond *= (-1);  
         speeds.omegaRadiansPerSecond *= (-1);
-        io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
+        io.acceptRequest(CODriveRequest.withSpeeds(speeds));
+    }
+
+    public void driveAuton(ChassisSpeeds speeds,DriveFeedforwards feedforwards) {
+        if (Elastic.getInstance().getPathPlannerMirrored()){
+            driveCOMirrored(speeds);
+        } else {
+            driveCO(speeds);
+        }
     }
 
     public double getVelocityMPS() {
@@ -176,7 +173,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     /** Swerve drive request with field-oriented chassisSpeeds */
     public void driveFO(ChassisSpeeds speeds) {
-        io.acceptRequest(new ApplyFieldSpeeds().withSpeeds(speeds).withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));
+        io.acceptRequest(FODriveRequest.withSpeeds(speeds).withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));
     }
     
     //TODO: ADD DRIVE METHOD TO DRIVE WITH PATHPLANNER WHEELFORCE FEEDFORWARDS
@@ -212,6 +209,14 @@ public class DriveSubsystem extends SubsystemBase {
         io.resetPose(newPose);
     }
 
+    public void resetPoseAuton(Pose2d pose) {
+        if (Elastic.getInstance().getPathPlannerMirrored()){
+            resetPoseMirrored(pose);
+        } else {
+            resetPose(pose);
+        }
+    }
+
     /** Makes the current heading of the robot the default zero degree heading
      * (Used if forward is the wrong direction)
      */
@@ -235,6 +240,14 @@ public class DriveSubsystem extends SubsystemBase {
             FieldConstants.fieldWidthMeters - io.getPose().getY(),
             io.getPose().getRotation().unaryMinus());
         return pose;
+    }
+
+    public Pose2d getPoseAuton() {
+        if (Elastic.getInstance().getPathPlannerMirrored()){
+            return getMirroredPose();
+        } else {
+            return getPose();
+        }
     }
 
     public class DriveCommandFactory {
