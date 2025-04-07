@@ -183,15 +183,9 @@ public class Superstructure extends VirtualSubsystem {
             safeToMoveElevator = false;
         };
 
-        Command wristPreMoveCommand = Commands.either(
-            m_wrist.applyAnglePersistent(algaeTravelAngle),
-            m_wrist.applyAnglePersistent(grabberDown ? Rotation2d.kCW_90deg : coralTravelAngle),
-            possessAlgae
-        );
-
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
         return Commands.sequence(
-            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position)),
+            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorGoal(position)),
             //CommandUtils.makeDaemon(wristPreMoveCommand),
             //Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT PREMOVE"),
@@ -201,6 +195,7 @@ public class Superstructure extends VirtualSubsystem {
             CommandUtils.makeDaemon(m_wrist.applyAnglePersistent(position.wristAngle)),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT WRIST FINAL"),
+            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorGoal(position)),
             Commands.runOnce(ledSignal)
         );
     }
@@ -247,7 +242,7 @@ public class Superstructure extends VirtualSubsystem {
         };
         
         return Commands.parallel(
-            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position)),
+            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorGoal(position)),
             Commands.runOnce(ledSignal),
             Commands.sequence(
                 m_elevator.applyPosition(position.elevatorHeightMeters).asProxy(),
@@ -256,7 +251,8 @@ public class Superstructure extends VirtualSubsystem {
             Commands.sequence(
                 m_wrist.applyAngle(position.wristAngle).asProxy(),
                 CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
-            )
+            ),
+            Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorState(position))
         ).until(override);
     }
 
@@ -370,7 +366,7 @@ public class Superstructure extends VirtualSubsystem {
                     grabberActionCommands,
                     () -> superstructure.applyGrabberState(GrabberState.DEFAULT_OUTTAKE),
                     RobotSuperState.getInstance()::getWristevatorState
-                );
+            );
         }
 
         /**
