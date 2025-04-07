@@ -28,6 +28,9 @@ import com.pathplanner.lib.path.PathConstraints;
 
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.commons.lang3.NotImplementedException;
 
 /**
@@ -411,6 +414,11 @@ public final class Constants {
             }
         }
 
+        public static final Set<PointOfInterest> reefCenters = Set.of(
+            PointOfInterest.BLU_REEF,
+            PointOfInterest.RED_REEF
+        );
+
         // Poses of interest
         public enum PoseOfInterest {
             BLU_PROCESSOR(5.973318, -0.00381, 90), //Taken from April Tag coordinates
@@ -427,6 +435,26 @@ public final class Constants {
             private PoseOfInterest(double xMeters, double yMeters, double omegaDeg) {
                 this.pose = new Pose2d(xMeters, yMeters, Rotation2d.fromDegrees(omegaDeg));
             }
+        }
+
+        public static final Set<PoseOfInterest> bluCoralStations = new HashSet<>();
+        static {
+            bluCoralStations.add(PoseOfInterest.BLU_RIGHT_STATION);
+            bluCoralStations.add(PoseOfInterest.BLU_LEFT_STATION);
+        }
+
+        public static final Set<PoseOfInterest> redCoralStations = new HashSet<>();
+        static {
+            redCoralStations.add(PoseOfInterest.RED_RIGHT_STATION);
+            redCoralStations.add(PoseOfInterest.RED_LEFT_STATION);
+        }
+        
+        public static final Set<PoseOfInterest> coralStations = new HashSet<>();
+        static {
+            coralStations.add(PoseOfInterest.BLU_RIGHT_STATION);
+            coralStations.add(PoseOfInterest.BLU_LEFT_STATION);
+            coralStations.add(PoseOfInterest.RED_RIGHT_STATION);
+            coralStations.add(PoseOfInterest.RED_LEFT_STATION);
         }
     }
 

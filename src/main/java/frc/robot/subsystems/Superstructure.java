@@ -18,6 +18,7 @@ import frc.robot.subsystems.grabber.GrabberSubsystem;
 import frc.robot.subsystems.index.IndexSubsystem;
 import frc.robot.subsystems.wrist.WristSubsystem;
 import frc.robot.utils.Localization;
+import frc.robot.utils.VirtualSubsystem;
 import lib.extendedcommands.CommandUtils;
 import lib.extendedcommands.SelectWithFallbackCommandFactory;
 
@@ -43,7 +44,7 @@ import org.littletonrobotics.junction.Logger;
  * Allows sensors to interact with subystems <p>
  * Contains command factories for actions requiring multiple systems <p>
  */
-public class Superstructure {
+public class Superstructure extends VirtualSubsystem {
 
     private final ElevatorSubsystem m_elevator;
     private final GrabberSubsystem m_grabber;
@@ -85,6 +86,11 @@ public class Superstructure {
 
         this.safeToFeedCoral = false;
         this.safeToMoveElevator = false;
+    }
+
+    @Override
+    public void periodic() {
+        RobotSuperState.getInstance().logSuperstructureToAkit();
     }
 
     public ElevatorSubsystem getElevator() {
