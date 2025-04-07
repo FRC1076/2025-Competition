@@ -7,14 +7,19 @@ package frc.robot.subsystems;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
+import frc.robot.subsystems.drive.DriveSubsystem;
 
 public class Elastic {
 
@@ -48,6 +53,13 @@ public class Elastic {
         this.putBoolean("safeToFeedCoral", false);
         this.putBoolean("safeToMoveElevator", false);
         this.putBoolean("isAutoAligned", false);
+    }
+
+    public static Elastic getInstance(){
+        if (inst == null) {
+            inst = new Elastic();
+        }
+        return inst;
     }
 
     public void putNumber(String key, double value) {
@@ -104,6 +116,20 @@ public class Elastic {
 
     public void updateIsAutoAligned(BooleanSupplier isAutoAligned) {
         this.putBoolean("isAutoAligned", isAutoAligned.getAsBoolean());
+    }
+
+    // This should only be called AFTER the drivetrain is constructed
+    public void buildAutoChooser(DriveSubsystem drive){
+        var autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser.addOption(
+            "DoNothingBlue180", 
+            Commands.runOnce(() -> drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))))
+        );
+        autoChooser.addOption(
+            "DoNothingRed0", 
+            Commands.runOnce(() -> drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0))))
+        );
+        SmartDashboard.putData(autoChooser);
     }
 
     /** Returns true to mirror the auton from the left side to the right side

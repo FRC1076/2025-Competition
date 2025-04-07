@@ -139,9 +139,6 @@ public class RobotContainer {
     private final CommandXboxController m_beamBreakController = 
         new CommandXboxController(2);
     */
-    
-    private final SendableChooser<Command> m_autoChooser;
-
     private final VisionLocalizationSystem m_vision = new VisionLocalizationSystem();
 
     private final VisionSystemSim m_visionSim;
@@ -178,7 +175,7 @@ public class RobotContainer {
         
         if (SystemConstants.currentMode == 0) {
             m_visionSim = null;
-            m_elastic = new Elastic(this);
+            m_elastic = Elastic.getInstance();
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
 
             // BLUE
@@ -209,7 +206,7 @@ public class RobotContainer {
                 );
             }
         } else if (SystemConstants.currentMode == 1) {
-            m_elastic = new Elastic(this);
+            m_elastic = Elastic.getInstance();
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOSim(), this::getLoopTime);
@@ -235,6 +232,8 @@ public class RobotContainer {
             CommandUtils.makePeriodic(() -> m_visionSim.update(m_drive.getPose()));
             */
         }
+
+        m_elastic.buildAutoChooser(m_drive);
 
         m_superstructure = new Superstructure(
             m_elevator,
@@ -310,18 +309,6 @@ public class RobotContainer {
     
         //configure beam break triggers
         configureBeamBreakTriggers();
-
-        //Build the auto chooser with PathPlanner
-        m_autoChooser = AutoBuilder.buildAutoChooser();
-        m_autoChooser.addOption(
-            "DoNothingBlue180", 
-            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(7.177, 5.147, Rotation2d.fromDegrees(180))))
-        );
-        m_autoChooser.addOption(
-            "DoNothingRed0", 
-            Commands.runOnce(() -> m_drive.resetPose(new Pose2d(10.380, 3.043, Rotation2d.fromDegrees(0))))
-        );
-        SmartDashboard.putData(m_autoChooser);
 
         CommandUtils.makePeriodic(() -> m_elastic.updateTeamColor(), true);
 
