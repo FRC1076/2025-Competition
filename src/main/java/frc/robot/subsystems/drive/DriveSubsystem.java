@@ -61,18 +61,15 @@ public class DriveSubsystem extends SubsystemBase {
     //private final ModuleIOInputsAutoLogged frontRightInputs = new ModuleIOInputsAutoLogged();
     //private final ModuleIOInputsAutoLogged rearLeftInputs = new ModuleIOInputsAutoLogged();
     //private final ModuleIOInputsAutoLogged rearRightInputs = new ModuleIOInputsAutoLogged();
-    private Boolean hasSetAlliance = false; // Wait until the driverstation had an alliance before setting it
     private boolean isAutoAligned = false;
     public final DriveCommandFactory CommandBuilder;
     private final VisionLocalizationSystem vision;
-    private final Elastic elastic;
     private SwerveRequest.ApplyRobotSpeeds CODriveRequest = new ApplyRobotSpeeds();
     private SwerveRequest.ApplyFieldSpeeds FODriveRequest = new ApplyFieldSpeeds();
 
-    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision, Elastic elastic) {
+    public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision) {
         this.io = io;
         this.vision = vision;
-        this.elastic = elastic;
         vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
 
         if (DriverStation.getAlliance().orElse(GameConfig.alliance) == Alliance.Red) {
