@@ -73,7 +73,7 @@ public class DriveSubsystem extends SubsystemBase {
         this.vision = vision;
         vision.registerMeasurementConsumer(this.io::addVisionMeasurement); // In DriveIOHardware, addVisionMeasurement is built into the SwerveDrivetrain class
 
-        if (DriverStation.getAlliance().orElse(GameConfig.alliance) == Alliance.Red) {
+        if (GameConfig.alliance == Alliance.Red) {
             io.setAllianceRotation(Rotation2d.fromDegrees(180));
         } else {
             io.setAllianceRotation(Rotation2d.fromDegrees(0));
@@ -92,7 +92,7 @@ public class DriveSubsystem extends SubsystemBase {
                     PathPlannerConstants.Control.rotPID
                 ),
                 RobotConfig.fromGUISettings(),
-                () -> DriverStation.getAlliance().orElse(GameConfig.alliance) == Alliance.Red,
+                () -> GameConfig.alliance == Alliance.Red,
                 this
             );
         } catch (Exception ex) {
