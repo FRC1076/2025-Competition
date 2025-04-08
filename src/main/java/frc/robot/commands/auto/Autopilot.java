@@ -3,7 +3,8 @@ package frc.robot.commands.auto;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-import frc.robot.Constants.FieldConstants.ReefLevel;
+import frc.robot.Constants.FieldConstants.ReefFace;
+import frc.robot.Constants.FieldConstants.CoralLevel;
 import frc.robot.RobotSuperState;
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.Superstructure;
@@ -24,21 +25,23 @@ public class Autopilot {
     private final DriveCommandFactory m_driveCommands;
     private final DriveSubsystem m_drive;
     private final Superstructure m_superstructure;
-    private final Map<ReefLevel,Command> reefCommandMap = new HashMap<>();
-    private ReefLevel targetLevel = ReefLevel.L1;
-    private ReefLevel commandGoalLevel = ReefLevel.L1;
-    private Command reefCommand = Commands.none();
+    private final Map<CoralLevel,Command> coralCommandMap = new HashMap<>();
+    private final Map<CoralLevel,Command> coralAutoCommandMap = new HashMap<>();
+    private CoralLevel targetLevel = CoralLevel.L1;
     
     public Autopilot(DriveSubsystem drive, Superstructure superstructure){
         m_driveCommands = drive.CommandBuilder;
         m_superstructureCommands = superstructure.CommandBuilder;
         m_drive = drive;
         m_superstructure = superstructure;
-        reefCommandMap.put(ReefLevel.L1,m_superstructureCommands.preL1());
-        reefCommandMap.put(ReefLevel.L2,m_superstructureCommands.preL2());
-        reefCommandMap.put(ReefLevel.L3,m_superstructureCommands.preL3());
-        reefCommandMap.put(ReefLevel.L4,m_superstructureCommands.preL4());
-        reefCommandMap.put(ReefLevel.NONE,m_superstructureCommands.retractMechanisms());
+        coralCommandMap.put(CoralLevel.L1,m_superstructureCommands.preL1());
+        coralCommandMap.put(CoralLevel.L2,m_superstructureCommands.preL2());
+        coralCommandMap.put(CoralLevel.L3,m_superstructureCommands.preL3());
+        coralCommandMap.put(CoralLevel.L4,m_superstructureCommands.preL4());
+        coralCommandMap.put(CoralLevel.NONE,m_superstructureCommands.retractMechanisms());
+        coralAutoCommandMap.put(CoralLevel.L2, m_superstructureCommands.preL2());
+        coralAutoCommandMap.put(CoralLevel.L3, m_superstructureCommands.preL3());
+        coralAutoCommandMap.put(CoralLevel.L4, m_superstructureCommands.preL4());
     }
 
 
@@ -63,6 +66,7 @@ public class Autopilot {
         );
     }
 
+    /*
     // A net scoring routine that is based on time
     public Command netScoringRoutineTimed(){
         return Commands.sequence(
@@ -81,51 +85,59 @@ public class Autopilot {
                 )
             )
         );
-    }
+    }*/
 
-    public Command setTargetLevel(ReefLevel level){
+    public Command setTargetLevel(CoralLevel level){
         return Commands.runOnce(() -> {
-            targetLevel = level;
-            Elastic.getInstance().putAutopilotTargetLevel(level);
+            if(targetLevel == level){
+                coralCommandMap.get(targetLevel).schedule();
+                targetLevel = CoralLevel.NONE;
+            }
+            else{
+                targetLevel = level;
+            }
+            Elastic.getInstance().putAutopilotTargetLevel(targetLevel);
         });
     }
 
     public Command executeAutoCoralCycleLeft(){
-        return Commands.defer(() -> alignForCoralCycle(true, targetLevel), Set.of(m_drive, m_superstructure.getElevator(), m_superstructure.getWrist()));
+        return alignForCoralCycle(true);
     }
 
     public Command executeAutoCoralCycleRight(){
-        return Commands.defer(() -> alignForCoralCycle(false, targetLevel), Set.of(m_drive, m_superstructure.getElevator(), m_superstructure.getWrist()));
+        return alignForCoralCycle(false);
     }
 
-    private Command followReefLevelTarget() {
-        return new FunctionalCommand(
-            () -> {
-                commandGoalLevel = targetLevel;
-                reefCommand = reefCommandMap.get(commandGoalLevel);
-                reefCommand.schedule();
-            }, 
-            () -> {
-                if (commandGoalLevel != targetLevel){
-                    commandGoalLevel = targetLevel;
-                    reefCommand.cancel();
-                    reefCommand = reefCommandMap.get(commandGoalLevel);
-                    reefCommand.schedule();
-                }
-            }, 
-            (interrupted) -> {
-                reefCommand.cancel();
-                commandGoalLevel = ReefLevel.NONE;
-                targetLevel = ReefLevel.NONE;
-            }, 
-            RobotSuperState.getInstance()::WristevatorAtGoal
-        );
+    private Command followCoralLevelTarget(boolean isL1, boolean leftSide) {
+        if(isL1){
+            if(leftSide){
+                return m_superstructureCommands.preL1DirectLeft();
+            }
+            else {
+                return m_superstructureCommands.preL1DirectRight();
+            }
+        }
+        else{
+            return coralAutoCommandMap.get(targetLevel);
+        }
     }
 
-    private Command alignForCoralCycle(boolean leftSide,ReefLevel level){
+    private Command alignForCoralCycle(boolean leftSide){
         return Commands.parallel(
-            followReefLevelTarget(),
-            leftSide ? m_driveCommands.directDriveToNearestLeftBranch() : m_driveCommands.directDriveToNearestRightBranch()
+            Commands.either(
+                followCoralLevelTarget(true, leftSide), 
+                followCoralLevelTarget(false, leftSide), 
+                () -> targetLevel == CoralLevel.L1
+            ),
+            Commands.either(
+                Commands.either(
+                    m_driveCommands.directDriveToNearestLeftBranch(),
+                    m_driveCommands.directDriveToNearestRightBranch(),
+                    () -> leftSide
+                ),
+                m_driveCommands.directDriveToNearestReefFace(),
+                () -> targetLevel == CoralLevel.L1
+            )
         );
     }
 }

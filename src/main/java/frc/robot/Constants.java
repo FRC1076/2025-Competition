@@ -276,7 +276,8 @@ public final class Constants {
 
             ALGAE_OUTTAKE(12, 12),
             CORAL_OUTTAKE(12, 12),
-            L1_OUTTAKE(8, 5),
+            L1_RIGHT_OUTTAKE(8, 5),
+            L1_LEFT_OUTTAKE(5, 8),
             DEFAULT_OUTTAKE(12, 12);
 
             public final double leftVoltage;
@@ -315,7 +316,8 @@ public final class Constants {
             GRABBER_CORAL_INTAKE_TRAVEL(0.784, 90),//90),
             HIGH_TRAVEL(0.3, -90), //with grabber down state
 
-            L1(0.3048, 23.9365), // Placeholder
+            L1_LEFT(0.3048, 23.9365), // Placeholder
+            L1_RIGHT(0.3048, 23.9365),
             L2(0.910, -35), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),
             L4(2.11455, -38),//-40.4130051, true), //1.8161, -45),
@@ -346,7 +348,7 @@ public final class Constants {
         private static final Transform2d leftBranchTransform = new Transform2d(0.0, -branchOffset, Rotation2d.kZero);
         private static final Transform2d rightBranchTransform = new Transform2d(0.0, branchOffset, Rotation2d.kZero);
 
-        public enum ReefLevel {
+        public enum CoralLevel {
             L1, L2, L3, L4, NONE
         }
         /**

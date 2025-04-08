@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.GameConfig;
 import frc.robot.SystemConfig;
-import frc.robot.Constants.FieldConstants.ReefLevel;
+import frc.robot.Constants.FieldConstants.CoralLevel;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.GameConstants.AutonSides;
 import frc.robot.Constants.SuperstructureConstants.GrabberPossession;
@@ -91,8 +91,8 @@ public class Elastic {
         this.putBoolean("safeToMoveElevator", safeToMoveElevator.getAsBoolean());
     }
 
-    public void putAutopilotTargetLevel(ReefLevel level) {
-        this.putString("stagedReefLevel", level.name());
+    public void putAutopilotTargetLevel(CoralLevel level) {
+        this.putString("stagedCoralLevel", level.name());
     }
 
     public void updateIsAutoAligned(BooleanSupplier isAutoAligned) {

@@ -47,7 +47,8 @@ import org.littletonrobotics.junction.Logger;
 public class Superstructure extends VirtualSubsystem {
 
     private static final Set<WristevatorState> grabberDownStates = Set.of(
-        WristevatorState.L1,
+        WristevatorState.L1_LEFT,
+        WristevatorState.L1_RIGHT,
         WristevatorState.L2,
         WristevatorState.L3,
         WristevatorState.L4,
@@ -362,7 +363,8 @@ public class Superstructure extends VirtualSubsystem {
             this.superstructure = superstructure;
             m_transferBeamBreak = transferBeamBreak;
             m_grabberCANRange = grabberCANRange;
-            grabberActionCommands.put(WristevatorState.L1, () -> superstructure.applyGrabberState(GrabberState.L1_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L1_RIGHT, () -> superstructure.applyGrabberState(GrabberState.L1_RIGHT_OUTTAKE));
+            grabberActionCommands.put(WristevatorState.L1_LEFT, () -> superstructure.applyGrabberState(GrabberState.L1_LEFT_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L2, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
             grabberActionCommands.put(WristevatorState.L3, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE)); 
             grabberActionCommands.put(WristevatorState.L4, () -> superstructure.applyGrabberState(GrabberState.CORAL_OUTTAKE));
@@ -479,10 +481,17 @@ public class Superstructure extends VirtualSubsystem {
         public Command preL1(){
             return  
                 Commands.either(
-                    superstructure.applyWristevatorStateDirect(WristevatorState.L1),
-                    superstructure.applyWristevatorState(WristevatorState.L1),
+                    superstructure.applyWristevatorStateDirect(WristevatorState.L1_RIGHT),
+                    superstructure.applyWristevatorState(WristevatorState.L1_RIGHT),
                     () -> RobotSuperState.getInstance().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
+        }
+
+        public Command preL1DirectRight(){
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L1_RIGHT);
+        }
+        public Command preL1DirectLeft(){
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L1_LEFT);
         }
 
         /**
@@ -497,6 +506,10 @@ public class Superstructure extends VirtualSubsystem {
                 );
         }
 
+        public Command preL2Direct(){
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L2);
+        }
+
         /**
          * Set elevator and wrist to L3 preset
          */
@@ -509,6 +522,10 @@ public class Superstructure extends VirtualSubsystem {
                 );
         }
 
+        public Command preL3Direct(){
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L3);
+        }
+
         /**
          * Set elevator and wrist to L4 preset
          */
@@ -519,6 +536,10 @@ public class Superstructure extends VirtualSubsystem {
                     superstructure.applyWristevatorState(WristevatorState.L4, Units.inchesToMeters(12)), //2 * 0.181368595),
                     () -> grabberDownStates.contains(RobotSuperState.getInstance().getWristevatorState())
                 );
+        }
+
+        public Command preL4Direct() {
+            return superstructure.applyWristevatorStateDirect(WristevatorState.L4);
         }
 
         /**
@@ -731,10 +752,6 @@ public class Superstructure extends VirtualSubsystem {
                 transferCoral(),
                 Commands.runOnce(() -> safeToMoveElevator = true)
             );
-        }
-
-        public Command preL4Direct() {
-            return superstructure.applyWristevatorStateDirect(WristevatorState.L4);
         }
 
         public Command holdAlgae() {
