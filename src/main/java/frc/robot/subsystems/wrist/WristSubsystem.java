@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.wrist;
 
+import frc.robot.RobotSuperState;
 import frc.robot.Constants.WristConstants;
 import lib.control.DynamicArmFeedforward;
 import lib.control.DynamicProfiledPIDController;
@@ -162,6 +163,7 @@ public class WristSubsystem extends SubsystemBase {
         Logger.recordOutput("Wrist/Setpoint", m_profiledPIDController.getSetpoint().position);
         Logger.recordOutput("Wrist/VelocitySetpoint", m_profiledPIDController.getSetpoint().velocity);
         Logger.processInputs("Wrist", inputs);
+        RobotSuperState.getInstance().updateWristAngle(getAngle());
     }
 
     @Override

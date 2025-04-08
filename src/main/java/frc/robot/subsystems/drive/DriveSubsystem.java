@@ -6,6 +6,7 @@ package frc.robot.subsystems.drive;
 
 import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import frc.robot.GameConfig;
+import frc.robot.RobotSuperState;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
@@ -113,6 +114,7 @@ public class DriveSubsystem extends SubsystemBase {
         // io.updateModuleInputs(rearLeftInputs, 2);
         // io.updateModuleInputs(rearRightInputs, 3);
         Logger.processInputs("Drive", driveInputs);
+        RobotSuperState.getInstance().updateDriveState(driveInputs);
         // Logger.processInputs("Drive/FrontLeft", frontLeftInputs);
         // Logger.processInputs("Drive/FrontRight", frontRightInputs);
         // Logger.processInputs("Drive/RearLeft", rearLeftInputs);

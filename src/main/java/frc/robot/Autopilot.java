@@ -1,11 +1,16 @@
-package frc.robot.commands.auto;
+package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+<<<<<<< HEAD:src/main/java/frc/robot/commands/auto/Autopilot.java
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.Constants.FieldConstants.CoralLevel;
 import frc.robot.RobotSuperState;
+=======
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.FieldConstants.ReefLevel;
+>>>>>>> c6488a3e31c460353762419c93a31cff96c03d0f:src/main/java/frc/robot/Autopilot.java
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
@@ -17,9 +22,11 @@ import java.util.Set;
 import java.util.HashMap;
 
 /**
- * A command factory that executes autonomous teleop routines requiring multiple subsystems
+ * A subsystem that executes autonomous teleop routines requiring multiple subsystems
  */
-public class Autopilot {
+public final class Autopilot {
+
+    private static Autopilot inst;
     
     private final SuperstructureCommandFactory m_superstructureCommands;
     private final DriveCommandFactory m_driveCommands;
@@ -28,17 +35,25 @@ public class Autopilot {
     private final Map<CoralLevel,Command> coralCommandMap = new HashMap<>();
     private final Map<CoralLevel,Command> coralAutoCommandMap = new HashMap<>();
     private CoralLevel targetLevel = CoralLevel.L1;
+
     
-    public Autopilot(DriveSubsystem drive, Superstructure superstructure){
+    private Autopilot(){
+        // Constructor is private to enforce singleton pattern
+    }
+
+    public void registerDrive(DriveSubsystem drive){
         m_driveCommands = drive.CommandBuilder;
-        m_superstructureCommands = superstructure.CommandBuilder;
         m_drive = drive;
+    }
+
+    public void registerSuperstructure(Superstructure superstructure){
+        m_superstructureCommands = superstructure.CommandBuilder;
         m_superstructure = superstructure;
         coralCommandMap.put(CoralLevel.L1,m_superstructureCommands.preL1());
         coralCommandMap.put(CoralLevel.L2,m_superstructureCommands.preL2());
         coralCommandMap.put(CoralLevel.L3,m_superstructureCommands.preL3());
         coralCommandMap.put(CoralLevel.L4,m_superstructureCommands.preL4());
-        coralCommandMap.put(CoralLevel.NONE,m_superstructureCommands.retractMechanisms());
+        coralCommandMap.put(CoralLevel.NONE, Commands.none());
         coralAutoCommandMap.put(CoralLevel.L2, m_superstructureCommands.preL2());
         coralAutoCommandMap.put(CoralLevel.L3, m_superstructureCommands.preL3());
         coralAutoCommandMap.put(CoralLevel.L4, m_superstructureCommands.preL4());
@@ -51,15 +66,15 @@ public class Autopilot {
             //Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs), TODO: Integrate LED state into RobotSuperState
             Commands.sequence(
                 Commands.parallel(
-                    m_superstructure.CommandBuilder.preAutomaticNet().asProxy(),
-                    m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
+                    m_superstructureCommands.preAutomaticNet().asProxy(),
+                    m_driveCommands.directDriveToNearestPreNetLocation()
                 ),
                 Commands.parallel(
-                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                    m_superstructure.CommandBuilder.preNet(),
+                    m_driveCommands.directDriveToNearestScoreNetLocation(),
+                    m_superstructureCommands.preNet(),
                     Commands.sequence(
-                        Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
-                        m_superstructure.CommandBuilder.doGrabberAction()
+                        Commands.waitUntil(() -> {return RobotSuperState.getInstance().getElevatorHeight() > 1.9158291;}), //1.7 //1.9158291
+                        m_superstructureCommands.doGrabberAction()
                     )
                 )
             )

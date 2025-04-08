@@ -72,6 +72,7 @@ public class Superstructure extends VirtualSubsystem {
     private Boolean safeToMoveElevator;
 
     private boolean elevatorClutch = false;
+    private Command activeWristevatorCommand = Commands.none();
 
     public Superstructure (
         ElevatorSubsystem elevator,
@@ -170,7 +171,7 @@ public class Superstructure extends VirtualSubsystem {
         );
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        return Commands.sequence(
+        Command wristevatorCommand = Commands.sequence(
             Commands.runOnce(() -> {
                 RobotSuperState.getInstance().updateWristevatorState(position);
                 RobotSuperState.getInstance().updateWristevatorAtGoal(false);
@@ -187,6 +188,13 @@ public class Superstructure extends VirtualSubsystem {
             Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorAtGoal(true)),
             Commands.runOnce(ledSignal)
         );
+
+        return wristevatorCommand.beforeStarting(() -> registerWristevatorCommand(wristevatorCommand)); // This ensures only one wristevator command can run at any given time
+    }
+
+    private void registerWristevatorCommand(Command command){
+        activeWristevatorCommand.cancel();
+        activeWristevatorCommand = command;
     }
 
     private Command applyWristevatorStateNoPremove(WristevatorState position, double tolerance, boolean grabberDown) {
@@ -197,7 +205,7 @@ public class Superstructure extends VirtualSubsystem {
         };
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        return Commands.sequence(
+        Command wristevatorCommand = Commands.sequence(
             Commands.runOnce(() -> {
                 RobotSuperState.getInstance().updateWristevatorState(position);
                 RobotSuperState.getInstance().updateWristevatorAtGoal(false);
@@ -214,6 +222,8 @@ public class Superstructure extends VirtualSubsystem {
             Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorAtGoal(true)),
             Commands.runOnce(ledSignal)
         );
+
+        return wristevatorCommand.beforeStarting(() -> registerWristevatorCommand(wristevatorCommand)); // This ensures only one wristevator command can run at any given time
     }
 
     /**
@@ -257,7 +267,7 @@ public class Superstructure extends VirtualSubsystem {
             safeToMoveElevator = false;
         };
         
-        return Commands.parallel(  
+        Command wristevatorCommand = Commands.parallel(  
             Commands.runOnce(() -> {
                 RobotSuperState.getInstance().updateWristevatorState(position);
                 RobotSuperState.getInstance().updateWristevatorAtGoal(false);
@@ -273,6 +283,8 @@ public class Superstructure extends VirtualSubsystem {
             ),
             Commands.runOnce(() -> RobotSuperState.getInstance().updateWristevatorAtGoal(true))
         ).until(override);
+
+        return wristevatorCommand.beforeStarting(() -> registerWristevatorCommand(wristevatorCommand)); // This ensures only one wristevator command can run at any given time
     }
 
     /**
@@ -289,10 +301,6 @@ public class Superstructure extends VirtualSubsystem {
     
     private Command applyWristevatorStateGrabberDown(WristevatorState position, double tolerance) {
         return applyWristevatorState(position,tolerance,true);
-    }
-
-    private Command applyWristevatorStateGrabberDown(WristevatorState position) {
-        return applyWristevatorStateGrabberDown(position, Units.inchesToMeters(0.5));
     }
 
     /**
@@ -400,8 +408,8 @@ public class Superstructure extends VirtualSubsystem {
                 Commands.runOnce(() -> {safeToMoveElevator = false;}),
                 Commands.runOnce(() -> RobotSuperState.getInstance().updatePossession(
                     algaeIntakeWristevatorStates.contains(RobotSuperState.getInstance().getWristevatorState())
-                            ? GrabberPossession.ALGAE
-                            : GrabberPossession.EMPTY)
+                        ? GrabberPossession.ALGAE
+                        : GrabberPossession.EMPTY)
                 )
             );
         }
