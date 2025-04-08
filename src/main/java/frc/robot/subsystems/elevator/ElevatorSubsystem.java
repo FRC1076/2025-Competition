@@ -167,17 +167,18 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     public Command holdPosition(double positionMeters) {
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.setGoal(positionMeters);},
+            () -> {m_profiledPIDController.setGoal(MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters));},
             () -> setPosition(),
             (interrupted) -> {},
-            () -> false
+            () -> false,
+            this
         );
     }
 
     public Command applyPositionPersistent(double positionMeters){
         return new FunctionalCommand(
             () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);
-                    m_profiledPIDController.setGoal(positionMeters);},
+                    m_profiledPIDController.setGoal(MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters));},
             () -> setPosition(),
             (interrupted) -> {},
             () -> false,

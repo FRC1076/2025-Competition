@@ -85,9 +85,9 @@ public class WristSubsystem extends SubsystemBase {
     }
 
     /** Sets the desired rotation of the wrist */
-    public void setAngle(Rotation2d position) {
+    public void setAngle() {
         io.setVoltage(
-            m_profiledPIDController.calculate(inputs.angleRadians, MathUtil.clamp(position.getRadians(), WristConstants.kMinWristAngleRadians, WristConstants.kMaxWristAngleRadians))
+            m_profiledPIDController.calculate(inputs.angleRadians)
             + m_feedforwardController.calculate(inputs.angleRadians, m_profiledPIDController.getSetpoint().velocity)
         );
     }
@@ -116,8 +116,9 @@ public class WristSubsystem extends SubsystemBase {
     */
     public Command applyAngle(Rotation2d angle) {
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getAngleRadians(),inputs.velocityRadiansPerSecond);},
-            () -> setAngle(angle), 
+            () -> {m_profiledPIDController.reset(getAngleRadians(),inputs.velocityRadiansPerSecond);
+                    m_profiledPIDController.setGoal(MathUtil.clamp(angle.getRadians(), WristConstants.kMinWristAngleRadians, WristConstants.kMaxWristAngleRadians));},
+            () -> setAngle(), 
             (interrupted) -> {},
             () -> Math.abs(angle.minus(getAngle()).getRadians()) < WristConstants.wristAngleToleranceRadians,
             this
@@ -135,8 +136,8 @@ public class WristSubsystem extends SubsystemBase {
     public Command applyAnglePersistent(Rotation2d angle) {
         return new FunctionalCommand(
             () -> {m_profiledPIDController.reset(getAngleRadians(),inputs.velocityRadiansPerSecond);
-                    m_profiledPIDController.setGoal(angle.getRadians());},
-            () -> setAngle(angle), 
+                m_profiledPIDController.setGoal(MathUtil.clamp(angle.getRadians(), WristConstants.kMinWristAngleRadians, WristConstants.kMaxWristAngleRadians));},
+            () -> setAngle(), 
             (interrupted) -> {},
             () -> false,
             this
@@ -148,7 +149,13 @@ public class WristSubsystem extends SubsystemBase {
      * @param angle The desired angle of the wrist
     */
     public Command holdAngle(Rotation2d angle){
-        return run(() -> setAngle(angle));
+        return new FunctionalCommand(
+            () -> {m_profiledPIDController.setGoal(MathUtil.clamp(angle.getRadians(), WristConstants.kMinWristAngleRadians, WristConstants.kMaxWristAngleRadians));},
+            () -> setAngle(), 
+            (interrupted) -> {},
+            () -> false,
+            this
+        );
     }
 
     public Command applyManualControl(DoubleSupplier controlSupplier) {
