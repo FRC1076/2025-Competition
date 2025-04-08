@@ -7,13 +7,12 @@ package frc.robot.subsystems.wrist;
 import frc.robot.RobotSuperState;
 import frc.robot.Constants.WristConstants;
 import lib.control.DynamicArmFeedforward;
-import lib.control.DynamicProfiledPIDController;
+import lib.control.ProfiledPIDController;
 
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;

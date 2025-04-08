@@ -7,13 +7,12 @@ package frc.robot.subsystems.elevator;
 import frc.robot.RobotSuperState;
 import frc.robot.Constants.ElevatorConstants;
 import lib.control.DynamicElevatorFeedforward;
-import lib.control.DynamicProfiledPIDController;
+import lib.control.ProfiledPIDController;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
