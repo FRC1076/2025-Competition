@@ -1,12 +1,11 @@
-package frc.robot.commands.auto;
+package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants.ReefLevel;
 import frc.robot.RobotSuperState;
-import frc.robot.subsystems.Elastic;
-import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
@@ -16,24 +15,36 @@ import java.util.Set;
 import java.util.HashMap;
 
 /**
- * A command factory that executes autonomous teleop routines requiring multiple subsystems
+ * A subsystem that executes autonomous teleop routines requiring multiple subsystems
  */
-public class Autopilot {
+public final class Autopilot extends SubsystemBase {
+
+    private static Autopilot inst;
     
-    private final SuperstructureCommandFactory m_superstructureCommands;
-    private final DriveCommandFactory m_driveCommands;
-    private final DriveSubsystem m_drive;
-    private final Superstructure m_superstructure;
+    public static Autopilot getInstance() {
+        if (inst == null) {
+            inst = new Autopilot();
+        }
+        return inst;
+    }
+    
+    private SuperstructureCommandFactory m_superstructureCommands;
+    private DriveCommandFactory m_driveCommands;
     private final Map<ReefLevel,Command> reefCommandMap = new HashMap<>();
     private ReefLevel targetLevel = ReefLevel.L1;
     private ReefLevel commandGoalLevel = ReefLevel.L1;
     private Command reefCommand = Commands.none();
     
-    public Autopilot(DriveSubsystem drive, Superstructure superstructure){
+    private Autopilot(){
+        // Constructor is private to enforce singleton pattern
+    }
+
+    public void registerDrive(DriveSubsystem drive){
         m_driveCommands = drive.CommandBuilder;
+    }
+
+    public void registerSuperstructure(Superstructure superstructure){
         m_superstructureCommands = superstructure.CommandBuilder;
-        m_drive = drive;
-        m_superstructure = superstructure;
         reefCommandMap.put(ReefLevel.L1,m_superstructureCommands.preL1());
         reefCommandMap.put(ReefLevel.L2,m_superstructureCommands.preL2());
         reefCommandMap.put(ReefLevel.L3,m_superstructureCommands.preL3());
@@ -48,15 +59,15 @@ public class Autopilot {
             //Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs), TODO: Integrate LED state into RobotSuperState
             Commands.sequence(
                 Commands.parallel(
-                    m_superstructure.CommandBuilder.preAutomaticNet().asProxy(),
-                    m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
+                    m_superstructureCommands.preAutomaticNet().asProxy(),
+                    m_driveCommands.directDriveToNearestPreNetLocation()
                 ),
                 Commands.parallel(
-                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                    m_superstructure.CommandBuilder.preNet(),
+                    m_driveCommands.directDriveToNearestScoreNetLocation(),
+                    m_superstructureCommands.preNet(),
                     Commands.sequence(
-                        Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
-                        m_superstructure.CommandBuilder.doGrabberAction()
+                        Commands.waitUntil(() -> {return RobotSuperState.getInstance().getElevatorHeight() > 1.9158291;}), //1.7 //1.9158291
+                        m_superstructureCommands.doGrabberAction()
                     )
                 )
             )
@@ -91,11 +102,15 @@ public class Autopilot {
     }
 
     public Command executeAutoCoralCycleLeft(){
-        return Commands.defer(() -> alignForCoralCycle(true, targetLevel), Set.of(m_drive, m_superstructure.getElevator(), m_superstructure.getWrist()));
+        return Commands.defer(() -> alignForCoralCycle(true, targetLevel), Set.of(this));
     }
 
     public Command executeAutoCoralCycleRight(){
-        return Commands.defer(() -> alignForCoralCycle(false, targetLevel), Set.of(m_drive, m_superstructure.getElevator(), m_superstructure.getWrist()));
+        return Commands.defer(() -> alignForCoralCycle(false, targetLevel), Set.of(this));
+    }
+
+    public void cancelAutopilot() {
+        this.getCurrentCommand().cancel();
     }
 
     private Command followReefLevelTarget() {
@@ -125,7 +140,9 @@ public class Autopilot {
     private Command alignForCoralCycle(boolean leftSide,ReefLevel level){
         return Commands.parallel(
             followReefLevelTarget(),
-            leftSide ? m_driveCommands.directDriveToNearestLeftBranch() : m_driveCommands.directDriveToNearestRightBranch()
+            leftSide 
+                ? m_driveCommands.directDriveToNearestLeftBranch().asProxy() 
+                : m_driveCommands.directDriveToNearestRightBranch().asProxy()
         );
     }
 }
