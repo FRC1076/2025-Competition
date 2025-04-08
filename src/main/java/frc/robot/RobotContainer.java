@@ -174,7 +174,7 @@ public class RobotContainer {
         if (SystemConstants.currentMode == 0) {
             m_visionSim = null;
             m_elastic = Elastic.getInstance();
-            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
+            m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision);
 
             // BLUE
             if(GameConstants.teamColor == Alliance.Blue){
@@ -205,7 +205,7 @@ public class RobotContainer {
             }
         } else if (SystemConstants.currentMode == 1) {
             m_elastic = Elastic.getInstance();
-            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
+            m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOSim(), this::getLoopTime);
             m_grabber = new GrabberSubsystem(new GrabberIOSim());
