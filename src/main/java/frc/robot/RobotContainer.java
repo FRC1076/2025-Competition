@@ -638,7 +638,7 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
 
         // Standard 3 coral auto
-        // return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        return AutoBuilder.buildAuto(GameConfig.defaultAuton);
 
         // Compementary 2 coral auto
         //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
@@ -648,7 +648,7 @@ public class RobotContainer {
 
         // Untested for a while 2 coral (funnel)
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
-        return Elastic.getInstance().getSelectedAutoCommand();
+        // return Elastic.getInstance().getSelectedAutoCommand();
     }
 
     /**
