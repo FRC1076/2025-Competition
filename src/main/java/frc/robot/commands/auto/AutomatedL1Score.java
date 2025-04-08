@@ -38,6 +38,8 @@ public class AutomatedL1Score extends Command {
     @Override
     public void initialize() {
 
+        System.out.println("hi");
+
         Pose2d currentPose = m_drive.getPose();
         Pose2d coralStationPose = Localization.getClosestCoralStation(currentPose);
         ReefFace closestReefFace = Localization.getClosestReefFace(currentPose);
@@ -58,7 +60,7 @@ public class AutomatedL1Score extends Command {
                     // Score the coral
                     Commands.parallel(
                         superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), // TODO: tune voltages (8 and 5 seem low)
-                        Commands.waitUntil(() -> !coralPossessionSupplier.getAsBoolean()),
+                        Commands.waitUntil(coralPossessionSupplier.negate()),
                         Commands.runOnce(() -> closestReefFace.increaseL1Index()) // The coral is scored, so next time score the next L1
                         //Commands.waitSeconds(0.5) // TODO: tune time - important that CANRange doesn't see coral
                     )
@@ -70,7 +72,9 @@ public class AutomatedL1Score extends Command {
             // If the robot does not have a coral, drive to the coral station and intake the coral
             autoL1Command = 
                 Commands.deadline(
-                    superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
+                    superstructure.getCommandBuilder()
+                        .autonGrabberIntakeCoral()
+                        .andThen(superstructure.applyGrabberState(GrabberState.IDLE)),
                     m_drive.CommandBuilder.directDriveToPose(coralStationPose)
                 );
         }
