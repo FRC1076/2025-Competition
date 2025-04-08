@@ -3,14 +3,9 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
-<<<<<<< HEAD:src/main/java/frc/robot/commands/auto/Autopilot.java
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.Constants.FieldConstants.CoralLevel;
 import frc.robot.RobotSuperState;
-=======
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.FieldConstants.ReefLevel;
->>>>>>> c6488a3e31c460353762419c93a31cff96c03d0f:src/main/java/frc/robot/Autopilot.java
 import frc.robot.subsystems.Elastic;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
