@@ -25,8 +25,6 @@ public final class Autopilot {
     
     private SuperstructureCommandFactory m_superstructureCommands;
     private DriveCommandFactory m_driveCommands;
-    private DriveSubsystem m_drive;
-    private Superstructure m_superstructure;
     private final Map<CoralLevel,Command> coralCommandMap = new HashMap<>();
     private final Map<CoralLevel,Command> coralAutoCommandMap = new HashMap<>();
     private CoralLevel targetLevel = CoralLevel.L1;
@@ -45,12 +43,10 @@ public final class Autopilot {
 
     public void registerDrive(DriveSubsystem drive){
         m_driveCommands = drive.CommandBuilder;
-        m_drive = drive;
     }
 
     public void registerSuperstructure(Superstructure superstructure){
         m_superstructureCommands = superstructure.CommandBuilder;
-        m_superstructure = superstructure;
         coralCommandMap.put(CoralLevel.L1,m_superstructureCommands.preL1());
         coralCommandMap.put(CoralLevel.L2,m_superstructureCommands.preL2());
         coralCommandMap.put(CoralLevel.L3,m_superstructureCommands.preL3());
@@ -109,8 +105,7 @@ public final class Autopilot {
             if(targetLevel == level){
                 coralCommandMap.get(targetLevel).schedule();
                 targetLevel = CoralLevel.NONE;
-            }
-            else{
+            } else {
                 targetLevel = level;
             }
             Elastic.getInstance().putAutopilotTargetLevel(targetLevel);
@@ -129,12 +124,10 @@ public final class Autopilot {
         if(isL1){
             if(leftSide){
                 return m_superstructureCommands.preL1DirectLeft();
-            }
-            else {
+            } else {
                 return m_superstructureCommands.preL1DirectRight();
             }
-        }
-        else{
+        } else {
             return coralAutoCommandMap.get(targetLevel);
         }
     }
@@ -155,6 +148,6 @@ public final class Autopilot {
                 m_driveCommands.directDriveToNearestReefFace(),
                 () -> targetLevel == CoralLevel.L1
             )
-        );
+        ).finallyDo(() -> targetLevel = CoralLevel.NONE);
     }
 }
