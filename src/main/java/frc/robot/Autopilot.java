@@ -1,11 +1,12 @@
-package frc.robot.subsystems;
+package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FieldConstants.ReefLevel;
-import frc.robot.RobotSuperState;
+import frc.robot.subsystems.Elastic;
+import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.Superstructure.SuperstructureCommandFactory;
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.subsystems.drive.DriveSubsystem.DriveCommandFactory;
@@ -17,7 +18,7 @@ import java.util.HashMap;
 /**
  * A subsystem that executes autonomous teleop routines requiring multiple subsystems
  */
-public final class Autopilot extends SubsystemBase {
+public final class Autopilot {
 
     private static Autopilot inst;
     
@@ -32,7 +33,6 @@ public final class Autopilot extends SubsystemBase {
     private DriveCommandFactory m_driveCommands;
     private final Map<ReefLevel,Command> reefCommandMap = new HashMap<>();
     private ReefLevel targetLevel = ReefLevel.L1;
-    private ReefLevel commandGoalLevel = ReefLevel.L1;
     private Command reefCommand = Commands.none();
     
     private Autopilot(){
@@ -49,7 +49,7 @@ public final class Autopilot extends SubsystemBase {
         reefCommandMap.put(ReefLevel.L2,m_superstructureCommands.preL2());
         reefCommandMap.put(ReefLevel.L3,m_superstructureCommands.preL3());
         reefCommandMap.put(ReefLevel.L4,m_superstructureCommands.preL4());
-        reefCommandMap.put(ReefLevel.NONE,m_superstructureCommands.retractMechanisms());
+        reefCommandMap.put(ReefLevel.NONE,Commands.none());
     }
 
 
@@ -102,47 +102,62 @@ public final class Autopilot extends SubsystemBase {
     }
 
     public Command executeAutoCoralCycleLeft(){
-        return Commands.defer(() -> alignForCoralCycle(true, targetLevel), Set.of(this));
+        return alignForCoralCycle(true);
     }
 
     public Command executeAutoCoralCycleRight(){
-        return Commands.defer(() -> alignForCoralCycle(false, targetLevel), Set.of(this));
+        return alignForCoralCycle(false);
     }
 
-    public void cancelAutopilot() {
-        this.getCurrentCommand().cancel();
+    public void clearStagedCommand() {
+        this.targetLevel = ReefLevel.NONE;
+    }
+
+    public void cancelReefCommand() {
+        reefCommand.cancel();
+        targetLevel = ReefLevel.NONE;
     }
 
     private Command followReefLevelTarget() {
-        return new FunctionalCommand(
-            () -> {
+        return new Command() {
+
+            private ReefLevel commandGoalLevel;
+
+            @Override
+            public void initialize() {
                 commandGoalLevel = targetLevel;
                 reefCommand = reefCommandMap.get(commandGoalLevel);
                 reefCommand.schedule();
-            }, 
-            () -> {
+            }
+
+            @Override
+            public void execute() {
                 if (commandGoalLevel != targetLevel){
                     commandGoalLevel = targetLevel;
                     reefCommand.cancel();
                     reefCommand = reefCommandMap.get(commandGoalLevel);
                     reefCommand.schedule();
                 }
-            }, 
-            (interrupted) -> {
-                reefCommand.cancel();
-                commandGoalLevel = ReefLevel.NONE;
+            }
+
+            @Override
+            public void end(boolean interrupted) {
                 targetLevel = ReefLevel.NONE;
-            }, 
-            RobotSuperState.getInstance()::WristevatorAtGoal
-        );
+            }
+
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+        };
     }
 
-    private Command alignForCoralCycle(boolean leftSide,ReefLevel level){
-        return Commands.parallel(
-            followReefLevelTarget(),
+    private Command alignForCoralCycle(boolean leftSide){
+        return Commands.deadline(  
             leftSide 
-                ? m_driveCommands.directDriveToNearestLeftBranch().asProxy() 
-                : m_driveCommands.directDriveToNearestRightBranch().asProxy()
+                ? m_driveCommands.directDriveToNearestLeftBranch()
+                : m_driveCommands.directDriveToNearestRightBranch(),
+            followReefLevelTarget()
         );
     }
 }
