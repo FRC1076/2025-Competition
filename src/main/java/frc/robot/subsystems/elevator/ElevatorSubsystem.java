@@ -99,11 +99,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
     
     /** Set desired position of the elevator
-     * @param positionMeters Desired position of the elevator in meters
+     * 
      */
-    public void setPosition(double positionMeters) {
+    public void setPosition() {
         io.setVoltage (
-            m_profiledPIDController.calculate(getPositionMeters(), MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters))
+            m_profiledPIDController.calculate(getPositionMeters())
             + m_feedforwardController.calculate(m_profiledPIDController.getSetpoint().velocity)
         );
     }
@@ -157,8 +157,9 @@ public class ElevatorSubsystem extends SubsystemBase {
      */
     public Command applyPosition(double positionMeters) {
         return new FunctionalCommand(
-            () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);},
-            () -> setPosition(positionMeters),
+            () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);
+                    m_profiledPIDController.setGoal(MathUtil.clamp(positionMeters, ElevatorConstants.kMinElevatorHeightMeters, ElevatorConstants.kMaxElevatorHeightMeters));},
+            () -> setPosition(),
             (interrupted) -> {},
             () -> Math.abs(positionMeters - getPositionMeters()) < ElevatorConstants.elevatorPositionToleranceMeters,
             this
@@ -166,14 +167,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     }
 
     public Command holdPosition(double positionMeters) {
-        return run(() -> setPosition(positionMeters));
+        return new FunctionalCommand(
+            () -> {m_profiledPIDController.setGoal(positionMeters);},
+            () -> setPosition(),
+            (interrupted) -> {},
+            () -> false
+        );
     }
 
     public Command applyPositionPersistent(double positionMeters){
         return new FunctionalCommand(
             () -> {m_profiledPIDController.reset(getPositionMeters(), inputs.velocityMetersPerSecond);
                     m_profiledPIDController.setGoal(positionMeters);},
-            () -> setPosition(positionMeters),
+            () -> setPosition(),
             (interrupted) -> {},
             () -> false,
             this
