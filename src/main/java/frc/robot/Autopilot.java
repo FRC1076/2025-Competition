@@ -23,10 +23,10 @@ public final class Autopilot {
 
     private static Autopilot inst;
     
-    private final SuperstructureCommandFactory m_superstructureCommands;
-    private final DriveCommandFactory m_driveCommands;
-    private final DriveSubsystem m_drive;
-    private final Superstructure m_superstructure;
+    private SuperstructureCommandFactory m_superstructureCommands;
+    private DriveCommandFactory m_driveCommands;
+    private DriveSubsystem m_drive;
+    private Superstructure m_superstructure;
     private final Map<CoralLevel,Command> coralCommandMap = new HashMap<>();
     private final Map<CoralLevel,Command> coralAutoCommandMap = new HashMap<>();
     private CoralLevel targetLevel = CoralLevel.L1;
@@ -34,6 +34,13 @@ public final class Autopilot {
     
     private Autopilot(){
         // Constructor is private to enforce singleton pattern
+    }
+
+    public static Autopilot getInstance() {
+        if (inst == null) {
+            inst = new Autopilot();
+        } 
+        return inst;
     }
 
     public void registerDrive(DriveSubsystem drive){
