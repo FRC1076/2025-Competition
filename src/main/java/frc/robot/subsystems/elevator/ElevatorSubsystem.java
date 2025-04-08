@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.elevator;
 
+import frc.robot.RobotSuperState;
 import frc.robot.Constants.ElevatorConstants;
 import lib.control.DynamicElevatorFeedforward;
 import lib.control.DynamicProfiledPIDController;
@@ -89,6 +90,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         Logger.recordOutput("Elevator/Setpoint", m_profiledPIDController.getSetpoint().position);
         Logger.recordOutput("Elevator/VelocitySetpoint", m_profiledPIDController.getSetpoint().velocity);
         Logger.processInputs("Elevator", inputs);
+        RobotSuperState.getInstance().updateElevatorHeight(inputs.elevatorHeightMeters);
     }
 
     @Override
