@@ -66,7 +66,7 @@ public class AutomatedL1Score extends Command {
                         superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), // TODO: tune voltages (8 and 5 seem low)
                         Commands.waitUntil(coralPossessionSupplier.negate()),
                         Commands.runOnce(() -> closestReefFace.increaseL1Index()), // The coral is scored, so next time score the next L1
-                        Commands.print("finished")
+                        superstructure.applyGrabberState(GrabberState.IDLE);
                 );
         } /*else if (closestReefFace == ReefFace.BLU_REEF_GH || closestReefFace == ReefFace.RED_REEF_GH) {
             // If the robot is too far from the coral station and in danger of hitting the reef, do nothing
