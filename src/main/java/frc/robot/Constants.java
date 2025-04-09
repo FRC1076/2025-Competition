@@ -72,6 +72,15 @@ public final class Constants {
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     12.389, -11.683, 11.513639, // 15 - 7.163, -(15 - 2.892), 19.162, 
                     0, 0, 20 // -11.385, 17.961, 40
+                ),
+                BACK_RIGHT_CAM(
+                    "BACK_RIGHT_CAM",
+                    kDefaultSingleTagStdDevs,
+                    kDefaultMultiTagStdDevs,
+                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
+                    PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
+                    -12.785, -12.565, 6.25+4.411,
+                    0, 0, -140
                 );
 
                 public final String name;
