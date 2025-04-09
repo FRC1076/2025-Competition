@@ -10,8 +10,12 @@ import frc.robot.subsystems.Superstructure;
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 
+import com.pathplanner.lib.path.PathConstraints;
+
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -24,6 +28,7 @@ public class AutomatedL1Score extends Command {
     private final DriveSubsystem m_drive;
     private final Superstructure superstructure;
     private final Trigger coralPossessionSupplier;
+    private final PathConstraints constraints;
 
     private Command autoL1Command;
 
@@ -31,14 +36,13 @@ public class AutomatedL1Score extends Command {
         this.m_drive = drive;
         this.superstructure = superstructure;
         this.coralPossessionSupplier = coralPossessionSupplier;
+        this.constraints = new PathConstraints(4, 4, Units.degreesToRadians(540), Units.degreesToRadians(540));
 
         this.autoL1Command = Commands.idle();
     }
 
     @Override
     public void initialize() {
-
-        System.out.println("hi");
 
         Pose2d currentPose = m_drive.getPose();
         Pose2d coralStationPose = Localization.getClosestCoralStation(currentPose);
@@ -53,29 +57,30 @@ public class AutomatedL1Score extends Command {
                 Commands.sequence(
                     // Drive to the reef
                     Commands.parallel(
-                        m_drive.CommandBuilder.directDriveToPose(scorePose),
+                        m_drive.CommandBuilder.directDriveToPose(scorePose, constraints),
                         // superstructure.getCommandBuilder().autonGrabberAdjustCoral(), //maybe not necessary
                         superstructure.getCommandBuilder().preL1()
                     ),
                     // Score the coral
-                    Commands.parallel(
+                    //Commands.parallel(
                         superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), // TODO: tune voltages (8 and 5 seem low)
                         Commands.waitUntil(coralPossessionSupplier.negate()),
-                        Commands.runOnce(() -> closestReefFace.increaseL1Index()) // The coral is scored, so next time score the next L1
-                        //Commands.waitSeconds(0.5) // TODO: tune time - important that CANRange doesn't see coral
-                    )
+                        Commands.runOnce(() -> closestReefFace.increaseL1Index()), // The coral is scored, so next time score the next L1
+                        Commands.print("finished")
                 );
-        } else if (closestReefFace == ReefFace.BLU_REEF_GH || closestReefFace == ReefFace.RED_REEF_GH) {
+        } /*else if (closestReefFace == ReefFace.BLU_REEF_GH || closestReefFace == ReefFace.RED_REEF_GH) {
             // If the robot is too far from the coral station and in danger of hitting the reef, do nothing
             autoL1Command = Commands.idle();
-        } else {
+        } */else {
             // If the robot does not have a coral, drive to the coral station and intake the coral
             autoL1Command = 
                 Commands.deadline(
-                    superstructure.getCommandBuilder()
-                        .autonGrabberIntakeCoral()
-                        .andThen(superstructure.applyGrabberState(GrabberState.IDLE)),
-                    m_drive.CommandBuilder.directDriveToPose(coralStationPose)
+                    Commands.sequence(
+                        Commands.print("intake started"),
+                        superstructure.getCommandBuilder().autonGrabberIntakeCoral(),
+                        superstructure.applyGrabberState(GrabberState.IDLE)
+                    ),
+                    m_drive.CommandBuilder.directDriveToPose(coralStationPose, constraints)
                 );
         }
         

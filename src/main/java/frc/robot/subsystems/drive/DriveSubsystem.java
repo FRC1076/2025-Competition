@@ -45,6 +45,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
@@ -293,7 +294,15 @@ public class DriveSubsystem extends SubsystemBase {
             );*/
         }
 
-
+        public Command directDriveToPose(Pose2d targetPose, PathConstraints constraints) {
+            return Commands.parallel(
+                new PPDriveToPose(drive, targetPose, constraints, 0),
+                Commands.sequence(
+                    Commands.runOnce(() -> {isAutoAligned = false;}),
+                    Commands.waitUntil(() -> {return targetPose.getTranslation().getDistance(drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;}),
+                    Commands.runOnce(() -> {isAutoAligned = true;})
+                ));
+        }
 
         public Command directDriveToNearestLeftBranch() {
             return new SelectCommand<>(leftBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));

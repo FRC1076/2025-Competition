@@ -85,6 +85,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -367,13 +368,15 @@ public class RobotContainer {
 
         final Command scoreNet = 
             Commands.parallel(
-                superstructureCommands.preNet(),
-                m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                Commands.sequence(
-                    Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}),
-                    superstructureCommands.doGrabberAction()
-                )
-            );
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                    Commands.sequence(
+                        superstructureCommands.preNet(),
+                        Commands.sequence(
+                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
+                            superstructureCommands.doGrabberAction()
+                        )
+                    )
+                );
         
         NamedCommands.registerCommand("preL1", superstructureCommands.preL1());
         NamedCommands.registerCommand("preL2", superstructureCommands.preL2());
@@ -384,6 +387,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
         NamedCommands.registerCommand("autonAlgaeIntake", superstructureCommands.autonAlgaeIntake());
+        NamedCommands.registerCommand("autonAlgaeHold", superstructureCommands.holdAlgae());
         NamedCommands.registerCommand("scoreNet", scoreNet);
         // NamedCommands.registerCommand("preNet", superstructureCommands.preNet());
         NamedCommands.registerCommand("preIntakeCoral", superstructureCommands.preIntakeCoral());
@@ -392,6 +396,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autonGrabberAdjustCoral", superstructureCommands.autonGrabberAdjustCoral());
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
+        NamedCommands.registerCommand("preAutomaticNet", superstructureCommands.preAutomaticNet().asProxy());
         // NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp()); didn't work before
     }
 
@@ -496,7 +501,7 @@ public class RobotContainer {
         );
 
         m_driverController.povLeft().whileTrue(
-            new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange).repeatedly()
+            new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange))
         );
     }
 
@@ -660,13 +665,13 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
 
         // Standard 3 coral auto
-        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        //return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
 
         // Compementary 2 coral auto
         //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
 
         // Complementary 1 coral 2 net auto
-        //return AutoBuilder.buildAuto("H4_GHnet_IJnet");
+        return AutoBuilder.buildAuto("H4_GHnet_IJnet");
 
         // Untested for a while 2 coral (funnel)
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");

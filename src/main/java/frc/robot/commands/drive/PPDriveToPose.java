@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.IdealStartingState;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.path.Waypoint;
 
@@ -30,19 +31,30 @@ public class PPDriveToPose extends Command {
     private Command followPathCommand;
     private Pose2d targetPose;
     private final DriveSubsystem m_drive;
+    private PathConstraints constraints;
     private double endVelocity;
 
     public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose) {
         this.m_drive = drive;
         this.targetPose = targetPose;
+        this.constraints = PathPlannerConstants.pathConstraints;
         this.endVelocity = 0;
     }
 
     public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose, double endVelocity) {
         this.m_drive = drive;
         this.targetPose = targetPose;
+        this.constraints = PathPlannerConstants.pathConstraints;
         this.endVelocity = endVelocity;
     }
+
+    public PPDriveToPose(DriveSubsystem drive, Pose2d targetPose, PathConstraints constraints, double endVelocity) {
+        this.m_drive = drive;
+        this.targetPose = targetPose;
+        this.constraints = constraints;
+        this.endVelocity = endVelocity;
+    }
+ 
 
     @Override
     public void initialize() {
@@ -58,7 +70,7 @@ public class PPDriveToPose extends Command {
         if (targetPose.getTranslation().getDistance(startingWaypoint.getTranslation()) > PathPlannerConstants.pathGenerationToleranceMeters){
             PathPlannerPath path = new PathPlannerPath(
                 waypoints, 
-                PathPlannerConstants.pathConstraints, 
+                constraints, 
                 //new IdealStartingState(m_drive.getVelocityMPS(), m_drive.getHeading()), 
                 null,
                 new GoalEndState(endVelocity, targetPose.getRotation())

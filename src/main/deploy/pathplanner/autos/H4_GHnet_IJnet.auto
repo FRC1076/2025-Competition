@@ -55,7 +55,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
@@ -69,6 +69,12 @@
                 "data": {
                   "waitTime": 0.4
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "autonAlgaeHold"
+                }
               }
             ]
           }
@@ -76,13 +82,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "GH-preNet"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "scoreNet"
+            "pathName": "GH-scoreNet"
           }
         },
         {
@@ -105,7 +105,7 @@
           }
         },
         {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
               {
@@ -119,6 +119,12 @@
                 "data": {
                   "waitTime": 0.4
                 }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "autonAlgaeHold"
+                }
               }
             ]
           }
@@ -126,19 +132,26 @@
         {
           "type": "path",
           "data": {
-            "pathName": "IJ-preNet"
+            "pathName": "IJ-scoreNet"
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "scoreNet"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "scoreNet-IJ"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "stopAndRetract"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "scoreNet-IJ"
+                }
+              }
+            ]
           }
         }
       ]
