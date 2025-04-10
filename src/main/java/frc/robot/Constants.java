@@ -22,6 +22,7 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import frc.robot.Constants.SuperstructureConstants.WristevatorState;
 
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.path.PathConstraints;
@@ -327,6 +328,7 @@ public final class Constants {
             HIGH_TRAVEL(0.3, -90), //with grabber down state
 
             L1(0.3048 + 0.0254, 23.9365), // Placeholder
+            L1_STACK(0.3048 + 3 * 0.0254, 15),
             L2(0.910, -35), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),
             L4(2.11455, -38),//-40.4130051, true), //1.8161, -45),
@@ -363,6 +365,8 @@ public final class Constants {
         private static final Transform2d leftL1Transform = new Transform2d(0.0, Units.inchesToMeters(-19), Rotation2d.kZero);
         private static final Transform2d middleL1Transform = new Transform2d(0.0, Units.inchesToMeters(-7), Rotation2d.kZero);
         private static final Transform2d rightL1Transform = new Transform2d(0.0, Units.inchesToMeters(5), Rotation2d.kZero);
+        private static final Transform2d leftL1StackTransform = new Transform2d(0.0, Units.inchesToMeters(-13), Rotation2d.kZero);
+        private static final Transform2d rightL1StackTransform = new Transform2d(0.0, Units.inchesToMeters(-1), Rotation2d.kZero); 
 
         /**
          * @description Provides coordinates for april tags
@@ -396,6 +400,8 @@ public final class Constants {
             public final Pose2d leftL1;
             public final Pose2d middleL1;
             public final Pose2d rightL1;
+            public final Pose2d leftStackL1;
+            public final Pose2d rightStackL1;
             private int L1Index;
 
             public final Pose2d AprilTag;
@@ -412,6 +418,8 @@ public final class Constants {
                 this.leftL1 = AprilTag.transformBy(leftL1Transform);
                 this.middleL1 = AprilTag.transformBy(middleL1Transform);
                 this.rightL1 = AprilTag.transformBy(rightL1Transform);
+                this.leftStackL1 = AprilTag.transformBy(leftL1StackTransform);
+                this.rightStackL1 = AprilTag.transformBy(rightL1StackTransform);
                 this.L1Index = 0;
 
                 this.algaeHigh = algaeHigh;
@@ -436,11 +444,27 @@ public final class Constants {
                     L1Position = rightL1;
                 } else if (L1Index % 3 == 1) {
                     L1Position = middleL1;
-                } else {
+                } else if (L1Index % 3 == 2) {
                     L1Position = leftL1;
+                } else if (L1Index % 3 == 3) {
+                    L1Position = rightStackL1;
+                } else {
+                    L1Position = leftStackL1;
                 }
 
                 return L1Position;
+            }
+
+            public WristevatorState getNextL1WristevatorState() {
+                WristevatorState state;
+
+                if (L1Index % 3 <= 2) {
+                    state = WristevatorState.L1;
+                } else {
+                    state = WristevatorState.L1_STACK;
+                }
+
+                return state;
             }
 
             public void increaseL1Index() {

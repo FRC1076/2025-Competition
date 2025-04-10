@@ -276,7 +276,7 @@ public class Superstructure {
      * @param position the WristevatorState, which consists of elevator height and wrist angle
      * @return generic transition command from one state to another 
      */
-    private Command applyWristevatorState(WristevatorState position) {
+    public Command applyWristevatorState(WristevatorState position) {
         return applyWristevatorState(position,Units.inchesToMeters(0.5),false);
     }
 
@@ -529,6 +529,15 @@ public class Superstructure {
                 Commands.either(
                     superstructure.applyWristevatorStateDirect(WristevatorState.L1),
                     superstructure.applyWristevatorState(WristevatorState.L1),
+                    () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
+                );
+        }
+
+        public Command preL1Stack() {
+            return  
+                Commands.either(
+                    superstructure.applyWristevatorStateDirect(WristevatorState.L1_STACK),
+                    superstructure.applyWristevatorState(WristevatorState.L1_STACK),
                     () -> superstructure.getSuperState().getWristevatorState() == WristevatorState.HIGH_TRAVEL
                 );
         }
