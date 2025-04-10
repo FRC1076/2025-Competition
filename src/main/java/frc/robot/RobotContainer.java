@@ -386,6 +386,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
+        NamedCommands.registerCommand("highAlgaeDirect", superstructureCommands.highAlgaeIntakeDirect());
         NamedCommands.registerCommand("autonAlgaeIntake", superstructureCommands.autonAlgaeIntake());
         NamedCommands.registerCommand("autonAlgaeHold", superstructureCommands.holdAlgae());
         NamedCommands.registerCommand("scoreNet", scoreNet);
@@ -501,7 +502,7 @@ public class RobotContainer {
         );
 
         m_driverController.povLeft()
-            .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)))
+            .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)).andThen(Commands.print("RepeatL1Cancelled")))
             .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));
     }
 
@@ -708,7 +709,7 @@ public class RobotContainer {
         return Commands.sequence(
             Commands.waitSeconds(20),
             Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 1)),
-            Commands.print("Main Thread Priority raised to 10 at " + Timer.getFPGATimestamp())
+            Commands.print("Main Thread Priority raised to RT1 at " + Timer.getFPGATimestamp())
         ).ignoringDisable(true);
     }
 }

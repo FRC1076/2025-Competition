@@ -615,6 +615,10 @@ public class Superstructure {
             return superstructure.applyWristevatorState(WristevatorState.HIGH_INTAKE);
         }
 
+        public Command highAlgaeIntakeDirect() {
+            return superstructure.applyWristevatorStateDirect(WristevatorState.HIGH_INTAKE);
+        }
+
         /** 
          * Transfers a coral from the indexer to the grabber, without checking for position 
          */

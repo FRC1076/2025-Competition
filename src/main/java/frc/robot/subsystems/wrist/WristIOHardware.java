@@ -70,8 +70,6 @@ public class WristIOHardware implements WristIO {
         );
         */
             
-        
-        
         m_leadMotorConfig.encoder
             .positionConversionFactor(WristConstants.kPositionConversionFactor)
             .velocityConversionFactor(WristConstants.kVelocityConversionFactor);

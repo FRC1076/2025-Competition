@@ -166,7 +166,7 @@ public final class Constants {
          * logOdometry = false
          * logCTRE = false
          */
-        public static final int currentMode = 0; // 0 is real, 1 is sim
+        public static final int currentMode = 1; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
