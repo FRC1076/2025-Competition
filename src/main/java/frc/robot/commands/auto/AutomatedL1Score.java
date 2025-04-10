@@ -6,13 +6,17 @@ package frc.robot.commands.auto;
 
 import frc.robot.subsystems.drive.DriveSubsystem;
 import frc.robot.utils.Localization;
+import lib.utils.GeometryUtils;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.Constants.FieldConstants.ReefFace;
 import frc.robot.Constants.SuperstructureConstants.GrabberState;
 
+import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
+
 import com.pathplanner.lib.path.PathConstraints;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -45,9 +49,9 @@ public class AutomatedL1Score extends Command {
     public void initialize() {
 
         Pose2d currentPose = m_drive.getPose();
-        Pose2d coralStationPose = Localization.getClosestCoralStation(currentPose);
+        Pose2d coralStationPose = GeometryUtils.rotatePose(Localization.getClosestCoralStation(currentPose), Rotation2d.k180deg);
         ReefFace closestReefFace = Localization.getClosestReefFace(currentPose);
-        Pose2d scorePose = closestReefFace.getNextL1Position();
+        Pose2d scorePose = GeometryUtils.rotatePose(closestReefFace.getNextL1Position().transformBy(robotOffset), Rotation2d.k180deg);
 
         // TODO: add waypoints dependent on the closest reef face so that we don't hit the reef    
 
@@ -65,8 +69,8 @@ public class AutomatedL1Score extends Command {
                     //Commands.parallel(
                         superstructure.applyGrabberState(GrabberState.L1_OUTTAKE), // TODO: tune voltages (8 and 5 seem low)
                         Commands.waitUntil(coralPossessionSupplier.negate()),
-                        Commands.runOnce(() -> closestReefFace.increaseL1Index()), // The coral is scored, so next time score the next L1
-                        superstructure.applyGrabberState(GrabberState.IDLE);
+                        Commands.runOnce(() -> closestReefFace.increaseL1Index()) // The coral is scored, so next time score the next L1
+                        //superstructure.applyGrabberState(GrabberState.IDLE);
                 );
         } /*else if (closestReefFace == ReefFace.BLU_REEF_GH || closestReefFace == ReefFace.RED_REEF_GH) {
             // If the robot is too far from the coral station and in danger of hitting the reef, do nothing

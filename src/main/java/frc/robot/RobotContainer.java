@@ -500,9 +500,9 @@ public class RobotContainer {
             )
         );
 
-        m_driverController.povLeft().whileTrue(
-            new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange))
-        );
+        m_driverController.povLeft()
+            .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)))
+            .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));
     }
 
     private void configureOperatorBindings() {

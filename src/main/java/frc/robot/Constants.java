@@ -29,6 +29,7 @@ import com.pathplanner.lib.path.PathConstraints;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 
 import org.apache.commons.lang3.NotImplementedException;
+import java.util.Set;
 
 import static frc.robot.utils.Localization.flipPose;
 import static frc.robot.utils.Localization.mirrorPose;
@@ -45,6 +46,7 @@ public final class Constants {
      
      public static class VisionConstants {
         public static final AprilTagFieldLayout fieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeWelded);
+        public static final Set<Integer> filteredTargetIDs = Set.of(6, 7, 8, 9, 10, 11, 17, 18, 19, 20, 21, 22);
         public static class Photonvision {
 
             public static final String driverCamName = "DRIVER_CAM"; //PV name of the driver camera
@@ -324,7 +326,7 @@ public final class Constants {
             GRABBER_CORAL_INTAKE_TRAVEL(0.784, 90),//90),
             HIGH_TRAVEL(0.3, -90), //with grabber down state
 
-            L1(0.3048, 23.9365), // Placeholder
+            L1(0.3048 + 0.0254, 23.9365), // Placeholder
             L2(0.910, -35), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),
             L4(2.11455, -38),//-40.4130051, true), //1.8161, -45),

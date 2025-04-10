@@ -7,6 +7,7 @@ package lib.vision;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import frc.robot.Constants.VisionConstants;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
@@ -121,7 +122,11 @@ public class PhotonVisionLocalizer implements CameraLocalizer {
         Optional<EstimatedRobotPose> visionEst = Optional.empty();
         
         for (var res : results) {
-            visionEst = poseEstimator.update(res);
+            if(res.hasTargets()){
+                if(VisionConstants.filteredTargetIDs.contains(res.getBestTarget().getFiducialId())){
+                    visionEst = poseEstimator.update(res);
+                }
+            }
         }
 
         return visionEst.map(
