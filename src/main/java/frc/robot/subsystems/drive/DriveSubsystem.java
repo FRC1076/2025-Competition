@@ -16,6 +16,9 @@ import frc.robot.utils.Localization;
 
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotOffset;
+import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotLeftL1Offset;
+import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotCenterL1Offset;
+import static frc.robot.Constants.DriveConstants.PathPlannerConstants.robotRightL1Offset;
 
 import lib.utils.GeometryUtils;
 import lib.vision.VisionLocalizationSystem;
@@ -243,6 +246,9 @@ public class DriveSubsystem extends SubsystemBase {
         private final Map<ReefFace, Command> leftBranchAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
+        private final Map<ReefFace, Command> leftL1AlignmentCommands = new HashMap<>();
+        private final Map<ReefFace, Command> centerL1AlignmentCommands = new HashMap<>();
+        private final Map<ReefFace, Command> rightL1AlignmentCommands = new HashMap<>();
         private final PPDriveToPose driveToPreNetCommand;
         private final PPDriveToPose driveToScoreNetCommand;
         private DriveCommandFactory(DriveSubsystem drive) {
@@ -251,6 +257,9 @@ public class DriveSubsystem extends SubsystemBase {
                 leftBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.leftBranch.transformBy(robotOffset), Rotation2d.k180deg)));
                 reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
                 rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
+                leftL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotLeftL1Offset), Rotation2d.k180deg)));
+                centerL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotCenterL1Offset), Rotation2d.k180deg)));
+                rightL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotRightL1Offset), Rotation2d.k180deg)));
             }
             driveToPreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
             driveToScoreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
@@ -308,6 +317,18 @@ public class DriveSubsystem extends SubsystemBase {
             return new SelectCommand<>(leftBranchAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
+        public Command directDriveToNearestLeftL1() {
+            return new SelectCommand<>(leftL1AlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
+        }
+
+        public Command directDriveToNearestCenterL1() {
+            return new SelectCommand<>(centerL1AlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
+        }
+
+        public Command directDriveToNearestRightL1() {
+            return new SelectCommand<>(rightL1AlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
+        }
+
         public Command directDriveToNearestReefFace() {
             return new SelectCommand<>(reefCenterAlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
@@ -322,8 +343,8 @@ public class DriveSubsystem extends SubsystemBase {
                     driveToPreNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
-                            ? 7.618 - 5 * 0.3048 //- 0.3556
-                            : 9.922 + 5 * 0.3048, //+ 0.3556,
+                            ? 7.618 - 6 * 0.3048 //- 0.3556
+                            : 9.922 + 6 * 0.3048, //+ 0.3556,
                             getPose().getY(),
                             getPose().getX() < 8.785
                             ? Rotation2d.kZero

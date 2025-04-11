@@ -426,6 +426,27 @@ public class RobotContainer {
                 m_drive.CommandBuilder.directDriveToNearestRightBranch()
             )
         );
+
+        m_driverController.povLeft().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestLeftL1()
+            )
+        );
+
+        m_driverController.povUp().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestCenterL1()
+            )
+        );
+
+        m_driverController.povRight().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestRightL1()
+            )
+        );
         
         // Point to reef
         // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
@@ -454,9 +475,9 @@ public class RobotContainer {
         m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
             .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL, 5));
 
-        m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
+        //m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
 
-        m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
+        //m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
 
         m_driverController.leftBumper().and(
             m_driverController.rightBumper().and(
@@ -500,10 +521,10 @@ public class RobotContainer {
                 )
             )
         );
-
+        /*
         m_driverController.povLeft()
             .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)).andThen(Commands.print("RepeatL1Cancelled")))
-            .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));
+            .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));*/
     }
 
     private void configureOperatorBindings() {

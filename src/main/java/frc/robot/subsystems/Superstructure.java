@@ -124,6 +124,8 @@ public class Superstructure {
 
     private boolean elevatorClutch = false;
 
+    private Command activeWristevatorCommand = Commands.none();
+
     public Superstructure (
         ElevatorSubsystem elevator,
         GrabberSubsystem grabber,
@@ -198,7 +200,13 @@ public class Superstructure {
 
     public Trigger elevatorClutchTrigger() {
         return elevatorClutchTrigger;
-    }   
+    }
+
+    private Command registerWristevatorCommand(Command wristevatorCommand){
+        activeWristevatorCommand.cancel();
+        activeWristevatorCommand = wristevatorCommand;
+        return wristevatorCommand;
+    }
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
 
@@ -224,7 +232,7 @@ public class Superstructure {
         );
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        return Commands.sequence(
+        return registerWristevatorCommand(Commands.sequence(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             CommandUtils.makeDaemon(wristPreMoveCommand),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
@@ -236,7 +244,7 @@ public class Superstructure {
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT WRIST FINAL"),
             Commands.runOnce(ledSignal)
-        );
+        ));
     }
 
     private Command applyWristevatorStateNoPremove(WristevatorState position, double tolerance, boolean grabberDown) {
@@ -253,7 +261,7 @@ public class Superstructure {
         );
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        return Commands.sequence(
+        return registerWristevatorCommand(Commands.sequence(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             //CommandUtils.makeDaemon(wristPreMoveCommand),
             //Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
@@ -265,7 +273,7 @@ public class Superstructure {
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
             //Commands.print("AT WRIST FINAL"),
             Commands.runOnce(ledSignal)
-        );
+        ));
     }
 
     /**
@@ -309,7 +317,7 @@ public class Superstructure {
             safeToMoveElevator = false;
         };
         
-        return Commands.parallel(
+        return registerWristevatorCommand(Commands.parallel(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal),
             Commands.sequence(
@@ -320,7 +328,7 @@ public class Superstructure {
                 m_wrist.applyAngle(position.wristAngle).asProxy(),
                 CommandUtils.makeDaemon(m_wrist.holdAngle(position.wristAngle), override)
             )
-        ).until(override);
+        ).until(override));
     }
 
     /**
@@ -600,14 +608,14 @@ public class Superstructure {
          * Set elevator and wrist to ground algae preset
          */
         public Command groundAlgaeIntake(){
-            return superstructure.applyWristevatorState(WristevatorState.GROUND_INTAKE);
+            return superstructure.applyWristevatorStateDirect(WristevatorState.GROUND_INTAKE);
         }
 
         /**
          * Set elevator and wrist to ground algae preset
          */
         public Command lollipopAlgaeIntake(){
-            return superstructure.applyWristevatorState(WristevatorState.LOLLIPOP_INTAKE);
+            return superstructure.applyWristevatorStateDirect(WristevatorState.LOLLIPOP_INTAKE);
         }
 
         /**

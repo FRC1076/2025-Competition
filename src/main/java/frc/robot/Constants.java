@@ -124,7 +124,7 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Red;
+        public static Alliance teamColor = Alliance.Blue;
         public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
@@ -167,7 +167,7 @@ public final class Constants {
          * logOdometry = false
          * logCTRE = false
          */
-        public static final int currentMode = 1; // 0 is real, 1 is sim
+        public static final int currentMode = 0; // 0 is real, 1 is sim
         public static final boolean operatorSysID = false;
         public static final boolean driverSysID = false;
         public static final boolean logOdometry = false;
@@ -218,6 +218,9 @@ public final class Constants {
         public static class PathPlannerConstants {
             public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.508, 0, Rotation2d.kZero);
+            public static final Transform2d robotLeftL1Offset = new Transform2d(0.508, Units.inchesToMeters(-15), Rotation2d.kZero);
+            public static final Transform2d robotCenterL1Offset = new Transform2d(0.508, Units.inchesToMeters(-3), Rotation2d.kZero);
+            public static final Transform2d robotRightL1Offset = new Transform2d(0.508, Units.inchesToMeters(9), Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
             public static final double LEDpathToleranceMeters = 0.03;
 
@@ -327,7 +330,7 @@ public final class Constants {
             GRABBER_CORAL_INTAKE_TRAVEL(0.784, 90),//90),
             HIGH_TRAVEL(0.3, -90), //with grabber down state
 
-            L1(0.3048 + 0.0254, 23.9365), // Placeholder
+            L1(0.394, 23.9365), // Placeholder
             L1_STACK(0.3048 + 3 * 0.0254, 15),
             L2(0.910, -35), //0.71628, -35),
             L3(1.348 + 2 * 0.00889, -35), //1.11252, -35),

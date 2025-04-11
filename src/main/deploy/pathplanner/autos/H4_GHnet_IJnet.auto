@@ -153,12 +153,6 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "stopAndRetract"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "scoreNet-leaveNet"
