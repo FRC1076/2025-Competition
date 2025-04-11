@@ -30,6 +30,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 import org.littletonrobotics.junction.AutoLog;
@@ -202,10 +203,15 @@ public class Superstructure {
         return elevatorClutchTrigger;
     }
 
-    private Command registerWristevatorCommand(Command wristevatorCommand){
-        activeWristevatorCommand.cancel();
-        activeWristevatorCommand = wristevatorCommand;
-        return wristevatorCommand;
+    private Command makeExclusive(Command wristevatorCommand){
+        return wristevatorCommand.beforeStarting(
+            () -> {
+                if (activeWristevatorCommand != null) {
+                    activeWristevatorCommand.cancel();
+                }
+                activeWristevatorCommand = wristevatorCommand;
+            }
+        );
     }
 
     // Command factories that apply states are private because they are only accessed by the main SuperStructureCommandFactory
@@ -232,7 +238,7 @@ public class Superstructure {
         );
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        return registerWristevatorCommand(Commands.sequence(
+        return makeExclusive(Commands.sequence(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             CommandUtils.makeDaemon(wristPreMoveCommand),
             Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
@@ -261,7 +267,7 @@ public class Superstructure {
         );
 
         // Due to command composition semantics, the command composition itself cannot require the subsystems directly
-        return registerWristevatorCommand(Commands.sequence(
+        return makeExclusive(Commands.sequence(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             //CommandUtils.makeDaemon(wristPreMoveCommand),
             //Commands.waitUntil(() -> m_wrist.withinTolerance(WristConstants.wristAngleToleranceRadians)),
@@ -317,7 +323,7 @@ public class Superstructure {
             safeToMoveElevator = false;
         };
         
-        return registerWristevatorCommand(Commands.parallel(
+        return makeExclusive(Commands.parallel(
             Commands.runOnce(() -> superState.setWristevatorState(position)),
             Commands.runOnce(ledSignal),
             Commands.sequence(
