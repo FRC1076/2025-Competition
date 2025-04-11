@@ -343,8 +343,8 @@ public class DriveSubsystem extends SubsystemBase {
                     driveToPreNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
-                            ? 7.618 - 6 * 0.3048 //- 0.3556
-                            : 9.922 + 6 * 0.3048, //+ 0.3556,
+                            ? 7.618 - 5.5 * 0.3048 //- 0.3556
+                            : 9.922 + 5.5 * 0.3048, //+ 0.3556,
                             getPose().getY(),
                             getPose().getX() < 8.785
                             ? Rotation2d.kZero
