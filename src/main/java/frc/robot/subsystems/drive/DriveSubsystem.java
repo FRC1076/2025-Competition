@@ -50,8 +50,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
-import com.pathplanner.lib.trajectory.PathPlannerTrajectory;
-import com.pathplanner.lib.util.DriveFeedforwards;
+
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyRobotSpeeds;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.ctre.phoenix6.swerve.SwerveRequest.ApplyFieldSpeeds;
@@ -71,10 +70,6 @@ public class DriveSubsystem extends SubsystemBase {
     private final VisionLocalizationSystem vision;
     private final Elastic elastic;
 
-    private final SwerveRequest.ApplyRobotSpeeds CODriveRequest = new ApplyRobotSpeeds();
-    private final SwerveRequest.ApplyFieldSpeeds FODriveRequest = new ApplyFieldSpeeds()
-    .withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective);
-
     public DriveSubsystem(DriveIO io, VisionLocalizationSystem vision, Elastic elastic) {
         this.io = io;
         this.vision = vision;
@@ -89,10 +84,24 @@ public class DriveSubsystem extends SubsystemBase {
         
         try {
             AutoBuilder.configure(
-                this::getAutonPose,
-                this::resetPoseAuton,
+                () -> elastic.getPathPlannerMirrored() 
+                    ? this.getMirroredPose() 
+                    : this.getPose(),
+                (pose) -> {
+                    if (elastic.getPathPlannerMirrored()) {
+                        this.resetPoseMirrored(pose);
+                    } else {
+                        this.resetPose(pose);
+                    }
+                },
                 () -> driveInputs.Speeds,
-                this::driveAuton,
+                (speeds, feedforwards) -> {
+                    if (elastic.getPathPlannerMirrored()) {
+                        driveCoMirrored(speeds);
+                    } else {
+                        driveCO(speeds);
+                    }
+                },
                 new PPHolonomicDriveController(
                     // PID constants for translation
                     PathPlannerConstants.Control.transPID,
@@ -150,38 +159,14 @@ public class DriveSubsystem extends SubsystemBase {
 
     /** Swerve drive request with chassis-oriented chassisSpeeds */
     public void driveCO(ChassisSpeeds speeds) {
-        io.acceptRequest(CODriveRequest.withSpeeds(speeds));
+        io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
     }
 
     /** Swerve drive request with chassis-orriented chassisSpeeds, but mirrors the speeds (used for mirroring paths in auton) */
-    public void driveCOMirrored(ChassisSpeeds speeds) {
+    public void driveCoMirrored(ChassisSpeeds speeds) {
         speeds.vyMetersPerSecond *= (-1);  
         speeds.omegaRadiansPerSecond *= (-1);
-        io.acceptRequest(CODriveRequest.withSpeeds(speeds));
-    }
-
-    public void resetPoseAuton(Pose2d pose) {
-        if (!elastic.getPathPlannerMirrored()) {
-            this.resetPose(pose);
-        } else {
-            this.resetPoseMirrored(pose);
-        }
-    }
-
-    public Pose2d getAutonPose() {
-        if (!elastic.getPathPlannerMirrored()) {
-            return this.getPose();
-        } else {
-            return this.getMirroredPose();
-        }
-    }
-
-    public void driveAuton(ChassisSpeeds speeds, DriveFeedforwards feedforwards) {
-        if (!elastic.getPathPlannerMirrored()) {
-            driveCO(speeds);
-        } else {
-            driveCOMirrored(speeds);
-        }
+        io.acceptRequest(new ApplyRobotSpeeds().withSpeeds(speeds));
     }
 
     public double getVelocityMPS() {
@@ -195,7 +180,7 @@ public class DriveSubsystem extends SubsystemBase {
 
     /** Swerve drive request with field-oriented chassisSpeeds */
     public void driveFO(ChassisSpeeds speeds) {
-        io.acceptRequest(FODriveRequest.withSpeeds(speeds));
+        io.acceptRequest(new ApplyFieldSpeeds().withSpeeds(speeds).withForwardPerspective(ForwardPerspectiveValue.OperatorPerspective));
     }
     
     //TODO: ADD DRIVE METHOD TO DRIVE WITH PATHPLANNER WHEELFORCE FEEDFORWARDS

@@ -180,7 +180,7 @@ public class RobotContainer {
         
         if (SystemConstants.currentMode == 0) {
             m_visionSim = null;
-            m_elastic = Elastic.getInstance();
+            m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOHardware(TunerConstants.createDrivetrain()), m_vision, m_elastic);
 
             // BLUE
@@ -211,7 +211,7 @@ public class RobotContainer {
                 );
             }
         } else if (SystemConstants.currentMode == 1) {
-            m_elastic = Elastic.getInstance();
+            m_elastic = new Elastic(this);
             m_drive = new DriveSubsystem(new DriveIOSim(TunerConstants.createDrivetrain()), m_vision, m_elastic);
             m_elevator = new ElevatorSubsystem(new ElevatorIOSim(), this::getLoopTime);
             m_wrist = new WristSubsystem(new WristIOSim(), this::getLoopTime);
