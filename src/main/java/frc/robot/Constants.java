@@ -64,7 +64,7 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    12.389, 11.683, 11.513639, // 15 - 7.163, 15 - 2.892, 19.162,
+                    12.389, 11.683, 11.25,//10.875,//11.513639, // 15 - 7.163, 15 - 2.892, 19.162,
                     0, 0, -20 //11.385, 17.961, -40 
                 ),
                 FRONT_RIGHT_CAM(
@@ -73,7 +73,7 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    12.389, -11.683, 11.513639, // 15 - 7.163, -(15 - 2.892), 19.162, 
+                    12.389, -11.683, 11.25,//10.875, // 15 - 7.163, -(15 - 2.892), 19.162, 
                     0, 0, 20 // -11.385, 17.961, 40
                 ),
                 BACK_RIGHT_CAM(
