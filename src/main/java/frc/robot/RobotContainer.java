@@ -385,6 +385,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("preL4Direct", superstructureCommands.preL4Direct());
         NamedCommands.registerCommand("preProcessor", superstructureCommands.preProcessor());
         NamedCommands.registerCommand("lowAlgae", superstructureCommands.lowAlgaeIntake());
+        NamedCommands.registerCommand("lowAlgaeDirect", superstructureCommands.lowAlgaeDirectIntake());
         NamedCommands.registerCommand("highAlgae", superstructureCommands.highAlgaeIntake());
         NamedCommands.registerCommand("highAlgaeDirect", superstructureCommands.highAlgaeIntakeDirect());
         NamedCommands.registerCommand("autonAlgaeIntake", superstructureCommands.autonAlgaeIntake());
@@ -398,6 +399,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("autonShoot", superstructureCommands.autonShoot());
         NamedCommands.registerCommand("stopAndRetract", superstructureCommands.stopAndRetract());
         NamedCommands.registerCommand("preAutomaticNet", superstructureCommands.preAutomaticNet().asProxy());
+        NamedCommands.registerCommand("stopGrabber", superstructureCommands.stopGrabber());
         // NamedCommands.registerCommand("wristFlickUp", superstructureCommands.wristFlickUp()); didn't work before
     }
 
@@ -434,12 +436,13 @@ public class RobotContainer {
             )
         );
 
+        /*
         m_driverController.povUp().whileTrue(
             Commands.parallel(
                 Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
                 m_drive.CommandBuilder.directDriveToNearestCenterL1()
             )
-        );
+        );*/
 
         m_driverController.povRight().whileTrue(
             Commands.parallel(
@@ -687,13 +690,13 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
 
         // Standard 3 coral auto
-        //return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
 
         // Compementary 2 coral auto
         //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
 
         // Complementary 1 coral 2 net auto
-        return AutoBuilder.buildAuto("H4_GHnet_IJnet");
+        // return AutoBuilder.buildAuto("H4_GHnet_IJnet");
 
         // Untested for a while 2 coral (funnel)
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");

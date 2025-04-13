@@ -247,7 +247,7 @@ public class DriveSubsystem extends SubsystemBase {
         private final Map<ReefFace, Command> reefCenterAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightBranchAlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> leftL1AlignmentCommands = new HashMap<>();
-        private final Map<ReefFace, Command> centerL1AlignmentCommands = new HashMap<>();
+        // private final Map<ReefFace, Command> centerL1AlignmentCommands = new HashMap<>();
         private final Map<ReefFace, Command> rightL1AlignmentCommands = new HashMap<>();
         private final PPDriveToPose driveToPreNetCommand;
         private final PPDriveToPose driveToScoreNetCommand;
@@ -258,7 +258,7 @@ public class DriveSubsystem extends SubsystemBase {
                 reefCenterAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotOffset), Rotation2d.k180deg)));
                 rightBranchAlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.rightBranch.transformBy(robotOffset), Rotation2d.k180deg)));
                 leftL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotLeftL1Offset), Rotation2d.k180deg)));
-                centerL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotCenterL1Offset), Rotation2d.k180deg)));
+                //centerL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotCenterL1Offset), Rotation2d.k180deg)));
                 rightL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotRightL1Offset), Rotation2d.k180deg)));
             }
             driveToPreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
@@ -321,9 +321,10 @@ public class DriveSubsystem extends SubsystemBase {
             return new SelectCommand<>(leftL1AlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
         }
 
+        /*
         public Command directDriveToNearestCenterL1() {
             return new SelectCommand<>(centerL1AlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));
-        }
+        }*/
 
         public Command directDriveToNearestRightL1() {
             return new SelectCommand<>(rightL1AlignmentCommands, () -> Localization.getClosestReefFace(drive.getPose()));

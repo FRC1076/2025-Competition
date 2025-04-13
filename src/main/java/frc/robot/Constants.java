@@ -64,7 +64,7 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    12.389, 11.683, 11.25,//10.875,//11.513639, // 15 - 7.163, 15 - 2.892, 19.162,
+                    13.75, /*12.389,*/ 11.683, 11.25,//10.875,//11.513639, // 15 - 7.163, 15 - 2.892, 19.162,
                     0, 0, -20 //11.385, 17.961, -40 
                 ),
                 FRONT_RIGHT_CAM(
@@ -73,7 +73,7 @@ public final class Constants {
                     kDefaultMultiTagStdDevs,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
                     PoseStrategy.PNP_DISTANCE_TRIG_SOLVE,
-                    12.389, -11.683, 11.25,//10.875, // 15 - 7.163, -(15 - 2.892), 19.162, 
+                    13.75/*12.389*/, -11.683, 11.25,//10.875, // 15 - 7.163, -(15 - 2.892), 19.162, 
                     0, 0, 20 // -11.385, 17.961, 40
                 ),
                 BACK_RIGHT_CAM(
@@ -124,7 +124,7 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Blue;
+        public static Alliance teamColor = Alliance.Red;
         public static AutonSides autonSide = AutonSides.Left;
         
         public enum TeamColors {
@@ -218,9 +218,9 @@ public final class Constants {
         public static class PathPlannerConstants {
             public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.508, 0, Rotation2d.kZero);
-            public static final Transform2d robotLeftL1Offset = new Transform2d(0.508, Units.inchesToMeters(-15), Rotation2d.kZero);
-            public static final Transform2d robotCenterL1Offset = new Transform2d(0.508, Units.inchesToMeters(-3), Rotation2d.kZero);
-            public static final Transform2d robotRightL1Offset = new Transform2d(0.508, Units.inchesToMeters(9), Rotation2d.kZero);
+            public static final Transform2d robotLeftL1Offset = new Transform2d(0.508, Units.inchesToMeters(-12), Rotation2d.kZero);
+            public static final Transform2d robotCenterL1Offset = new Transform2d(0.508, Units.inchesToMeters(0), Rotation2d.kZero);
+            public static final Transform2d robotRightL1Offset = new Transform2d(0.508, Units.inchesToMeters(2), Rotation2d.kZero);
             public static final double pathGenerationToleranceMeters = 0.011; // Technically it's anything larger than 0.01, but I'm adding .001 just to be safe
             public static final double LEDpathToleranceMeters = 0.03;
 

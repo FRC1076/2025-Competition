@@ -632,6 +632,13 @@ public class Superstructure {
         }
 
         /**
+         * Set elevator and wrist to low algae preset
+         */
+        public Command lowAlgaeDirectIntake(){
+            return superstructure.applyWristevatorStateDirect(WristevatorState.LOW_INTAKE);  
+        }
+
+        /**
          * Set elevator and wrist to high algae preset
          */
         public Command highAlgaeIntake(){

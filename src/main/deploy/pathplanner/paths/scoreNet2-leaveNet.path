@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 7.518,
-        "y": 5.22
+        "y": 5.685
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.937948717948718,
-        "y": 5.211858974358974
+        "x": 7.165,
+        "y": 5.635
       },
       "isLocked": false,
-      "linkedName": "scoreNet"
+      "linkedName": "scoreNet2"
     },
     {
       "anchor": {
-        "x": 6.1123076923076916,
-        "y": 5.22
+        "x": 6.772820512820513,
+        "y": 6.18198717948718
       },
       "prevControl": {
-        "x": 6.362297154919868,
-        "y": 5.222295339381263
+        "x": 6.796522785977512,
+        "y": 5.933113311338692
       },
       "nextControl": null,
       "isLocked": false,
@@ -56,7 +56,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": null,
