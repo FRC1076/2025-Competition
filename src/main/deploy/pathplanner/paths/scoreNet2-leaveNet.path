@@ -8,20 +8,20 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.165,
-        "y": 5.635
+        "x": 7.268844527575466,
+        "y": 5.664468303506356
       },
       "isLocked": false,
       "linkedName": "scoreNet2"
     },
     {
       "anchor": {
-        "x": 6.772820512820513,
-        "y": 6.18198717948718
+        "x": 6.710880681818183,
+        "y": 5.685
       },
       "prevControl": {
-        "x": 6.796522785977512,
-        "y": 5.933113311338692
+        "x": 6.960608692551719,
+        "y": 5.696658501407594
       },
       "nextControl": null,
       "isLocked": false,
@@ -56,7 +56,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": null,
