@@ -262,7 +262,7 @@ public class DriveSubsystem extends SubsystemBase {
                 rightL1AlignmentCommands.put(face, directDriveToPose(GeometryUtils.rotatePose(face.AprilTag.transformBy(robotRightL1Offset), Rotation2d.k180deg)));
             }
             driveToPreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
-            driveToScoreNetCommand = new PPDriveToPose(drive, Pose2d.kZero);
+            driveToScoreNetCommand = new PPDriveToPose(drive, Pose2d.kZero, PathPlannerConstants.netConstraints, 0);
         }
 
         public Command pathfindToPose(Pose2d targetPose) {
@@ -344,8 +344,8 @@ public class DriveSubsystem extends SubsystemBase {
                     driveToPreNetCommand.setTargetPose(
                         new Pose2d(
                             getPose().getX() < 8.785
-                            ? 7.618 - 5 * 0.3048 //- 0.3556
-                            : 9.922 + 5 * 0.3048, //+ 0.3556,
+                            ? 7.618 - 5.7 * 0.3048 //- 0.3556
+                            : 9.922 + 5.7 * 0.3048, //+ 0.3556,
                             getPose().getY(),
                             getPose().getX() < 8.785
                             ? Rotation2d.kZero

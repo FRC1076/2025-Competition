@@ -690,13 +690,13 @@ public class RobotContainer {
     public Command getAutonomousCommand() {
 
         // Standard 3 coral auto
-        // return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
 
         // Compementary 2 coral auto
-        //return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
+        // return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
 
         // Complementary 1 coral 2 net auto
-        return AutoBuilder.buildAuto("H4_GHnet_IJnet");
+        // return AutoBuilder.buildAuto("H4_GHnet_IJnet");
 
         // Untested for a while 2 coral (funnel)
         // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
@@ -735,5 +735,13 @@ public class RobotContainer {
             Commands.runOnce(() -> Threads.setCurrentThreadPriority(true, 1)),
             Commands.print("Main Thread Priority raised to RT1 at " + Timer.getFPGATimestamp())
         ).ignoringDisable(true);
+    }
+
+    public void enableAllCameras() {
+        m_vision.enableAllCameras(true);
+    }
+
+    public void disableRearRightCamera() {
+        m_vision.enableCameras(false, "BACK_RIGHT_CAM");
     }
 }

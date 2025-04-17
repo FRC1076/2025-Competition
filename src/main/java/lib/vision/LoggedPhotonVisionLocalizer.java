@@ -124,6 +124,7 @@ public class LoggedPhotonVisionLocalizer implements CameraLocalizer {
 
         inputs.cameraConnected = camera.isConnected();
         inputs.estimatePresent = false;
+        inputs.tagsDetected = 0;
 
         poseEstimator.addHeadingData(Timer.getFPGATimestamp(), headingSupplier.get());
         List<PhotonPipelineResult> results = camera.getAllUnreadResults();

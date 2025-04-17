@@ -17,6 +17,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.SystemConstants;
 import edu.wpi.first.wpilibj.Threads;
 import edu.wpi.first.wpilibj.Timer;
@@ -92,6 +93,10 @@ public class Robot extends LoggedRobot {
 
     // This raises thread priority after a delay of 20 seconds
     RobotContainer.threadCommand().schedule();
+
+    if (!GameConstants.rearRightCameraEnabledAuton) {
+      m_robotContainer.disableRearRightCamera();
+    }
   }
 
   /**
@@ -160,6 +165,7 @@ public class Robot extends LoggedRobot {
     }
 
     m_robotContainer.zeroVoltages();
+    m_robotContainer.disableRearRightCamera();
   }
 
   /** This function is called periodically during operator control. */

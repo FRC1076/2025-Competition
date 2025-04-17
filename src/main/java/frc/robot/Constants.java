@@ -124,8 +124,9 @@ public final class Constants {
     /** Contains starting position and team */
     public static class GameConstants {
 
-        public static Alliance teamColor = Alliance.Red;
+        public static Alliance teamColor = Alliance.Blue;
         public static AutonSides autonSide = AutonSides.Left;
+        public static boolean rearRightCameraEnabledAuton = false; // Only set to true if running algae auton
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -217,6 +218,7 @@ public final class Constants {
 
         public static class PathPlannerConstants {
             public static final PathConstraints pathConstraints = new PathConstraints(2, 2, Units.degreesToRadians(360), Units.degreesToRadians(360));
+            public static final PathConstraints netConstraints = new PathConstraints(2, 2.6788, Units.degreesToRadians(360), Units.degreesToRadians(360));
             public static final Transform2d robotOffset = new Transform2d(0.508, 0, Rotation2d.kZero);
             public static final Transform2d robotLeftL1Offset = new Transform2d(0.508, Units.inchesToMeters(-12), Rotation2d.kZero);
             public static final Transform2d robotCenterL1Offset = new Transform2d(0.508, Units.inchesToMeters(0), Rotation2d.kZero);
