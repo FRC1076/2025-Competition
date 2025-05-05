@@ -8,7 +8,6 @@ import frc.robot.Constants.DriveConstants.PathPlannerConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.GameConstants;
 import frc.robot.Constants.FieldConstants.ReefFace;
-import frc.robot.commands.drive.DirectDriveToPose;
 import frc.robot.commands.drive.PPDriveToPose;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;

@@ -4,9 +4,9 @@
 
 package frc.robot;
 
-import frc.robot.commands.auto.AutomatedL1Score;
 import frc.robot.commands.drive.TeleopDriveCommand;
 import frc.robot.subsystems.Elastic;
+import static edu.wpi.first.units.Units.Meters;
 import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.drive.DriveIOHardware;
@@ -52,7 +52,6 @@ import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
 import static frc.robot.Constants.VisionConstants.Photonvision.driverCamName;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultMultiTagStdDevs;
-import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchRotFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.ElevatorClutchTransFactor;
 import static frc.robot.Constants.DriveConstants.DriverControlConstants.elevatorAccelerationTable;
@@ -531,47 +530,6 @@ public class RobotContainer {
     }
 
     private void configureOperatorBindings() {
-
-        //if (SystemConstants.operatorSysID) {
-            /*
-            // Quasistsic and Dynamic control scheme for Elevator Sysid
-            m_driverController.rightBumper().and(   
-                m_driverController.a()
-            ).whileTrue(m_elevator.elevatorSysIdQuasistatic(SysIdRoutine.Direction.kForward));
-
-            m_driverController.rightBumper().and(
-                m_driverController.b()
-            ).whileTrue(m_elevator.elevatorSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-
-            m_driverController.rightBumper().and(
-                m_driverController.x()
-            ).whileTrue(m_elevator.elevatorSysIdDynamic(SysIdRoutine.Direction.kForward));
-            
-            m_driverController.rightBumper().and(
-                m_driverController.y()
-            ).whileTrue(m_elevator.elevatorSysIdDynamic(SysIdRoutine.Direction.kReverse));
-            
-        */
-        /* 
-            //Quasistsic and Dynamic control scheme for Wrist Sysid
-            
-            m_driverController.rightBumper().and(
-                m_driverController.a()
-            ).whileTrue(m_wrist.wristSysIdQuasistatic(SysIdRoutine.Direction.kForward));
-
-            m_driverController.rightBumper().and(
-                m_driverController.b()
-            ).whileTrue(m_wrist.wristSysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-
-            m_driverController.rightBumper().and(
-                m_driverController.x()
-            ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kForward));
-        
-            m_driverController.rightBumper().and(
-                m_driverController.y()
-            ).whileTrue(m_wrist.wristSysIdDynamic(SysIdRoutine.Direction.kReverse));
-        */
-        //}
          
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
         

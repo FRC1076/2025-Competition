@@ -189,17 +189,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         );
     }
 
-    /** 
-     * Temporarily allows the operator unrestricted control over the elevator's position, in order to let
-     * them manually move the elevator to the zero position in order to rezero the encoder in the event that it
-     * gets thrown off by acceleration. This version always uses the lower max control voltage.
-     * NOTE: both software stops and gravity compensation are disabled during this command
-     */
-    public Command zeroEncoderJoystickControl(DoubleSupplier controlSupplier) {
-        return run(() -> io.setVoltage(controlSupplier.getAsDouble() * ElevatorConstants.defaultMaxOperatorControlVolts))
-            .finallyDo(() -> io.resetPosition(0));
-    }
-
     public Command elevatorSysIdQuasistatic(SysIdRoutine.Direction direction) {
         return m_elevatorSysIdRoutine.quasistatic(direction);
     }
