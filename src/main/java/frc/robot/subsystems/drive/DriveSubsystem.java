@@ -125,26 +125,7 @@ public class DriveSubsystem extends SubsystemBase {
         io.periodic(); //currently just for calling sim
         vision.update();
         io.updateInputs(driveInputs);
-        // io.updateModuleInputs(frontLeftInputs, 0);
-        // io.updateModuleInputs(frontRightInputs, 1);
-        // io.updateModuleInputs(rearLeftInputs, 2);
-        // io.updateModuleInputs(rearRightInputs, 3);
         Logger.processInputs("Drive", driveInputs);
-        // Logger.processInputs("Drive/FrontLeft", frontLeftInputs);
-        // Logger.processInputs("Drive/FrontRight", frontRightInputs);
-        // Logger.processInputs("Drive/RearLeft", rearLeftInputs);
-        // Logger.processInputs("Drive/RearRight", rearRightInputs);
-
-         /*
-            if(DriverStation.getAlliance().isPresent()){
-                hasSetAlliance = true;
-                if (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red) {
-                    io.setAllianceRotation(Rotation2d.fromDegrees(180));
-                } else {
-                    io.setAllianceRotation(Rotation2d.fromDegrees(0));
-                }
-            } 
-        }*/
     }
 
     /** This method is not used in any command logic. It is only used for LEDs and Elastic */
@@ -288,18 +269,6 @@ public class DriveSubsystem extends SubsystemBase {
                     Commands.waitUntil(() -> {return targetPose.getTranslation().getDistance(drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;}),
                     Commands.runOnce(() -> {isAutoAligned = true;})
                 ));
-            /*
-            DirectDriveToPoseCommand directDriveToPoseCommand = new DirectDriveToPoseCommand(drive, targetPose);
-
-            return Commands.parallel(
-                    directDriveToPoseCommand,
-                    Commands.sequence(
-                        Commands.runOnce(() -> {isAutoAligned = false;}),
-                        Commands.waitUntil(() -> {return targetPose.getTranslation().getDistance(drive.getPose().getTranslation()) < PathPlannerConstants.LEDpathToleranceMeters;}),
-                        Commands.run(() -> {isAutoAligned = true;})
-                    )
-
-            );*/
         }
 
         public Command directDriveToPose(Pose2d targetPose, PathConstraints constraints) {

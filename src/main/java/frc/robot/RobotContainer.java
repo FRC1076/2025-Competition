@@ -218,23 +218,6 @@ public class RobotContainer {
             m_index = new IndexSubsystem(new IndexIOSim());
             m_LEDs = new LEDSubsystem(new LEDIOSim());
             m_visionSim = new VisionSystemSim("main");
-            /*
-            for (PhotonConfig config : PhotonConfig.values()){
-                var cam = new PhotonCamera(config.name);
-                m_vision.addCamera(new PhotonVisionLocalizer(
-                    cam, 
-                    config.offset,
-                    config.multiTagPoseStrategy,
-                    config.singleTagPoseStrategy,
-                    () -> m_drive.getPose().getRotation(),
-                    fieldLayout,
-                    kDefaultSingleTagStdDevs, 
-                    kDefaultMultiTagStdDevs)
-                );
-                m_visionSim.addCamera(new PhotonCameraSim(cam), config.offset);
-            }
-            CommandUtils.makePeriodic(() -> m_visionSim.update(m_drive.getPose()));
-            */
         }
 
         m_superstructure = new Superstructure(
@@ -488,21 +471,6 @@ public class RobotContainer {
         ).onTrue(new InstantCommand(
             () -> m_drive.resetHeading()
         )); 
-
-        /*
-        m_driverController.y().whileTrue(
-            Commands.sequence(
-                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
-                superstructureCommands.preNet(),
-                Commands.parallel(
-                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                    Commands.sequence(
-                        Commands.waitSeconds(0.5),
-                        superstructureCommands.doGrabberAction()
-                    )
-                )
-            )
-        );*/
         
         m_driverController.y().whileTrue(
             Commands.parallel(
@@ -523,10 +491,6 @@ public class RobotContainer {
                 )
             )
         );
-        /*
-        m_driverController.povLeft()
-            .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)).andThen(Commands.print("RepeatL1Cancelled")))
-            .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));*/
     }
 
     private void configureOperatorBindings() {
@@ -606,13 +570,6 @@ public class RobotContainer {
         // Ground Algae Intake
         m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
 
-        /*
-        m_operatorController.povRight().onTrue(
-            superstructureCommands.holdAlgae()
-        ).onFalse(
-            superstructureCommands.stopGrabber()
-        );*/
-
         // Interrupts any elevator command when the the left joystick is moved
         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
 
@@ -632,12 +589,7 @@ public class RobotContainer {
     }
 
     private void configureBeamBreakTriggers() {
-        /*
-        m_transferBeamBreak.onChange(
-            Commands.run(
-                () -> m_elastic.updateTransferBeamBreak(m_transferBeamBreak.getAsBoolean())
-            ).ignoringDisable(true)
-        );*/
+
     }
 
    /**

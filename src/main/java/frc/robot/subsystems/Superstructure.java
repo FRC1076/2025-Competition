@@ -691,18 +691,7 @@ public class Superstructure {
                 ).unless(elevatorClutchTrigger)
             );
         }
-/* 
-        private Command completeTransfer() {
-            return Commands.sequence(
-                superstructure.holdIndexState(IndexState.TRANSFER).until(m_transferBeamBreak.negate().debounce(0.06)),
-                superstructure.m_grabber.applyRotationsBangBang(12, 1.4),
-                Commands.parallel(
-                    superstructure.applyGrabberState(GrabberState.IDLE),
-                    superstructure.applyIndexState(IndexState.BACKWARDS)
-                )
-            );
-        }
-*/
+
         /**
          * Moves the elevator and wrist to the intake position, intakes the coral,
          * moves it out 0.2 rotations to avoid hitting the carriage,
@@ -727,24 +716,6 @@ public class Superstructure {
                 )
             );
             
-            /* Current sensing
-            return Commands.sequence(
-                superstructure.applyWristevatorState(WristevatorState.GRABBER_CORAL_INTAKE),
-                Commands.parallel(
-                    Commands.runOnce(() -> safeToFeedCoral = true),
-                    Commands.sequence(
-                        applyGrabberState(GrabberState.GRABBER_CORAL_INTAKE),
-                        Commands.waitSeconds(0.2),
-                        Commands.waitUntil(m_grabber::hasCoral),
-                        m_grabber.applyRotationsBangBang(8, 0.2)
-                    )
-                ),
-                Commands.parallel(
-                    superstructure.applyWristevatorStateDirect(WristevatorState.TRAVEL),
-                    Commands.run(() -> safeToMoveElevator = true)
-                )
-            );
-            */
         }
 
         /**
