@@ -406,6 +406,7 @@ public class RobotContainer {
     private void configureSharedBindings() {
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
 
+        // Shoot
         m_driverController.rightTrigger()
             .or(m_operatorController.rightTrigger())
                 .onTrue(superstructureCommands.doGrabberAction())
@@ -454,7 +455,7 @@ public class RobotContainer {
         // Point to reef
         // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
-        // Apply single clutch
+        // Shoot and go to algae intake from reef
         m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
             .onTrue(superstructureCommands.doGrabberAction())
             .onFalse(superstructureCommands.stopAndAlgaeIntake());
