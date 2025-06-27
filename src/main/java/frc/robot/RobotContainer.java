@@ -64,6 +64,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
@@ -160,6 +161,7 @@ public class RobotContainer {
    // private final PhotonCamera m_driveCamera;
 
     private final TeleopDriveCommand teleopDriveCommand;
+    private final TeleopDriveCommand slowToStopDrivetrain;
 
     private double lastLoopTime = 0;
 
@@ -178,8 +180,16 @@ public class RobotContainer {
         CANrange grabberCANRange = new CANrange(CANRangeConstants.grabberCANRangeId);
         m_grabberCANRange = new Trigger(() -> (grabberCANRange.getDistance().getValue().in(Meters) < CANRangeConstants.grabberCANRangeTriggerDistanceMeters));
         m_transferBeamBreak = new Trigger(() -> {return ! transferDIO.get();});//.or(m_beamBreakController.x());
-        m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
-        m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
+       
+        if (OIConstants.kUseDroperatorController) {
+            // Use Droperator controller
+            m_interruptElevator = m_droperatorController.L3();
+            m_interruptWrist = m_droperatorController.R3();
+        } else {
+            // Regular operator controller
+            m_interruptElevator = new Trigger(() -> m_operatorController.getLeftY() != 0);
+            m_interruptWrist = new Trigger(() -> m_operatorController.getRightY() != 0);
+        }
     
         // m_driveCamera = new PhotonCamera(driverCamName);
         // m_driveCamera.setDriverMode(true);
@@ -262,15 +272,29 @@ public class RobotContainer {
             0
         );
 
-        teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
-            () -> slewRateLimiterEnabled
-                ? slewRateLimiter.calculateY(-m_driverController.getLeftX(), -m_driverController.getLeftY())
-                : -m_driverController.getLeftY(),
-            () -> slewRateLimiterEnabled
-                ? slewRateLimiter.calculateX(-m_driverController.getLeftX(), -m_driverController.getLeftY())
-                : -m_driverController.getLeftX(),
-            () -> -m_driverController.getRightX()
-        );
+        if (OIConstants.kUseDroperatorController) {
+            teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
+                () -> slewRateLimiterEnabled
+                    ? slewRateLimiter.calculateY(-m_droperatorController.getLeftX(), -m_droperatorController.getLeftY())
+                    : -m_droperatorController.getLeftY(),
+                () -> slewRateLimiterEnabled
+                    ? slewRateLimiter.calculateX(-m_droperatorController.getLeftX(), -m_droperatorController.getLeftY())
+                    : -m_droperatorController.getLeftX(),
+                () -> -m_droperatorController.getRightX()
+            );
+        } else {
+            teleopDriveCommand = m_drive.CommandBuilder.teleopDrive(
+                () -> slewRateLimiterEnabled
+                    ? slewRateLimiter.calculateY(-m_driverController.getLeftX(), -m_driverController.getLeftY())
+                    : -m_driverController.getLeftY(),
+                () -> slewRateLimiterEnabled
+                    ? slewRateLimiter.calculateX(-m_driverController.getLeftX(), -m_driverController.getLeftY())
+                    : -m_driverController.getLeftX(),
+                () -> -m_driverController.getRightX()
+            );
+        }
+
+        slowToStopDrivetrain = m_drive.CommandBuilder.teleopDrive(() -> slewRateLimiter.calculateY(0, 0), () -> slewRateLimiter.calculateX(0, 0), () -> 0.0);
 
         // Drive team status triggers
         m_safeToFeedCoral = new Trigger(() -> m_superstructure.getSafeToFeedCoral());
@@ -307,21 +331,24 @@ public class RobotContainer {
         // Configure miscellaneous bindings
         configureBindings();
         
-        if (OIConstants.kUseAlternateDriverController)
-        {
+        if (OIConstants.kUseDroperatorController) {
+            // Use combined driver and operator controller
+            configureDroperatorBindings();
+        } else if (OIConstants.kUseAlternateDriverController) {
             // Use alternate shared and driver bindings
             configureAlternateSharedBindings();
             configureAlternateDriverBindings();
-        }
-        else 
-        {
-            // Use default shared and driver bindings
-            configureSharedBindings();
-            configureDriverBindings();
-        }
 
             // Configure the operator bindings
             configureOperatorBindings();
+        } else {
+            // Use default shared and driver bindings
+            configureSharedBindings();
+            configureDriverBindings();
+
+            // Configure the operator bindings
+            configureOperatorBindings();
+        }
     
         //configure beam break triggers
         configureBeamBreakTriggers();
@@ -340,6 +367,30 @@ public class RobotContainer {
 
         CommandUtils.makePeriodic(() -> m_elastic.updateTeamColor(), true);
 
+
+    }
+
+   /**
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
+   */
+    public Command getAutonomousCommand() {
+
+        // Standard 3 coral auto
+        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
+
+        // Compementary 2 coral auto
+        // return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
+
+        // Complementary 1 coral 2 net auto
+        // return AutoBuilder.buildAuto("H4_GHnet_IJnet");
+
+        // Untested for a while 2 coral (funnel)
+        // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
+
+        // Select auto from Elastic (leave disabled)
+        // return m_autoChooser.getSelected();
 
     }
 
@@ -670,10 +721,6 @@ public class RobotContainer {
                 )
             )
         );
-        /*
-        m_driverController.povLeft()
-            .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)).andThen(Commands.print("RepeatL1Cancelled")))
-            .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));*/
     }
 
     private void configureOperatorBindings() {
@@ -828,15 +875,28 @@ public class RobotContainer {
         );*/
     }
 
-    boolean algaeMode = false;
+    // Stuff for droperator algae mode
+    boolean algaeModeEnabled = false;
     private void setAlgaeMode(boolean val) {
-        algaeMode = val;
+        algaeModeEnabled = val;
+    }
+    @AutoLogOutput
+    private boolean getAlgaeMode() {
+        return algaeModeEnabled;
+    }
+
+    // Stuff for droperator manual wrist/elevator control
+    boolean manualMechanismControlEnabled = false;
+    private void setManualMechanismControl(boolean val) {
+        manualMechanismControlEnabled = val;
     }
 
     private void configureDroperatorBindings() {
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
-        Trigger algae = new Trigger(() -> algaeMode);
+        Trigger algaeMode = new Trigger(() -> algaeModeEnabled);
+        Trigger manualMechanismControl = new Trigger(() -> manualMechanismControlEnabled);
 
+        // Auto-align left
         m_droperatorController.povLeft().whileTrue(
             Commands.parallel(
                 Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
@@ -844,12 +904,20 @@ public class RobotContainer {
             )
         );
 
-        m_driverController.povRight().whileTrue(
+        // Auto-align right
+        m_droperatorController.povRight().whileTrue(
             Commands.parallel(
                 Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
                 m_drive.CommandBuilder.directDriveToNearestRightBranch()
             )
         );
+
+        // Shoot
+        m_droperatorController.R2()
+            .and(m_droperatorController.L2().negate())
+                .onTrue(superstructureCommands.doGrabberAction())
+                .onFalse(Commands.runOnce(() -> setAlgaeMode(false)))
+                .whileFalse(superstructureCommands.stopAndRetract());
 
         // Shoot and go to algae intake from reef
         m_droperatorController.R1().and(m_droperatorController.L1().negate())
@@ -872,82 +940,94 @@ public class RobotContainer {
                 )
             );
 
+        // Reset gyro
         m_droperatorController.create()
             .onTrue(new InstantCommand(
                 () -> m_drive.resetHeading()
-        )); 
+            )); 
 
-        m_droperatorController.povUp().whileTrue(
-            Commands.parallel(
-                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
-                Commands.sequence(
-                    Commands.parallel(
-                        superstructureCommands.preAutomaticNet().asProxy(),
-                        m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
-                    ),
-                    Commands.parallel(
-                        m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
-                        superstructureCommands.preNet(),
-                        Commands.sequence(
-                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
-                            superstructureCommands.doGrabberAction()
+        // Auto-net
+        m_droperatorController.povUp()
+            .whileTrue(
+                Commands.parallel(
+                    Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                    Commands.sequence(
+                        Commands.parallel(
+                            superstructureCommands.preAutomaticNet().asProxy(),
+                            m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
+                        ),
+                        Commands.parallel(
+                            m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                            superstructureCommands.preNet(),
+                            Commands.sequence(
+                                Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
+                                superstructureCommands.doGrabberAction()
+                            )
                         )
                     )
                 )
             )
-        );
+            .onFalse(
+                Commands.runOnce(() -> setAlgaeMode(false))
+            );
 
-         // L1
-         m_droperatorController.square().and(algae.negate())
-         .and(m_operatorController.leftBumper().negate())
-             .onTrue(superstructureCommands.preL1());
+        // L1
+        m_droperatorController.square()
+            .and(algaeMode.negate())
+                .onTrue(superstructureCommands.preL1());
  
-         // L2
-         m_droperatorController.cross().and(algae.negate())
-         .and(m_operatorController.leftBumper().negate())
-             .onTrue(superstructureCommands.preL2());
+        // L2
+        m_droperatorController.cross()
+            .and(algaeMode.negate())
+                .onTrue(superstructureCommands.preL2());
  
-         // L3
-         m_droperatorController.circle().and(algae.negate())
-             .and(m_operatorController.leftBumper().negate())
-             .onTrue(superstructureCommands.preL3());
+        // L3
+        m_droperatorController.circle()
+            .and(algaeMode.negate())
+                .onTrue(superstructureCommands.preL3());
  
-         // L4
-         m_droperatorController.triangle().and(algae.negate())
-         .and(m_operatorController.leftBumper().negate())
-             .onTrue(superstructureCommands.preL4());
+        // L4
+        m_droperatorController.triangle()
+            .and(algaeMode.negate())
+                .onTrue(superstructureCommands.preL4());
         
-
+        // Toggle algae mode
         m_droperatorController.touchpad().onTrue(
-            Commands.runOnce(() -> setAlgaeMode(!algaeMode))
+            Commands.runOnce(() -> setAlgaeMode(!algaeModeEnabled))
         );
 
-         // Processor
-         m_droperatorController.square()
-             .and(algae)
-             .onTrue(superstructureCommands.preProcessor());
+        // Processor
+        m_droperatorController.square()
+            .and(algaeMode)
+                .onTrue(superstructureCommands.preProcessor());
  
-         // Low Algae Intake
-         m_droperatorController.cross()
-             .and(algae)
-             .onTrue(superstructureCommands.lowAlgaeIntake());
+        // Low Algae Intake
+        m_droperatorController.cross()
+            .and(algaeMode)
+                .onTrue(superstructureCommands.lowAlgaeIntake());
  
-         // High Algae Intake
-         m_droperatorController.circle()
-             .and(algae)
-             .onTrue(superstructureCommands.highAlgaeIntake());
+        // High Algae Intake
+        m_droperatorController.circle()
+            .and(algaeMode)
+                .onTrue(superstructureCommands.highAlgaeIntake());
  
-         // Net
-         m_droperatorController.triangle()
-             .and(algae)
-             .onTrue(superstructureCommands.preNet());
+        // Net
+        m_droperatorController.triangle()
+            .and(algaeMode)
+                .onTrue(superstructureCommands.preNet());
  
-         // Coral Intake and transfer into Grabber
-         m_droperatorController.L2()
-             .and(m_operatorController.leftBumper().negate())
-             .whileTrue(superstructureCommands.intakeCoral())
-             .whileFalse(superstructureCommands.stopIntake());
+        // Coral Intake and transfer into Grabber
+        m_droperatorController.L2()
+            .and(algaeMode.negate())
+                .whileTrue(superstructureCommands.intakeCoral())
+                .whileFalse(superstructureCommands.stopIntake());
+
+        // Grabber intake coral        
+        m_droperatorController.povDown()
+            .whileTrue(superstructureCommands.grabberIntakeCoral())
+            .onFalse(superstructureCommands.stopGrabber());
  
+        /*
          m_droperatorController.L1()
             .and(m_droperatorController.R1())
             .and(m_droperatorController.L2())
@@ -956,54 +1036,70 @@ public class RobotContainer {
             .and(m_droperatorController.square())
             .and(() -> (m_droperatorController.getRightY() < -0.9))
                 .onTrue(superstructureCommands.lollipopAlgaeIntake());
+        */
  
-         // Ground Algae Intake
-         m_droperatorController.L2().and(algae).onTrue(superstructureCommands.groundAlgaeIntake());
+        // Ground Algae Intake
+        m_droperatorController.L2()
+            .and(algaeMode)
+            .and(m_droperatorController.R2().negate())
+                .onTrue(superstructureCommands.groundAlgaeIntake());
+        
+        // Manual extake
+        m_droperatorController.L2()
+            .and(m_droperatorController.R2())
+                .onTrue(
+                    m_superstructure.holdIndexState(IndexState.TRANSFER).alongWith(
+                    m_superstructure.applyGrabberState(GrabberState.CORAL_INTAKE)))
+                .onFalse(
+                    m_superstructure.holdIndexState(IndexState.BACKWARDS).alongWith(
+                    m_superstructure.applyGrabberState(GrabberState.IDLE)));
+
+        // Stop drivetrain when using manual mechanism control
+        manualMechanismControl 
+            .whileTrue(slowToStopDrivetrain);
+
+        // Manual wrist control
+        m_droperatorController.R3()
+            .onTrue(
+                Commands.runOnce(() -> setManualMechanismControl(true))
+            )
+            .whileTrue(
+                m_wrist.applyManualControl(
+                    () -> -m_droperatorController.getRightY()
+                )
+            )
+            .onFalse(
+                Commands.runOnce(() -> setManualMechanismControl(false))
+            );
+
+        // Manual elevator control
+        m_droperatorController.L3()
+            .onTrue(
+                Commands.runOnce(() -> setManualMechanismControl(true))
+            )
+            .whileTrue(
+                m_elevator.applyManualControl(
+                    () -> -m_droperatorController.getLeftY(),
+                    () -> false
+                )
+            )
+            .onFalse(
+                Commands.runOnce(() -> setManualMechanismControl(false))
+            );;
+
+        // Interrupts any elevator command when the the left joystick is moved
+        m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
  
-         /*
-         m_operatorController.povRight().onTrue(
-             superstructureCommands.holdAlgae()
-         ).onFalse(
-             superstructureCommands.stopGrabber()
-         );*/
- 
-         // Interrupts any elevator command when the the left joystick is moved
-         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
- 
-         // Interrupts any wrist command when the right joystick is moved
-         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
-         
-         m_operatorController.povLeft()
-             .onTrue(superstructureCommands.doGrabberAction())
-             .onFalse(superstructureCommands.stopAndAlgaeIntake());
- 
-         m_operatorController.start().whileTrue(
-             Commands.parallel(
-                 m_elevator.autoHome(),
-                 m_wrist.applyAngle(algaeTravelAngle)
-             )
-         ); 
-    }
-
-   /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
-    public Command getAutonomousCommand() {
-
-        // Standard 3 coral auto
-        return AutoBuilder.buildAuto("Grabber J4_K4_L4 - E4_D4_C4");
-
-        // Compementary 2 coral auto
-        // return AutoBuilder.buildAuto("Grabber A4-B4 - B4-A4");
-
-        // Complementary 1 coral 2 net auto
-        // return AutoBuilder.buildAuto("H4_GHnet_IJnet");
-
-        // Untested for a while 2 coral (funnel)
-        // return AutoBuilder.buildAuto("J4_K4 - E4_D4");
-        // return m_autoChooser.getSelected();
+        // Interrupts any wrist command when the right joystick is moved
+        m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
+        
+        // Re-zero elevator
+        m_droperatorController.options().whileTrue(
+            Commands.parallel(
+                m_elevator.autoHome(),
+                m_wrist.applyAngle(algaeTravelAngle)
+            )
+        ); 
     }
 
     /**

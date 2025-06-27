@@ -127,6 +127,8 @@ public final class Constants {
         public static Alliance teamColor = Alliance.Blue;
         public static AutonSides autonSide = AutonSides.Left;
         public static boolean rearRightCameraEnabledAuton = false; // Only set to true if running algae auton
+
+        // Autonomous command is selected in getAutonomousCommand() in RobotContainer
         
         public enum TeamColors {
             kTeamColorBlue("BLUE"),
@@ -153,7 +155,8 @@ public final class Constants {
     }
 
     public static class OIConstants {
-        public static final boolean kUseAlternateDriverController = false;
+        public static final boolean kUseDroperatorController = false; // Overrides alternate driver controller
+        public static final boolean kUseAlternateDriverController = true;
 
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
