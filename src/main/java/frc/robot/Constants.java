@@ -153,6 +153,8 @@ public final class Constants {
     }
 
     public static class OIConstants {
+        public static final boolean kUseAlternateDriverController = false;
+
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
         public static final double kControllerDeadband = 0.15;

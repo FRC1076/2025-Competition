@@ -300,15 +300,22 @@ public class RobotContainer {
 
         // Configure miscellaneous bindings
         configureBindings();
+        
+        if (OIConstants.kUseAlternateDriverController)
+        {
+            // Use alternate shared and driver bindings
+            configureAlternateSharedBindings();
+            configureAlternateDriverBindings();
+        }
+        else 
+        {
+            // Use default shared and driver bindings
+            configureSharedBindings();
+            configureDriverBindings();
+        }
 
-        // Configure shared bindings
-        configureSharedBindings();
-
-        // Configure the driver bindings
-        configureDriverBindings();
-
-        // Configure the operator bindings
-        configureOperatorBindings();
+            // Configure the operator bindings
+            configureOperatorBindings();
     
         //configure beam break triggers
         configureBeamBreakTriggers();
@@ -466,6 +473,138 @@ public class RobotContainer {
 
         // Apply FPV Driving
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
+            .whileTrue(
+                Commands.parallel(
+                    teleopDriveCommand.applyDoubleClutch(),
+                    Commands.startEnd(
+                        () -> slewRateLimiterEnabled = false,
+                        () -> slewRateLimiterEnabled = true
+                    )
+                )
+            );
+
+        m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
+            .onTrue(m_LEDs.setStateTimed(LEDStates.HUMAN_PLAYER_SIGNAL, 5));
+
+        //m_driverController.povUp().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = true));
+
+        //m_driverController.povDown().onTrue(Commands.runOnce(() -> slewRateLimiterEnabled = false));
+
+        m_driverController.leftBumper().and(
+            m_driverController.rightBumper().and(
+                m_driverController.x()
+            )
+        ).onTrue(new InstantCommand(
+            () -> m_drive.resetHeading()
+        )); 
+
+        /*
+        m_driverController.y().whileTrue(
+            Commands.sequence(
+                m_drive.CommandBuilder.directDriveToNearestPreNetLocation(),
+                superstructureCommands.preNet(),
+                Commands.parallel(
+                    m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                    Commands.sequence(
+                        Commands.waitSeconds(0.5),
+                        superstructureCommands.doGrabberAction()
+                    )
+                )
+            )
+        );*/
+        
+        m_driverController.y().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                Commands.sequence(
+                    Commands.parallel(
+                        superstructureCommands.preAutomaticNet().asProxy(),
+                        m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
+                    ),
+                    Commands.parallel(
+                        m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                        superstructureCommands.preNet(),
+                        Commands.sequence(
+                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
+                            superstructureCommands.doGrabberAction()
+                        )
+                    )
+                )
+            )
+        );
+        /*
+        m_driverController.povLeft()
+            .whileTrue(new RepeatCommand(new AutomatedL1Score(m_drive, m_superstructure, m_grabberCANRange)).andThen(Commands.print("RepeatL1Cancelled")))
+            .onFalse(m_superstructure.applyGrabberState(GrabberState.IDLE));*/
+    }
+
+    private void configureAlternateSharedBindings() {
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
+        // Shoot
+        m_driverController.b()
+            .or(m_operatorController.rightTrigger())
+                .onTrue(superstructureCommands.doGrabberAction())
+                    .whileFalse(superstructureCommands.stopAndRetract());
+    }
+
+    private void configureAlternateDriverBindings() {
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+
+        m_driverController.leftTrigger().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            )
+        );
+
+        m_driverController.rightTrigger().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            )
+        );
+
+        m_driverController.povLeft().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestLeftL1()
+            )
+        );
+
+        /*
+        m_driverController.povUp().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestCenterL1()
+            )
+        );*/
+
+        m_driverController.povRight().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestRightL1()
+            )
+        );
+        
+        // Point to reef
+        // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
+
+        // Shoot and go to algae intake from reef
+        m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
+            .onTrue(superstructureCommands.doGrabberAction())
+            .onFalse(superstructureCommands.stopAndAlgaeIntake());
+
+        // Apply single clutch
+        m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
+            .whileTrue(teleopDriveCommand.applySingleClutch());
+
+        // Apply double clutch
+        m_driverController.leftBumper().and(m_driverController.rightBumper().negate())
+            .whileTrue(teleopDriveCommand.applyDoubleClutch());
+
+        // Apply FPV Driving
+        m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
             .whileTrue(
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
