@@ -157,6 +157,7 @@ public final class Constants {
 
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;
+        public static final int kDroperatorControllerPort = 2;
         public static final double kControllerDeadband = 0.15;
         public static final double kControllerTriggerThreshold = 0.7;
     }

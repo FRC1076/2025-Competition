@@ -32,6 +32,7 @@ import frc.robot.subsystems.wrist.WristSubsystem;
 import lib.control.DynamicSlewRateLimiter2d;
 import lib.extendedcommands.CommandUtils;
 import lib.hardware.hid.SamuraiXboxController;
+import lib.hardware.hid.SamuraiPS5Controller;
 import lib.vision.LoggedPhotonVisionLocalizer;
 import lib.vision.PhotonVisionLocalizer;
 import lib.vision.VisionLocalizationSystem;
@@ -87,6 +88,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandPS5Controller;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -137,6 +139,10 @@ public class RobotContainer {
         new SamuraiXboxController(OIConstants.kOperatorControllerPort)
             .withDeadband(OIConstants.kControllerDeadband)
             .withTriggerThreshold(OIConstants.kControllerTriggerThreshold);
+
+    private final CommandPS5Controller m_droperatorController = 
+        new SamuraiPS5Controller(OIConstants.kDroperatorControllerPort)
+            .withDeadband(OIConstants.kControllerDeadband);
     /* 
     private final CommandXboxController m_beamBreakController = 
         new CommandXboxController(2);
@@ -820,6 +826,163 @@ public class RobotContainer {
                 () -> m_elastic.updateTransferBeamBreak(m_transferBeamBreak.getAsBoolean())
             ).ignoringDisable(true)
         );*/
+    }
+
+    boolean algaeMode = false;
+    private void setAlgaeMode(boolean val) {
+        algaeMode = val;
+    }
+
+    private void configureDroperatorBindings() {
+        final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
+        Trigger algae = new Trigger(() -> algaeMode);
+
+        m_droperatorController.povLeft().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestLeftBranch()
+            )
+        );
+
+        m_driverController.povRight().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                m_drive.CommandBuilder.directDriveToNearestRightBranch()
+            )
+        );
+
+        // Shoot and go to algae intake from reef
+        m_droperatorController.R1().and(m_droperatorController.L1().negate())
+            .onTrue(superstructureCommands.doGrabberAction())
+            .onFalse(superstructureCommands.stopAndAlgaeIntake());
+
+        // Apply double clutch
+        m_droperatorController.L1().and(m_droperatorController.R1().negate())
+            .whileTrue(teleopDriveCommand.applyDoubleClutch());
+
+        // Apply FPV Driving
+        m_droperatorController.L1().and(m_droperatorController.R1())
+            .whileTrue(
+                Commands.parallel(
+                    teleopDriveCommand.applyDoubleClutch(),
+                    Commands.startEnd(
+                        () -> slewRateLimiterEnabled = false,
+                        () -> slewRateLimiterEnabled = true
+                    )
+                )
+            );
+
+        m_droperatorController.create()
+            .onTrue(new InstantCommand(
+                () -> m_drive.resetHeading()
+        )); 
+
+        m_droperatorController.povUp().whileTrue(
+            Commands.parallel(
+                Commands.run(() -> m_LEDs.setState(LEDStates.AUTO_ALIGNING), m_LEDs),
+                Commands.sequence(
+                    Commands.parallel(
+                        superstructureCommands.preAutomaticNet().asProxy(),
+                        m_drive.CommandBuilder.directDriveToNearestPreNetLocation()
+                    ),
+                    Commands.parallel(
+                        m_drive.CommandBuilder.directDriveToNearestScoreNetLocation(),
+                        superstructureCommands.preNet(),
+                        Commands.sequence(
+                            Commands.waitUntil(() -> {return m_superstructure.getElevator().getPositionMeters() > 1.9158291;}), //1.7 //1.9158291
+                            superstructureCommands.doGrabberAction()
+                        )
+                    )
+                )
+            )
+        );
+
+         // L1
+         m_droperatorController.square().and(algae.negate())
+         .and(m_operatorController.leftBumper().negate())
+             .onTrue(superstructureCommands.preL1());
+ 
+         // L2
+         m_droperatorController.cross().and(algae.negate())
+         .and(m_operatorController.leftBumper().negate())
+             .onTrue(superstructureCommands.preL2());
+ 
+         // L3
+         m_droperatorController.circle().and(algae.negate())
+             .and(m_operatorController.leftBumper().negate())
+             .onTrue(superstructureCommands.preL3());
+ 
+         // L4
+         m_droperatorController.triangle().and(algae.negate())
+         .and(m_operatorController.leftBumper().negate())
+             .onTrue(superstructureCommands.preL4());
+        
+
+        m_droperatorController.touchpad().onTrue(
+            Commands.runOnce(() -> setAlgaeMode(!algaeMode))
+        );
+
+         // Processor
+         m_droperatorController.square()
+             .and(algae)
+             .onTrue(superstructureCommands.preProcessor());
+ 
+         // Low Algae Intake
+         m_droperatorController.cross()
+             .and(algae)
+             .onTrue(superstructureCommands.lowAlgaeIntake());
+ 
+         // High Algae Intake
+         m_droperatorController.circle()
+             .and(algae)
+             .onTrue(superstructureCommands.highAlgaeIntake());
+ 
+         // Net
+         m_droperatorController.triangle()
+             .and(algae)
+             .onTrue(superstructureCommands.preNet());
+ 
+         // Coral Intake and transfer into Grabber
+         m_droperatorController.L2()
+             .and(m_operatorController.leftBumper().negate())
+             .whileTrue(superstructureCommands.intakeCoral())
+             .whileFalse(superstructureCommands.stopIntake());
+ 
+         m_droperatorController.L1()
+            .and(m_droperatorController.R1())
+            .and(m_droperatorController.L2())
+            .and(m_droperatorController.R2())
+            .and(m_droperatorController.povDown())
+            .and(m_droperatorController.square())
+            .and(() -> (m_droperatorController.getRightY() < -0.9))
+                .onTrue(superstructureCommands.lollipopAlgaeIntake());
+ 
+         // Ground Algae Intake
+         m_droperatorController.L2().and(algae).onTrue(superstructureCommands.groundAlgaeIntake());
+ 
+         /*
+         m_operatorController.povRight().onTrue(
+             superstructureCommands.holdAlgae()
+         ).onFalse(
+             superstructureCommands.stopGrabber()
+         );*/
+ 
+         // Interrupts any elevator command when the the left joystick is moved
+         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
+ 
+         // Interrupts any wrist command when the right joystick is moved
+         m_interruptWrist.onTrue(superstructureCommands.interruptWrist());
+         
+         m_operatorController.povLeft()
+             .onTrue(superstructureCommands.doGrabberAction())
+             .onFalse(superstructureCommands.stopAndAlgaeIntake());
+ 
+         m_operatorController.start().whileTrue(
+             Commands.parallel(
+                 m_elevator.autoHome(),
+                 m_wrist.applyAngle(algaeTravelAngle)
+             )
+         ); 
     }
 
    /**
