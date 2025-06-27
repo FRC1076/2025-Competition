@@ -886,15 +886,19 @@ public class RobotContainer {
     }
 
     // Stuff for droperator manual wrist/elevator control
-    boolean manualMechanismControlEnabled = false;
-    private void setManualMechanismControl(boolean val) {
-        manualMechanismControlEnabled = val;
+    boolean manualElevatorControlEnabled = false;
+    boolean manualWristControlEnabled = false;
+    private void setManualElevatorControl(boolean val) {
+        manualElevatorControlEnabled = val;
+    }
+    private void setManualWristControl(boolean val) {
+        manualWristControlEnabled = val;
     }
 
     private void configureDroperatorBindings() {
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
         Trigger algaeMode = new Trigger(() -> algaeModeEnabled);
-        Trigger manualMechanismControl = new Trigger(() -> manualMechanismControlEnabled);
+        Trigger manualMechanismControl = new Trigger(() -> manualElevatorControlEnabled || manualWristControlEnabled);
 
         // Auto-align left
         m_droperatorController.povLeft().whileTrue(
@@ -1061,7 +1065,7 @@ public class RobotContainer {
         // Manual wrist control
         m_droperatorController.R3()
             .onTrue(
-                Commands.runOnce(() -> setManualMechanismControl(true))
+                Commands.runOnce(() -> setManualWristControl(true))
             )
             .whileTrue(
                 m_wrist.applyManualControl(
@@ -1069,13 +1073,13 @@ public class RobotContainer {
                 )
             )
             .onFalse(
-                Commands.runOnce(() -> setManualMechanismControl(false))
+                Commands.runOnce(() -> setManualWristControl(false))
             );
 
         // Manual elevator control
         m_droperatorController.L3()
             .onTrue(
-                Commands.runOnce(() -> setManualMechanismControl(true))
+                Commands.runOnce(() -> setManualElevatorControl(true))
             )
             .whileTrue(
                 m_elevator.applyManualControl(
@@ -1084,7 +1088,7 @@ public class RobotContainer {
                 )
             )
             .onFalse(
-                Commands.runOnce(() -> setManualMechanismControl(false))
+                Commands.runOnce(() -> setManualElevatorControl(false))
             );;
 
         // Interrupts any elevator command when the the left joystick is moved
