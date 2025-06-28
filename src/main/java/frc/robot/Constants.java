@@ -155,7 +155,7 @@ public final class Constants {
     }
 
     public static class OIConstants {
-        public static final boolean kUseDroperatorController = false; // Overrides alternate driver controller
+        public static final boolean kUseDroperatorController = true; // Overrides alternate driver controller
         public static final boolean kUseAlternateDriverController = true;
 
         public static final int kDriverControllerPort = 0;

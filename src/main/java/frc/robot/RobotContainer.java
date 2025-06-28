@@ -648,7 +648,7 @@ public class RobotContainer {
         // m_driverController.y().whileTrue(teleopDriveCommand.applyReefHeadingLock());
 
         // Shoot and go to algae intake from reef
-        m_driverController.rightBumper().and(m_driverController.leftBumper().negate())
+        m_driverController.a().and(m_driverController.leftBumper().negate())
             .onTrue(superstructureCommands.doGrabberAction())
             .onFalse(superstructureCommands.stopAndAlgaeIntake());
 
@@ -882,23 +882,25 @@ public class RobotContainer {
     }
     @AutoLogOutput
     private boolean getAlgaeMode() {
-        return algaeModeEnabled;
+        return algaeModeEnabled || (m_operatorController.leftBumper().getAsBoolean() && !m_operatorController.rightBumper().getAsBoolean());
     }
 
     // Stuff for droperator manual wrist/elevator control
-    boolean manualElevatorControlEnabled = false;
-    boolean manualWristControlEnabled = false;
-    private void setManualElevatorControl(boolean val) {
-        manualElevatorControlEnabled = val;
+    boolean manualMechanismControlEnabled = false;
+
+    private void setManualMechanismControl(boolean val) {
+        manualMechanismControlEnabled = val;
     }
-    private void setManualWristControl(boolean val) {
-        manualWristControlEnabled = val;
+
+    @AutoLogOutput
+    private boolean getManualMechanismControl() {
+        return manualMechanismControlEnabled;
     }
 
     private void configureDroperatorBindings() {
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
         Trigger algaeMode = new Trigger(() -> algaeModeEnabled);
-        Trigger manualMechanismControl = new Trigger(() -> manualElevatorControlEnabled || manualWristControlEnabled);
+        Trigger manualMechanismControl = new Trigger(() -> manualMechanismControlEnabled);
 
         // Auto-align left
         m_droperatorController.povLeft().whileTrue(
@@ -920,7 +922,6 @@ public class RobotContainer {
         m_droperatorController.R2()
             .and(m_droperatorController.L2().negate())
                 .onTrue(superstructureCommands.doGrabberAction())
-                .onFalse(Commands.runOnce(() -> setAlgaeMode(false)))
                 .whileFalse(superstructureCommands.stopAndRetract());
 
         // Shoot and go to algae intake from reef
@@ -1060,36 +1061,30 @@ public class RobotContainer {
 
         // Stop drivetrain when using manual mechanism control
         manualMechanismControl 
-            .whileTrue(slowToStopDrivetrain);
-
+            .whileTrue(
+                Commands.parallel(
+                    slowToStopDrivetrain,
+                    m_wrist.applyManualControl(
+                        () -> -m_droperatorController.getRightY()
+                    ),
+                    m_elevator.applyManualControl(
+                        () -> -m_droperatorController.getLeftY(),
+                        () -> false
+                    )
+                )
+                );
+        
         // Manual wrist control
         m_droperatorController.R3()
             .onTrue(
-                Commands.runOnce(() -> setManualWristControl(true))
-            )
-            .whileTrue(
-                m_wrist.applyManualControl(
-                    () -> -m_droperatorController.getRightY()
-                )
-            )
-            .onFalse(
-                Commands.runOnce(() -> setManualWristControl(false))
+                Commands.runOnce(() -> setManualMechanismControl(!manualMechanismControlEnabled))
             );
 
         // Manual elevator control
         m_droperatorController.L3()
             .onTrue(
-                Commands.runOnce(() -> setManualElevatorControl(true))
-            )
-            .whileTrue(
-                m_elevator.applyManualControl(
-                    () -> -m_droperatorController.getLeftY(),
-                    () -> false
-                )
-            )
-            .onFalse(
-                Commands.runOnce(() -> setManualElevatorControl(false))
-            );;
+                Commands.runOnce(() -> setManualMechanismControl(!manualMechanismControlEnabled))
+            );
 
         // Interrupts any elevator command when the the left joystick is moved
         m_interruptElevator.onTrue(superstructureCommands.interruptElevator());
