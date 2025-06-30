@@ -927,7 +927,12 @@ public class RobotContainer {
         // Shoot and go to algae intake from reef
         m_droperatorController.R1().and(m_droperatorController.L1().negate())
             .onTrue(superstructureCommands.doGrabberAction())
-            .onFalse(superstructureCommands.stopAndAlgaeIntake());
+            .onFalse(
+                Commands.sequence(
+                    superstructureCommands.stopAndAlgaeIntake(),
+                    Commands.runOnce(() -> setAlgaeMode(true))
+                )
+            );
 
         // Apply double clutch
         m_droperatorController.L1().and(m_droperatorController.R1().negate())
