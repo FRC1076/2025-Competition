@@ -768,6 +768,10 @@ public class RobotContainer {
          
         final SuperstructureCommandFactory superstructureCommands = m_superstructure.getCommandBuilder();
         
+        // Retract mechanisms without shooting
+        m_operatorController.back()
+            .onTrue(superstructureCommands.retractMechanisms());
+
         // L1
         m_operatorController.x()
         .and(m_operatorController.leftBumper().negate())
@@ -980,6 +984,10 @@ public class RobotContainer {
             .onFalse(
                 Commands.runOnce(() -> setAlgaeMode(false))
             );
+
+        // Retract mechanisms without shooting
+        m_droperatorController.PS()
+            .onTrue(superstructureCommands.retractMechanisms());
 
         // L1
         m_droperatorController.square()
