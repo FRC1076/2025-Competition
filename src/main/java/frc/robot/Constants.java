@@ -193,8 +193,8 @@ public final class Constants {
             public static final double FPVClutchRotationFactor = 0.1;
             public static final double ElevatorClutchTransFactor = 0.5; // Clutch activated when the elevator is above L3
             public static final double ElevatorClutchRotFactor = 0.5;
-            public static final double maxTranslationSpeedMPS = 5.0;
-            public static final double maxRotationSpeedRadPerSec = 5.0;
+            public static final double maxTranslationSpeedMPS = 3.0; // 5.0 is default
+            public static final double maxRotationSpeedRadPerSec = 3.0; // 5.0 is default
 
             // Calculations from: https://docs.google.com/spreadsheets/d/1ht2fXTaIHJL2nEzKbsCiHQ5DaE7uzN4XHMsRuwxwwmQ/edit?usp=sharing
             // Input: elevator height from bottom of the elevator in meters

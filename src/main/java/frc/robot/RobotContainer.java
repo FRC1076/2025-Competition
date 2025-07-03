@@ -531,6 +531,8 @@ public class RobotContainer {
         // Apply FPV Driving
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate()).or(m_driverController.leftTrigger())
             .whileTrue(
+                teleopDriveCommand.applyDoubleClutch()
+                /* Disabled as it is a feature for advanced drivers
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
                     Commands.startEnd(
@@ -538,6 +540,7 @@ public class RobotContainer {
                         () -> slewRateLimiterEnabled = true
                     )
                 )
+                */
             );
 
         m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
@@ -663,6 +666,8 @@ public class RobotContainer {
         // Apply FPV Driving
         m_driverController.leftBumper().and(m_driverController.rightBumper()).and(m_driverController.x().negate())
             .whileTrue(
+                teleopDriveCommand.applyDoubleClutch()
+                /* Disabled as it is a feature for advanced drivers
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
                     Commands.startEnd(
@@ -670,6 +675,7 @@ public class RobotContainer {
                         () -> slewRateLimiterEnabled = true
                     )
                 )
+                */
             );
 
         m_driverController.x().and(m_driverController.leftBumper().negate()).and(m_driverController.rightBumper().negate())
@@ -945,6 +951,8 @@ public class RobotContainer {
         // Apply FPV Driving
         m_droperatorController.L1().and(m_droperatorController.R1())
             .whileTrue(
+                teleopDriveCommand.applyDoubleClutch()
+                /* Disabled as it is a feature for advanced drivers
                 Commands.parallel(
                     teleopDriveCommand.applyDoubleClutch(),
                     Commands.startEnd(
@@ -952,6 +960,7 @@ public class RobotContainer {
                         () -> slewRateLimiterEnabled = true
                     )
                 )
+                */
             );
 
         // Reset gyro
