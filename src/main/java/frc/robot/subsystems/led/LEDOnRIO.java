@@ -61,6 +61,11 @@ public class LEDOnRIO implements LEDBase {
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
         .scrollAtRelativeSpeed(Percent.per(Seconds).of(100));
 
+        private final LEDPattern rainbowFast = LEDPattern
+        .rainbow(255, 255)
+        .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
+        .scrollAtRelativeSpeed(Percent.per(Seconds).of(200));
+
     private final LEDPattern off = LEDPattern.kOff;
     
 
@@ -86,16 +91,16 @@ public class LEDOnRIO implements LEDBase {
             solidRed.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.AUTO_ALIGNING) {
-            solidGreen.applyTo(m_buffer);
+            rainbow.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.AUTO_ALIGNED) {
-            flashingGreen.applyTo(m_buffer);
+            rainbowFast.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.ELEVATOR_ZEROED) {
             solidOrange.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.HUMAN_PLAYER_SIGNAL) {
-            rainbow.applyTo(m_buffer);
+            flashingGreen.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.OFF) {
             off.applyTo(m_buffer);
