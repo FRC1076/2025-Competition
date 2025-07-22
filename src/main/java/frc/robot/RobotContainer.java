@@ -48,6 +48,7 @@ import frc.robot.Constants.VisionConstants.Photonvision.PhotonConfig;
 import frc.robot.Constants.BeamBreakConstants;
 import frc.robot.Constants.CANRangeConstants;
 import frc.robot.Constants.GameConstants;
+import frc.robot.Constants.LEDConstants;
 import frc.robot.Constants.LEDConstants.LEDStates;
 import frc.robot.subsystems.Superstructure;
 import static frc.robot.Constants.VisionConstants.Photonvision.kDefaultSingleTagStdDevs;
@@ -334,6 +335,11 @@ public class RobotContainer {
         if (OIConstants.kUseDroperatorController) {
             // Use combined driver and operator controller
             configureDroperatorBindings();
+
+            // Enable color controller?
+            if (OIConstants.kUseOperiverColorController) {
+                configureColorBindings();
+            }
         } else if (OIConstants.kUseAlternateDriverController) {
             // Use alternate shared and driver bindings
             configureAlternateSharedBindings();
@@ -1137,6 +1143,44 @@ public class RobotContainer {
                 m_wrist.applyAngle(algaeTravelAngle)
             )
         ); 
+    }
+
+    private void configureColorBindings() {
+        // Red
+        m_operatorController.b()
+            .whileTrue(
+                Commands.run(() -> m_LEDs.setState(LEDStates.RED_HP_SIGNAL), m_LEDs)
+            ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
+
+        // Orange
+        m_operatorController.povUp()
+            .whileTrue(
+                Commands.run(() -> m_LEDs.setState(LEDStates.ORANGE_HP_SIGNAL), m_LEDs)
+            ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
+
+        // Yellow
+        m_operatorController.y()
+            .whileTrue(
+                Commands.run(() -> m_LEDs.setState(LEDStates.YELLOW_HP_SIGNAL), m_LEDs)
+            ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
+
+        // Green
+        m_operatorController.a()
+            .whileTrue(
+                Commands.run(() -> m_LEDs.setState(LEDStates.GREEN_HP_SIGNAL), m_LEDs)
+            ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
+
+        // Blue
+        m_operatorController.x()
+            .whileTrue(
+                Commands.run(() -> m_LEDs.setState(LEDStates.BLUE_HP_SIGNAL), m_LEDs)
+            ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
+
+        // Purple
+        m_operatorController.povDown()
+            .whileTrue(
+                Commands.run(() -> m_LEDs.setStateTimed(LEDStates.PURPLE_HP_SIGNAL), m_LEDs)
+            ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
     }
 
     /**

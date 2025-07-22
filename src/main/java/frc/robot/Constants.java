@@ -156,6 +156,8 @@ public final class Constants {
 
     public static class OIConstants {
         public static final boolean kUseDroperatorController = true; // Overrides alternate driver/operator controller
+        public static final boolean kUseOperiverColorController = false; // Use the color controller (requires droperator to be enabled)
+
         public static final boolean kUseAlternateDriverController = true;
         public static final boolean kUseAlternateOperatorController = false; // Switches controls for ground algae intake and processor
 
@@ -697,6 +699,8 @@ public final class Constants {
     }
 
     public static class LEDConstants {
+        public static final double kHPSignalTime = 3.0;
+
         /// Digital input-output pins on the RIO
         public static class LEDDIOConstants {
             public static final int kDIOPort1 = 7;
@@ -721,7 +725,15 @@ public final class Constants {
             AUTO_ALIGNED(false, false, true),
             AUTO_ALIGNING(false, false, false),
             OFF(true, false, true),
-            ELEVATOR_ZEROED(false, true, true);
+            ELEVATOR_ZEROED(false, true, true),
+            
+            // Rainbow Rumble specific color states for the rainbow bonus
+            RED_HP_SIGNAL(true, true, true),
+            ORANGE_HP_SIGNAL(false,false,false),
+            YELLOW_HP_SIGNAL(false,false,false),
+            GREEN_HP_SIGNAL(false,false,false),
+            BLUE_HP_SIGNAL(false,false,false),
+            PURPLE_HP_SIGNAL(false,false,false);
 
             public final boolean onesPlace;
             public final boolean twosPlace;
