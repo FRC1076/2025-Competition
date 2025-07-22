@@ -155,8 +155,9 @@ public final class Constants {
     }
 
     public static class OIConstants {
-        public static final boolean kUseDroperatorController = true; // Overrides alternate driver controller
+        public static final boolean kUseDroperatorController = true; // Overrides alternate driver/operator controller
         public static final boolean kUseAlternateDriverController = true;
+        public static final boolean kUseAlternateOperatorController = false; // Switches controls for ground algae intake and processor
 
         public static final int kDriverControllerPort = 0;
         public static final int kOperatorControllerPort = 1;

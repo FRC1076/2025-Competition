@@ -795,13 +795,32 @@ public class RobotContainer {
 
         // L4
         m_operatorController.y()
-        .and(m_operatorController.leftBumper().negate())
+            .and(m_operatorController.leftBumper().negate())
             .onTrue(superstructureCommands.preL4());
 
-        // Processor
-        m_operatorController.x()
-            .and(m_operatorController.leftBumper())
-            .onTrue(superstructureCommands.preProcessor());
+        if (OIConstants.kUseAlternateOperatorController) {
+            // Swap controls for ground algae intake and processor
+
+            // Ground Algae Intake
+            m_operatorController.x()
+                .and(m_operatorController.leftBumper())
+                .onTrue(superstructureCommands.groundAlgaeIntake());
+
+            // Processor
+            m_operatorController.leftTrigger()
+                .and(m_operatorController.leftBumper())
+                .onTrue(superstructureCommands.preProcessor());
+        } else {
+            // Ground Algae Intake
+            m_operatorController.leftTrigger()
+                .and(m_operatorController.leftBumper())
+                .onTrue(superstructureCommands.groundAlgaeIntake());
+
+            // Processor
+            m_operatorController.x()
+                .and(m_operatorController.leftBumper())
+                .onTrue(superstructureCommands.preProcessor());
+        }
 
         // Low Algae Intake
         m_operatorController.a()
@@ -847,9 +866,6 @@ public class RobotContainer {
                 m_superstructure.applyGrabberState(GrabberState.REVERSE_CORAL_INTAKE)))
             .onFalse(
                 m_superstructure.applyGrabberState(GrabberState.IDLE));
-
-        // Ground Algae Intake
-        m_operatorController.leftTrigger().and(m_operatorController.leftBumper()).onTrue(superstructureCommands.groundAlgaeIntake());
 
         /*
         m_operatorController.povRight().onTrue(
