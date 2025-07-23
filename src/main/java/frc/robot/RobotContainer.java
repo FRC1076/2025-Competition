@@ -953,6 +953,7 @@ public class RobotContainer {
         // Shoot
         m_droperatorController.R2()
             .and(m_droperatorController.L2().negate())
+            .or(m_droperatorController.R2().and(algaeMode)) // Manual extake is disabled when algae mode is on
                 .onTrue(superstructureCommands.doGrabberAction())
                 .whileFalse(superstructureCommands.stopAndRetract());
 
@@ -1090,12 +1091,12 @@ public class RobotContainer {
         // Ground Algae Intake
         m_droperatorController.L2()
             .and(algaeMode)
-            .and(m_droperatorController.R2().negate())
                 .onTrue(superstructureCommands.groundAlgaeIntake());
         
         // Manual extake
         m_droperatorController.L2()
             .and(m_droperatorController.R2())
+            .and(algaeMode.negate())
                 .onTrue(
                     m_superstructure.holdIndexState(IndexState.TRANSFER).alongWith(
                     m_superstructure.applyGrabberState(GrabberState.CORAL_INTAKE)))
