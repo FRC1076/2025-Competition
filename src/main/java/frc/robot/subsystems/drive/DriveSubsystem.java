@@ -146,6 +146,7 @@ public class DriveSubsystem extends SubsystemBase {
                 }
             } 
         }*/
+        elastic.updateField(driveInputs.Pose); // Update the robot's pose on Elastic
     }
 
     /** This method is not used in any command logic. It is only used for LEDs and Elastic */
