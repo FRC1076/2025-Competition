@@ -66,12 +66,12 @@ public class LEDOnRIO implements LEDBase {
         .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
 
     private final LEDPattern flashingOrange = LEDPattern
-        .solid(Color.kOrange)
+        .solid(Color.kOrangeRed)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
         .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
 
     private final LEDPattern flashingYellow = LEDPattern
-        .solid(Color.kYellow)
+        .solid(Color.kOrange)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
         .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
 

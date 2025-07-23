@@ -1180,7 +1180,7 @@ public class RobotContainer {
         // Purple
         m_operatorController.povDown()
             .whileTrue(
-                Commands.run(() -> m_LEDs.setStateTimed(LEDStates.PURPLE_HP_SIGNAL), m_LEDs)
+                Commands.run(() -> m_LEDs.setState(LEDStates.PURPLE_HP_SIGNAL), m_LEDs)
             ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
     }
 
