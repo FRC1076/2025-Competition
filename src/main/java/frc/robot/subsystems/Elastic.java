@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.util.HashMap;
 import java.util.function.BooleanSupplier;
 
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -106,6 +107,10 @@ public class Elastic {
 
     public void updateIsAutoAligned(BooleanSupplier isAutoAligned) {
         this.putBoolean("isAutoAligned", isAutoAligned.getAsBoolean());
+    }
+
+    public void updateField(Pose2d robotPose) {
+        field.setRobotPose(robotPose);
     }
 
     /** Returns true to mirror the auton from the left side to the right side
