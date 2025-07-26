@@ -156,7 +156,7 @@ public final class Constants {
 
     public static class OIConstants {
         public static final boolean kUseDroperatorController = true; // Overrides alternate driver/operator controller
-        public static final boolean kUseOperiverColorController = false; // Use the color controller (requires droperator to be enabled)
+        public static final boolean kUseOperiverColorController = true; // Use the color controller (requires droperator to be enabled)
 
         public static final boolean kUseAlternateDriverController = true;
         public static final boolean kUseAlternateOperatorController = false; // Switches controls for ground algae intake and processor
@@ -733,7 +733,8 @@ public final class Constants {
             YELLOW_HP_SIGNAL(false,false,false),
             GREEN_HP_SIGNAL(false,false,false),
             BLUE_HP_SIGNAL(false,false,false),
-            PURPLE_HP_SIGNAL(false,false,false);
+            PURPLE_HP_SIGNAL(false,false,false),
+            WHITE_HP_SIGNAL(false,false,false);
 
             public final boolean onesPlace;
             public final boolean twosPlace;

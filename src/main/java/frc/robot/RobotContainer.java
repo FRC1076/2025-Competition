@@ -1182,6 +1182,12 @@ public class RobotContainer {
             .whileTrue(
                 Commands.run(() -> m_LEDs.setState(LEDStates.PURPLE_HP_SIGNAL), m_LEDs)
             ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
+
+        // White
+        m_operatorController.povLeft().or(m_operatorController.povRight())
+        .whileTrue(
+            Commands.run(() -> m_LEDs.setState(LEDStates.WHITE_HP_SIGNAL), m_LEDs)
+        ).onFalse(Commands.run(() -> m_LEDs.setState(LEDStates.IDLE), m_LEDs));
     }
 
     /**

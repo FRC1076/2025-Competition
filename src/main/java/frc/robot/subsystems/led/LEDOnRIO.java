@@ -36,11 +36,6 @@ public class LEDOnRIO implements LEDBase {
         .solid(Color.kRed)
         .atBrightness(Percent.of(LEDOnRIOConstants.kEmptyStateBrightness));
 
-    private final LEDPattern flashingWhite = LEDPattern
-        .solid(Color.kWhite)
-        .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
-        .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
-
     private final LEDPattern flashingGreen = LEDPattern
         .solid(Color.kGreen)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
@@ -84,6 +79,11 @@ public class LEDOnRIO implements LEDBase {
 
     private final LEDPattern flashingPurple = LEDPattern
         .solid(Color.kPurple)
+        .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
+        .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
+
+    private final LEDPattern flashingWhite = LEDPattern
+        .solid(Color.kGhostWhite)
         .atBrightness(Percent.of(LEDOnRIOConstants.kFlashingStateBrightness))
         .blink(Seconds.of(LEDOnRIOConstants.kFlashSeconds));
 
@@ -138,6 +138,9 @@ public class LEDOnRIO implements LEDBase {
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.PURPLE_HP_SIGNAL) {
             flashingPurple.applyTo(m_buffer);
+            m_leds.setData(m_buffer);
+        } else if (state == LEDStates.WHITE_HP_SIGNAL) {
+            flashingWhite.applyTo(m_buffer);
             m_leds.setData(m_buffer);
         } else if (state == LEDStates.OFF) {
             off.applyTo(m_buffer);
