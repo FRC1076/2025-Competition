@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.955880681818181,
+        "y": 5.186690340909092
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.781776487188954,
+        "y": 5.665196462354833
+      },
+      "isLocked": false,
+      "linkedName": "J"
+    },
+    {
+      "anchor": {
+        "x": 1.4458806818181815,
+        "y": 7.470184659090909
+      },
+      "prevControl": {
+        "x": 1.8589657998198337,
+        "y": 7.24408353499599
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Grabber LOUT"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.0,
+    "maxAcceleration": 4.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 126.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -119.99999999999999
+  },
+  "useDefaultConstraints": true
+}
